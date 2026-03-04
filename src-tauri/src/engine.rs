@@ -24,7 +24,19 @@ pub fn start_engine(app: &tauri::AppHandle, config: &serde_json::Value) -> Resul
         return Ok(());
     }
 
-    let args = build_start_args(config);
+    // Resolve the bundled aria2.conf from the app's resource directory
+    let conf_path = app
+        .path()
+        .resource_dir()
+        .map_err(|e| format!("Failed to get resource dir: {}", e))?
+        .join("binaries")
+        .join("aria2.conf");
+
+    let conf_path_str = conf_path.to_string_lossy().to_string();
+    log::info!("[aria2c] conf path: {}", conf_path_str);
+
+    let args = build_start_args(config, &conf_path_str);
+    log::info!("[aria2c] starting with args: {:?}", args);
 
     let sidecar = app
         .shell()
@@ -82,11 +94,11 @@ pub fn restart_engine(app: &tauri::AppHandle, config: &serde_json::Value) -> Res
     start_engine(app, config)
 }
 
-fn build_start_args(config: &serde_json::Value) -> Vec<String> {
+fn build_start_args(config: &serde_json::Value, conf_path: &str) -> Vec<String> {
     let mut args: Vec<String> = Vec::new();
 
-    let mut has_enable_rpc = false;
-    let mut has_rpc_listen_port = false;
+    // Load the bundled config file (has all BT/DHT/RPC defaults)
+    args.push(format!("--conf-path={}", conf_path));
 
     if let Some(obj) = config.as_object() {
         for (key, value) in obj {
@@ -96,24 +108,17 @@ fn build_start_args(config: &serde_json::Value) -> Vec<String> {
                 serde_json::Value::Bool(b) => b.to_string(),
                 _ => continue,
             };
+            // Skip keys we force-set below for security
             match key.as_str() {
-                "enable-rpc" => has_enable_rpc = true,
-                "rpc-listen-port" => has_rpc_listen_port = true,
-                "rpc-allow-origin-all" | "rpc-listen-all" => continue,
+                "rpc-listen-all" => continue,
                 _ => {}
             }
             args.push(format!("--{}={}", key, val_str));
         }
     }
 
-    if !has_enable_rpc {
-        args.push("--enable-rpc=true".to_string());
-    }
-    if !has_rpc_listen_port {
-        args.push("--rpc-listen-port=16800".to_string());
-    }
+    // Security: only listen on localhost, but allow CORS for Tauri webview
     args.push("--rpc-listen-all=false".to_string());
-    args.push("--rpc-allow-origin-all=true".to_string());
 
     args
 }

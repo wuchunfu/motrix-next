@@ -32,6 +32,9 @@
     "externalBin": [
       "binaries/aria2c"
     ],
+    "resources": [
+      "binaries/aria2.conf"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
