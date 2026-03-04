@@ -1,8 +1,9 @@
-name: Release
+name: Build and Publish Release
 
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: write
