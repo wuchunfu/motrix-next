@@ -74,6 +74,7 @@ export const useTaskStore = defineStore('task', () => {
 
     async function changeCurrentList(list: string) {
         currentList.value = list
+        taskList.value = []
         selectedGidList.value = []
         await fetchList()
     }

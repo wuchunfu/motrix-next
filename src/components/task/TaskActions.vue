@@ -102,23 +102,47 @@ function onDeleteAll() {
 
 function resumeAll() {
   if (!isEngineReady()) { message.warning(t('app.engine-not-ready')); return }
-  taskStore.resumeAllTask()
-    .then(() => message.success(t('task.resume-all-task-success')))
-    .catch(() => message.error(t('task.resume-all-task-fail')))
+  dialog.warning({
+    title: t('task.resume-all-task'),
+    content: t('task.resume-all-task-confirm') || 'Resume all tasks?',
+    positiveText: t('app.yes'),
+    negativeText: t('app.no'),
+    onPositiveClick: async () => {
+      await taskStore.resumeAllTask()
+        .then(() => message.success(t('task.resume-all-task-success')))
+        .catch(() => message.error(t('task.resume-all-task-fail')))
+    },
+  })
 }
 
 function pauseAll() {
   if (!isEngineReady()) { message.warning(t('app.engine-not-ready')); return }
-  taskStore.pauseAllTask()
-    .then(() => message.success(t('task.pause-all-task-success')))
-    .catch(() => message.error(t('task.pause-all-task-fail')))
+  dialog.warning({
+    title: t('task.pause-all-task'),
+    content: t('task.pause-all-task-confirm') || 'Pause all tasks?',
+    positiveText: t('app.yes'),
+    negativeText: t('app.no'),
+    onPositiveClick: async () => {
+      await taskStore.pauseAllTask()
+        .then(() => message.success(t('task.pause-all-task-success')))
+        .catch(() => message.error(t('task.pause-all-task-fail')))
+    },
+  })
 }
 
 function purgeRecord() {
   if (!isEngineReady()) { message.warning(t('app.engine-not-ready')); return }
-  taskStore.purgeTaskRecord()
-    .then(() => message.success(t('task.purge-record-success')))
-    .catch(() => message.error(t('task.purge-record-fail')))
+  dialog.warning({
+    title: t('task.purge-record'),
+    content: t('task.purge-record-confirm') || 'Clear all finished records?',
+    positiveText: t('app.yes'),
+    negativeText: t('app.no'),
+    onPositiveClick: async () => {
+      await taskStore.purgeTaskRecord()
+        .then(() => message.success(t('task.purge-record-success')))
+        .catch(() => message.error(t('task.purge-record-fail')))
+    },
+  })
 }
 </script>
 
@@ -132,14 +156,6 @@ function purgeRecord() {
       </template>
       {{ t('task.new-task') || 'New Task' }}
     </NTooltip>
-    <NTooltip v-if="currentList !== 'stopped'">
-      <template #trigger>
-        <NButton quaternary circle size="small" :disabled="allGids.length === 0" @click="onDeleteAll">
-          <template #icon><NIcon><CloseOutline /></NIcon></template>
-        </NButton>
-      </template>
-      {{ t('task.delete-all-task') }}
-    </NTooltip>
     <NTooltip>
       <template #trigger>
         <NButton quaternary circle size="small" @click="onRefresh">
@@ -150,7 +166,7 @@ function purgeRecord() {
       </template>
       {{ t('task.refresh-list') || 'Refresh' }}
     </NTooltip>
-    <NTooltip>
+    <NTooltip v-if="currentList !== 'stopped'">
       <template #trigger>
         <NButton quaternary circle size="small" @click="resumeAll">
           <template #icon><NIcon><PlayOutline /></NIcon></template>
@@ -158,13 +174,21 @@ function purgeRecord() {
       </template>
       {{ t('task.resume-all-task') || 'Resume All' }}
     </NTooltip>
-    <NTooltip>
+    <NTooltip v-if="currentList !== 'stopped'">
       <template #trigger>
         <NButton quaternary circle size="small" @click="pauseAll">
           <template #icon><NIcon><PauseOutline /></NIcon></template>
         </NButton>
       </template>
       {{ t('task.pause-all-task') || 'Pause All' }}
+    </NTooltip>
+    <NTooltip v-if="currentList !== 'stopped'">
+      <template #trigger>
+        <NButton quaternary circle size="small" :disabled="allGids.length === 0" @click="onDeleteAll">
+          <template #icon><NIcon><CloseOutline /></NIcon></template>
+        </NButton>
+      </template>
+      {{ t('task.delete-all-task') }}
     </NTooltip>
     <NTooltip v-if="currentList === 'stopped'">
       <template #trigger>
@@ -189,5 +213,7 @@ function purgeRecord() {
 }
 .spinning {
   animation: spin 0.5s linear;
+  display: inline-block;
+  transform-origin: center;
 }
 </style>

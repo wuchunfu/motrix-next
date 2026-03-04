@@ -5,7 +5,7 @@ import { TASK_STATUS } from '@shared/constants'
 import { checkTaskIsSeeder, getTaskName, calcProgress, bytesToSize, timeRemaining, timeFormat, checkTaskIsBT } from '@shared/utils'
 import { exists } from '@tauri-apps/plugin-fs'
 import { NProgress, NIcon } from 'naive-ui'
-import { ArrowUpOutline, ArrowDownOutline, GitNetworkOutline, MagnetOutline, AlertCircleOutline, CloudUploadOutline } from '@vicons/ionicons5'
+import { ArrowUpOutline, ArrowDownOutline, GitNetworkOutline, MagnetOutline, AlertCircleOutline, CloudUploadOutline, CheckmarkCircleOutline, TrashOutline } from '@vicons/ionicons5'
 import TaskItemActions from './TaskItemActions.vue'
 
 const props = defineProps<{ task: Record<string, unknown> }>()
@@ -62,6 +62,14 @@ const statusColorMap: Record<string, string> = {
 
 const progressColor = computed(() => statusColorMap[taskStatus.value] || '#E0A422')
 
+const finishedTag = computed(() => {
+  const s = props.task.status as string
+  if (s === TASK_STATUS.COMPLETE) return { label: t('task.task-complete') || 'Completed', color: '#67C23A', icon: CheckmarkCircleOutline }
+  if (s === TASK_STATUS.ERROR) return { label: t('task.task-error') || 'Error', color: '#F56C6C', icon: AlertCircleOutline }
+  if (s === TASK_STATUS.REMOVED) return { label: t('task.task-removed') || 'Removed', color: '#909399', icon: TrashOutline }
+  return null
+})
+
 function onDblClick() {
   const s = props.task.status as string
   if (s === TASK_STATUS.COMPLETE) return
@@ -102,14 +110,20 @@ watch(() => props.task.status, checkFileExists)
   <div class="task-item" :class="{ 'file-missing': fileMissing, 'is-seeding': isSeeder }" @dblclick="onDblClick">
     <div class="task-name" :title="taskFullName">
       <span>{{ taskFullName }}</span>
-      <span v-if="isSeeder" class="seeding-tag">
-        <NIcon :size="13"><CloudUploadOutline /></NIcon>
-        {{ t('task.seeding') || 'Seeding' }}
-      </span>
-      <span v-if="fileMissing" class="file-missing-tag">
-        <NIcon :size="13"><AlertCircleOutline /></NIcon>
-        {{ t('task.file-missing') || 'File missing' }}
-      </span>
+      <div v-if="isSeeder || finishedTag || fileMissing" class="task-tags">
+        <span v-if="isSeeder" class="seeding-tag">
+          <NIcon :size="13"><CloudUploadOutline /></NIcon>
+          {{ t('task.seeding') || 'Seeding' }}
+        </span>
+        <span v-else-if="finishedTag" class="status-tag" :style="{ color: finishedTag.color }">
+          <NIcon :size="13"><component :is="finishedTag.icon" /></NIcon>
+          {{ finishedTag.label }}
+        </span>
+        <span v-if="fileMissing" class="file-missing-tag">
+          <NIcon :size="13"><AlertCircleOutline /></NIcon>
+          {{ t('task.file-missing') || 'File missing' }}
+        </span>
+      </div>
     </div>
     <TaskItemActions
       :task="task"
@@ -162,6 +176,7 @@ watch(() => props.task.status, checkFileExists)
             <span>{{ task.connections }}</span>
           </span>
         </div>
+        <div v-if="task.errorMessage" class="error-message">{{ task.errorMessage }}</div>
       </div>
     </div>
   </div>
@@ -186,6 +201,10 @@ watch(() => props.task.status, checkFileExists)
   margin-right: 200px;
   word-break: break-all;
   min-height: 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 }
 .task-name > span {
   font-size: 14px;
@@ -200,10 +219,9 @@ watch(() => props.task.status, checkFileExists)
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-size: 11px;
+  font-size: 13px;
   color: #e88080;
   opacity: 0.85;
-  margin-left: 6px;
   vertical-align: middle;
   animation: fade-in 0.3s ease;
 }
@@ -237,19 +255,40 @@ watch(() => props.task.status, checkFileExists)
   line-height: 14px;
   white-space: nowrap;
 }
+.task-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .seeding-tag {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-size: 11px;
+  font-size: 13px;
   color: #67C23A;
   opacity: 0.9;
-  margin-left: 6px;
   vertical-align: middle;
   animation: fade-in 0.3s ease;
 }
 .task-item.is-seeding {
   border-left: 3px solid #67C23A;
   background: linear-gradient(90deg, rgba(103, 194, 58, 0.04) 0%, transparent 40%);
+}
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 13px;
+  opacity: 0.9;
+  vertical-align: middle;
+  animation: fade-in 0.3s ease;
+}
+.error-message {
+  font-size: 11px;
+  color: #F56C6C;
+  margin-top: 4px;
+  opacity: 0.85;
+  word-break: break-all;
+  line-height: 1.4;
 }
 </style>

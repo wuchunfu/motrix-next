@@ -41,8 +41,8 @@ function handleItemClick(task: Record<string, unknown>, event: MouseEvent) {
 </script>
 
 <template>
-  <div v-if="taskList.length > 0" class="task-list">
-    <TransitionGroup name="task-list" tag="div">
+  <div class="task-list" :class="{ 'is-empty': taskList.length === 0 }">
+    <TransitionGroup name="task-list" tag="div" class="task-list-inner">
       <div
         v-for="item in taskList"
         :key="(item as Record<string, unknown>).gid as string"
@@ -63,12 +63,14 @@ function handleItemClick(task: Record<string, unknown>, event: MouseEvent) {
         />
       </div>
     </TransitionGroup>
-  </div>
-  <div v-else class="no-task">
-    <div class="no-task-inner">
-      <div class="no-task-brand">Motrix Next</div>
-      <div class="no-task-text">{{ t('task.no-task') || 'No Task' }}</div>
-    </div>
+    <Transition name="fade">
+      <div v-if="taskList.length === 0" class="no-task">
+        <div class="no-task-inner">
+          <div class="no-task-brand">Motrix Next</div>
+          <div class="no-task-text">{{ t('task.no-task') || 'No Task' }}</div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -77,6 +79,12 @@ function handleItemClick(task: Record<string, unknown>, event: MouseEvent) {
   padding: 16px 36px 64px;
   min-height: 100%;
   box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.task-list-inner {
+  position: relative;
 }
 .selected :deep(.task-item) {
   border-color: var(--task-item-hover-border);
@@ -128,4 +136,7 @@ function handleItemClick(task: Record<string, unknown>, event: MouseEvent) {
   font-size: 14px;
   color: #555;
 }
+.fade-enter-active { transition: opacity 0.3s ease; }
+.fade-leave-active { transition: opacity 0.2s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>

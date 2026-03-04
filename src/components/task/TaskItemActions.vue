@@ -18,7 +18,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
-const actionsMap = computed<Record<string, { key: string; icon: Component; label: string; event: string }[]>>(() => ({
+const actionsMap = computed<Record<string, { key: string; icon: Component; label: string; event: string; tooltip?: string; cls?: string }[]>>(() => ({
   [TASK_STATUS.ACTIVE]: [
     { key: 'pause', icon: PauseOutline, label: t('task.pause-task'), event: 'pause' },
     { key: 'delete', icon: CloseOutline, label: t('task.delete-task'), event: 'delete' },
@@ -44,14 +44,14 @@ const actionsMap = computed<Record<string, { key: string; icon: Component; label
     { key: 'trash', icon: TrashOutline, label: t('task.remove-record'), event: 'delete-record' },
   ],
   [TASK_STATUS.SEEDING]: [
-    { key: 'stop', icon: StopOutline, label: t('task.stop-seeding') || 'Stop Seeding', event: 'stop-seeding' },
+    { key: 'stop', icon: StopOutline, label: t('task.stop-seeding') || 'Stop Seeding', event: 'stop-seeding', tooltip: t('task.stop-seeding-tip') || 'Download complete. You are sharing this file with others via BT. Click to stop seeding.', cls: 'stop-seeding' },
     { key: 'delete', icon: CloseOutline, label: t('task.delete-task'), event: 'delete' },
   ],
 }))
 
 const actions = computed(() => {
   const primary = actionsMap.value[props.status] || []
-  const common = [
+  const common: { key: string; icon: Component; label: string; event: string; tooltip?: string; cls?: string }[] = [
     { key: 'folder', icon: FolderOpenOutline, label: t('task.show-in-folder'), event: 'folder' },
     { key: 'link', icon: LinkOutline, label: t('task.copy-link'), event: 'copy-link' },
     { key: 'info', icon: InformationCircleOutline, label: t('task.task-detail-title'), event: 'show-info' },
@@ -79,13 +79,14 @@ function onAction(event: string) {
       v-for="action in actions"
       :key="action.key"
       class="task-item-action"
+      :class="action.cls"
       @click.stop="onAction(action.event)"
     >
-      <NTooltip :delay="500">
+      <NTooltip :delay="500" :style="action.tooltip ? 'max-width: 220px' : ''">
         <template #trigger>
           <NIcon :size="20"><component :is="action.icon" /></NIcon>
         </template>
-        {{ action.label }}
+        {{ action.tooltip || action.label }}
       </NTooltip>
     </li>
   </ul>
@@ -129,5 +130,11 @@ function onAction(event: string) {
 }
 .task-item-action:hover {
   color: var(--primary-color, #E0A422);
+}
+.task-item-action.stop-seeding {
+  color: #67C23A;
+}
+.task-item-action.stop-seeding:hover {
+  color: #85ce61;
 }
 </style>
