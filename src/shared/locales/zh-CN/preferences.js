@@ -107,5 +107,11 @@ export default {
   'is-latest-version': '已是最新版本',
   'check-update-failed': '检查更新失败',
   'update-download-complete': '下载完成，准备安装',
-  'restart-now': '立即重启'
+  'restart-now': '立即重启',
+  'check-frequency': '检查频率',
+  'interval-daily': '每天',
+  'interval-weekly': '每周',
+  'interval-monthly': '每月',
+  'interval-semi-annual': '每半年',
+  'interval-yearly': '每年'
 }

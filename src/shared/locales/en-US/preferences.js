@@ -105,5 +105,11 @@ export default {
   'is-latest-version': 'Already up to date',
   'check-update-failed': 'Failed to check for updates',
   'update-download-complete': 'Download complete, ready to install',
-  'restart-now': 'Restart Now'
+  'restart-now': 'Restart Now',
+  'check-frequency': 'Check Frequency',
+  'interval-daily': 'Every day',
+  'interval-weekly': 'Every week',
+  'interval-monthly': 'Every month',
+  'interval-semi-annual': 'Every 6 months',
+  'interval-yearly': 'Every year'
 }

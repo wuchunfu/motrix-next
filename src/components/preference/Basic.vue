@@ -9,7 +9,7 @@ import { downloadDir } from '@tauri-apps/api/path'
 import { extractSpeedUnit } from '@shared/utils'
 import {
   NForm, NFormItem, NInput, NInputNumber, NSelect, NCheckbox, NSwitch,
-  NButton, NSpace, NDivider, NInputGroup, useDialog
+  NButton, NSpace, NDivider, NInputGroup, NText, useDialog
 } from 'naive-ui'
 import { FolderOpenOutline, CloudDownloadOutline } from '@vicons/ionicons5'
 import { NIcon } from 'naive-ui'
@@ -24,6 +24,14 @@ const dialog = useDialog()
 const defaultDownloadDir = ref('')
 const updateDialogRef = ref<InstanceType<typeof UpdateDialog> | null>(null)
 
+const checkIntervalOptions = [
+  { label: t('preferences.interval-daily'), value: 24 },
+  { label: t('preferences.interval-weekly'), value: 168 },
+  { label: t('preferences.interval-monthly'), value: 720 },
+  { label: t('preferences.interval-semi-annual'), value: 4320 },
+  { label: t('preferences.interval-yearly'), value: 8760 },
+]
+
 function buildForm() {
   const config = (preferenceStore.config || {}) as Record<string, unknown>
   const followTorrent = config.followTorrent !== false
@@ -32,6 +40,7 @@ function buildForm() {
   const btAutoDownloadContent = followTorrent && followMetalink && !pauseMetadata
   return {
     autoCheckUpdate: config.autoCheckUpdate !== false,
+    autoCheckUpdateInterval: (config.autoCheckUpdateInterval as number) || 24,
     lastCheckUpdateTime: (config.lastCheckUpdateTime as number) || 0,
     dir: (config.dir as string) || defaultDownloadDir.value,
     locale: (config.locale as string) || 'en-US',
@@ -214,18 +223,26 @@ onMounted(async () => {
   <div class="preference-form-wrapper">
     <NForm label-placement="left" label-align="left" label-width="240px" size="small" class="form-preference">
       <NDivider title-placement="left">{{ t('preferences.auto-update') }}</NDivider>
-      <NFormItem :show-label="false">
-        <NSpace vertical>
-          <NSpace align="center">
-            <NCheckbox v-model:checked="form.autoCheckUpdate">{{ t('preferences.auto-check-update') }}</NCheckbox>
-            <NButton size="small" @click="handleCheckUpdate">
-              <template #icon><NIcon :size="14"><CloudDownloadOutline /></NIcon></template>
-              {{ t('app.check-updates-now') }}
-            </NButton>
-          </NSpace>
-          <div v-if="form.lastCheckUpdateTime" class="info-text">
-            {{ t('preferences.last-check-update-time') }}: {{ new Date(form.lastCheckUpdateTime).toLocaleString() }}
-          </div>
+      <NFormItem :label="t('preferences.auto-check-update')">
+        <NSwitch v-model:value="form.autoCheckUpdate" />
+      </NFormItem>
+      <NFormItem v-if="form.autoCheckUpdate" :label="t('preferences.check-frequency')">
+        <NSelect
+          v-model:value="form.autoCheckUpdateInterval"
+          :options="checkIntervalOptions"
+          style="width: 180px;"
+        />
+      </NFormItem>
+      <NFormItem :label="t('preferences.last-check-update-time')">
+        <NSpace align="center" :size="16">
+          <NText v-if="form.lastCheckUpdateTime" depth="3" style="font-size: 13px;">
+            {{ new Date(form.lastCheckUpdateTime).toLocaleString() }}
+          </NText>
+          <NText v-else depth="3" style="font-size: 13px;">—</NText>
+          <NButton size="small" @click="handleCheckUpdate">
+            <template #icon><NIcon :size="14"><CloudDownloadOutline /></NIcon></template>
+            {{ t('app.check-updates-now') }}
+          </NButton>
         </NSpace>
       </NFormItem>
       <UpdateDialog ref="updateDialogRef" />
