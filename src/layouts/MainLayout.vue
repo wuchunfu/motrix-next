@@ -56,7 +56,7 @@ async function handleExitConfirm() {
   isExiting.value = true
   showExitDialog.value = false
   appReady.value = false
-  await new Promise((r) => setTimeout(r, 450))
+  await new Promise((r) => setTimeout(r, 250))
   const appWindow = getCurrentWindow()
   await appWindow.destroy()
 }
@@ -66,7 +66,7 @@ function handleExitCancel() {
 }
 
 onMounted(async () => {
-  setTimeout(() => { appReady.value = true }, 50)
+  setTimeout(() => { appReady.value = true }, 120)
 
   const webview = getCurrentWebview()
   unlistenDragDrop = await webview.onDragDropEvent((event) => {
@@ -142,7 +142,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div id="container" :class="{ 'app-ready': appReady }">
+  <div id="container" :class="{ 'app-ready': appReady, 'app-closing': isExiting }">
     <AsideBar @show-about="showAbout = true" />
     <div class="subnav-slot">
       <Transition name="fade" mode="out-in">
@@ -208,10 +208,21 @@ onUnmounted(() => {
   border-radius: 12px;
   overflow: hidden;
   opacity: 0;
-  transition: opacity 0.2s cubic-bezier(0.2, 0, 0, 1);
+  transform: scale(0.96);
+  transition:
+    opacity 650ms cubic-bezier(0.05, 0.7, 0.1, 1.0),
+    transform 650ms cubic-bezier(0.05, 0.7, 0.1, 1.0);
 }
 #container.app-ready {
   opacity: 1;
+  transform: scale(1);
+}
+#container.app-closing {
+  transition:
+    opacity 200ms cubic-bezier(0.3, 0, 0.8, 0.15),
+    transform 200ms cubic-bezier(0.3, 0, 0.8, 0.15);
+  opacity: 0;
+  transform: scale(0.96);
 }
 .subnav-slot {
   width: var(--subnav-width);
