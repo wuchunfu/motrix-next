@@ -145,12 +145,17 @@ pub fn update_progress_bar(app: AppHandle, progress: f64) -> Result<(), String> 
 
 #[tauri::command]
 pub fn update_dock_badge(app: AppHandle, label: String) -> Result<(), String> {
-    if let Some(window) = app.get_webview_window("main") {
-        if label.is_empty() {
-            let _ = window.set_badge_label(None::<String>);
-        } else {
-            let _ = window.set_badge_label(Some(label));
+    #[cfg(target_os = "macos")]
+    {
+        if let Some(window) = app.get_webview_window("main") {
+            if label.is_empty() {
+                let _ = window.set_badge_label(None::<String>);
+            } else {
+                let _ = window.set_badge_label(Some(label));
+            }
         }
     }
+    let _ = app; // suppress unused warning on non-macOS
+    let _ = label;
     Ok(())
 }
