@@ -29,8 +29,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: latest
 
       - uses: actions/setup-node@v4
         with:
@@ -50,13 +48,6 @@ jobs:
             librsvg2-dev patchelf xdg-utils
 
       - run: pnpm install
-
-      - name: Debug release info
-        run: |
-          echo "Trigger: ${{ github.event_name }}"
-          echo "Release ID: ${{ github.event.release.id }}"
-          echo "Release Tag: ${{ github.event.release.tag_name }}"
-          echo "Upload to Release: ${{ github.event_name == 'release' }}"
 
       - uses: tauri-apps/tauri-action@v0
         env:
@@ -84,6 +75,9 @@ jobs:
           VERSION="${TAG#v}"
           BASE="https://github.com/${{ github.repository }}/releases/download/$TAG"
 
+          # Fetch release notes from the GitHub Release body
+          NOTES=$(gh release view "$TAG" -R "${{ github.repository }}" --json body -q .body || echo "")
+
           mkdir -p sigs
           gh release download "$TAG" -R "${{ github.repository }}" -p "*.sig" -D sigs
 
@@ -100,6 +94,7 @@ jobs:
           jq -n \
             --arg version "$VERSION" \
             --arg pub_date "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --arg notes "$NOTES" \
             --arg darwin_sig "$DARWIN_SIG" \
             --arg darwin_url "$BASE/MotrixNext_aarch64.app.tar.gz" \
             --arg win_sig "$WINDOWS_SIG" \
@@ -110,7 +105,7 @@ jobs:
             --arg larm_url "$BASE/MotrixNext_${VERSION}_aarch64.AppImage" \
             '{
               version: $version,
-              notes: "",
+              notes: $notes,
               pub_date: $pub_date,
               platforms: {
                 "darwin-aarch64": { signature: $darwin_sig, url: $darwin_url },
