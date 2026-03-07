@@ -1,8 +1,10 @@
+/** @fileoverview Composable providing application-level message notifications. */
 import { useMessage, type MessageOptions } from 'naive-ui'
+import { MESSAGE_DURATION } from '@shared/timing'
 
 const DEFAULTS: MessageOptions = {
     closable: true,
-    duration: 3000,
+    duration: MESSAGE_DURATION,
     keepAliveOnHover: true,
 }
 
@@ -15,7 +17,7 @@ function dedupShow(
 ) {
     const key = content
     const existing = activeMessages.get(key)
-    const duration = options?.duration ?? DEFAULTS.duration ?? 3000
+    const duration = options?.duration ?? DEFAULTS.duration ?? MESSAGE_DURATION
 
     if (existing) {
         existing.el.destroy()

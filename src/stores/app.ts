@@ -1,9 +1,11 @@
+/** @fileoverview Pinia store for global application state: engine, tasks, stats, and polling. */
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { ADD_TASK_TYPE } from '@shared/constants'
 import { invoke } from '@tauri-apps/api/core'
 import { decodeThunderLink } from '@shared/utils'
 import { logger } from '@shared/logger'
+import type { Aria2RawGlobalStat, Aria2Task } from '@shared/types'
 
 const BASE_INTERVAL = 1000
 const PER_INTERVAL = 100
@@ -34,7 +36,7 @@ export const useAppStore = defineStore('app', () => {
     const addTaskOptions = ref<Record<string, unknown>>({})
     const droppedTorrentPaths = ref<string[]>([])
     const progress = ref(0)
-    const pendingUpdate = ref<any>(null)
+    const pendingUpdate = ref<unknown>(null)
 
     function updateInterval(millisecond: number) {
         let val = millisecond
@@ -81,8 +83,8 @@ export const useAppStore = defineStore('app', () => {
     }
 
     async function fetchGlobalStat(api: {
-        getGlobalStat: () => Promise<Record<string, string>>,
-        fetchActiveTaskList?: () => Promise<Record<string, unknown>[]>
+        getGlobalStat: () => Promise<Aria2RawGlobalStat>,
+        fetchActiveTaskList?: () => Promise<Aria2Task[]>
     }) {
         try {
             const data = await api.getGlobalStat()

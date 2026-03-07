@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/** @fileoverview About panel showing application version and system info. */
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { NModal, NCard, NIcon, NButton, NTag, NDivider } from 'naive-ui'
@@ -33,9 +34,9 @@ function openUrl(url: string) {
   <NModal :show="show" transform-origin="center" @update:show="(v: boolean) => { if (!v) emit('close') }">
     <NCard
       closable
-      @close="emit('close')"
       :style="{ maxWidth: '480px', minWidth: '340px', width: '50vw' }"
       :content-style="{ padding: '0' }"
+      @close="emit('close')"
     >
       <div class="about-container">
         <div class="about-header">
@@ -47,7 +48,7 @@ function openUrl(url: string) {
         </div>
 
         <div class="about-desc">
-          A full-featured download manager, rebuilt from the ground up<br/>
+          A full-featured download manager, rebuilt from the ground up<br />
           with Tauri, Vue 3, and TypeScript.
         </div>
 

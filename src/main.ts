@@ -1,3 +1,4 @@
+/** @fileoverview Application entry point: mounts Vue, initializes i18n, aria2 engine, and IPC listeners. */
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import router from './router'
@@ -44,7 +45,7 @@ async function waitForEngine(port: number, secret: string, maxRetries = 15): Pro
             await probe.call('getVersion')
             await probe.close()
             return true
-        } catch {
+        } catch { /* engine not ready yet, retry after delay */
             await new Promise((r) => setTimeout(r, 500))
         }
     }
@@ -52,11 +53,11 @@ async function waitForEngine(port: number, secret: string, maxRetries = 15): Pro
 }
 
 async function autoCheckForUpdate() {
-    const config = (preferenceStore.config || {}) as Record<string, unknown>
+    const config = preferenceStore.config
     if (config.autoCheckUpdate === false) return
 
-    const lastCheck = (config.lastCheckUpdateTime as number) || 0
-    const intervalMs = ((config.autoCheckUpdateInterval as number) || 24) * 3_600_000
+    const lastCheck = Number(config.lastCheckUpdateTime) || 0
+    const intervalMs = (Number(config.autoCheckUpdateInterval) || 24) * 3_600_000
     if (Date.now() - lastCheck < intervalMs) return
 
     try {
@@ -84,18 +85,18 @@ preferenceStore.loadPreference().then(async () => {
                 const prefix = sysLang.split('-')[0]
                 locale = available.find(l => l === prefix || l.startsWith(prefix + '-')) || 'en-US'
             }
-        } catch {
+        } catch { /* locale detection failed, fallback to en-US */
             locale = 'en-US'
         }
         preferenceStore.updateAndSave({ locale })
     }
     if (locale && i18n.global.locale) {
-        (i18n.global.locale as any).value = locale
+        ; (i18n.global.locale as unknown as { value: string }).value = locale
     }
 
-    const config = preferenceStore.config || {}
-    const port = (config.rpcListenPort as number) || ENGINE_RPC_PORT
-    let secret = (config.rpcSecret as string) || ''
+    const config = preferenceStore.config
+    const port = config.rpcListenPort || ENGINE_RPC_PORT
+    let secret = config.rpcSecret || ''
 
     if (!secret) {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -104,7 +105,7 @@ preferenceStore.loadPreference().then(async () => {
         await preferenceStore.updateAndSave({ rpcSecret: secret })
     }
 
-    taskStore.setApi(aria2Api as any)
+    taskStore.setApi(aria2Api as unknown as Parameters<typeof taskStore.setApi>[0])
 
     try {
         const { invoke } = await import('@tauri-apps/api/core')
@@ -123,7 +124,7 @@ preferenceStore.loadPreference().then(async () => {
 
     try {
         await initClient({ port, secret })
-        console.log('[aria2] RPC client connected via WebSocket on port', port)
+        logger.info('Engine', `RPC client connected via WebSocket on port ${port}`)
     } catch (e) {
         logger.warn('Engine', 'WebSocket failed, using HTTP fallback: ' + (e as Error).message)
     }
@@ -157,7 +158,7 @@ preferenceStore.loadPreference().then(async () => {
                 appStore.addTaskUrl = text
                 appStore.showAddTaskDialog('uri')
             }
-        } catch { }
+        } catch (e) { logger.debug('Main.clipboardMonitor', e) }
     })
 })
 

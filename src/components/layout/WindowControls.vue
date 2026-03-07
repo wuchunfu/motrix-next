@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/** @fileoverview Custom window control buttons (minimize, maximize, close). */
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { NIcon } from 'naive-ui'
 import { RemoveOutline, CopyOutline, CloseOutline } from '@vicons/ionicons5'
@@ -20,13 +21,13 @@ function close() {
 
 <template>
   <div class="window-controls">
-    <button class="ctrl-btn" @click="minimize" title="Minimize">
+    <button class="ctrl-btn" title="Minimize" @click="minimize">
       <NIcon :size="14"><RemoveOutline /></NIcon>
     </button>
-    <button class="ctrl-btn" @click="toggleMaximize" title="Maximize">
+    <button class="ctrl-btn" title="Maximize" @click="toggleMaximize">
       <NIcon :size="14"><CopyOutline /></NIcon>
     </button>
-    <button class="ctrl-btn close" @click="close" title="Close">
+    <button class="ctrl-btn close" title="Close" @click="close">
       <NIcon :size="14"><CloseOutline /></NIcon>
     </button>
   </div>

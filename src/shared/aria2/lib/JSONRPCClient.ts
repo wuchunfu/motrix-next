@@ -1,6 +1,8 @@
+/** @fileoverview JSON-RPC 2.0 WebSocket client with reconnection and batch support. */
 import { EventEmitter } from './EventEmitter'
 import { Deferred } from './Deferred'
 import { JSONRPCError } from './JSONRPCError'
+import { RPC_TIMEOUT } from '../../timing'
 
 interface RPCMessage {
     method: string
@@ -121,7 +123,7 @@ export class JSONRPCClient extends EventEmitter {
         await this._send(message)
 
         return message.map(({ id }) => {
-            const deferred = new Deferred(15000, () => {
+            const deferred = new Deferred(RPC_TIMEOUT, () => {
                 delete this.deferreds[id]
             })
             this.deferreds[id] = deferred
@@ -134,7 +136,7 @@ export class JSONRPCClient extends EventEmitter {
         await this._send(message)
 
         const id = message.id
-        const deferred = new Deferred(15000, () => {
+        const deferred = new Deferred(RPC_TIMEOUT, () => {
             delete this.deferreds[id]
         })
         this.deferreds[id] = deferred

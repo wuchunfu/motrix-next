@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/** @fileoverview Preference settings view with basic/advanced sub-routes. */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'

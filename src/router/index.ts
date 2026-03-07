@@ -1,3 +1,4 @@
+/** @fileoverview Vue Router configuration with task and preference routes. */
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({

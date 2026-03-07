@@ -26,3 +26,12 @@ export const ENGINE_RETRY_INTERVAL = 500
 
 /** Maximum number of engine health-check retries before giving up. */
 export const ENGINE_MAX_RETRIES = 10
+
+/** Default duration for notification messages (ms). */
+export const MESSAGE_DURATION = 3000
+
+/** JSON-RPC call timeout (ms). */
+export const RPC_TIMEOUT = 15_000
+
+/** Default aria2 RPC listen port. */
+export const DEFAULT_ARIA2_PORT = 16800

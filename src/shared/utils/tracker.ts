@@ -1,4 +1,6 @@
+/** @fileoverview BT tracker list fetching from external sources with proxy support. */
 import { isEmpty } from 'lodash-es'
+import type { ProxyConfig } from '@shared/types'
 import axios from 'axios'
 import { MAX_BT_TRACKER_LENGTH, ONE_SECOND, PROXY_SCOPES } from '@shared/constants'
 
@@ -10,10 +12,10 @@ export const convertToAxiosProxy = (proxyServer = '') => {
     const url = new URL(proxyServer)
     const { username, password, protocol = 'http:', hostname, port } = url
 
-    const result: Record<string, unknown> = {
+    const result: { protocol: string; host: string; port: number; auth?: { username: string; password: string } } = {
         protocol: protocol.replace(':', ''),
         host: hostname,
-        port,
+        port: Number(port) || 80,
     }
 
     if (username || password) {
@@ -25,18 +27,14 @@ export const convertToAxiosProxy = (proxyServer = '') => {
 
 export const fetchBtTrackerFromSource = async (
     source: string[],
-    proxyConfig: Record<string, unknown> = {}
+    proxyConfig: Partial<ProxyConfig> = {}
 ): Promise<string[]> => {
     if (isEmpty(source)) {
         return []
     }
 
     const now = Date.now()
-    const { enable, server, scope = [] } = proxyConfig as {
-        enable?: boolean
-        server?: string
-        scope?: string[]
-    }
+    const { enable, server, scope = [] as string[] } = proxyConfig
     const proxy =
         enable && server && scope.includes(PROXY_SCOPES.UPDATE_TRACKERS)
             ? convertToAxiosProxy(server)
@@ -46,7 +44,7 @@ export const fetchBtTrackerFromSource = async (
         return axios
             .get(`${url}?t=${now}`, {
                 timeout: 30 * ONE_SECOND,
-                proxy: proxy as never,
+                proxy: proxy ?? false,
             })
             .then((value) => value.data as string)
     })

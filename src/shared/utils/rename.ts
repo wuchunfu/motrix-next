@@ -1,3 +1,4 @@
+/** @fileoverview File rename pattern utilities. */
 const RULE_REGEX = /\(([^)]*)\)/
 const PLUS = '+'
 const MINUS = '-'

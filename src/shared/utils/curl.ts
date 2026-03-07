@@ -1,3 +1,4 @@
+/** @fileoverview cURL command parser to extract URI, headers, and options. */
 import curlParser from '@bany/curl-to-json'
 
 export const buildUrisFromCurl = (uris: string[] = []): string[] => {

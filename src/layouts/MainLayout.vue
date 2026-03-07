@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/** @fileoverview Main application layout with sidebar, subnav, and IPC event handling. */
 import { computed, ref, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { onMounted, onUnmounted } from 'vue'
@@ -8,6 +9,7 @@ import { ADD_TASK_TYPE } from '@shared/constants'
 import { getCurrentWebview } from '@tauri-apps/api/webview'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { listen } from '@tauri-apps/api/event'
+import { logger } from '@shared/logger'
 import AsideBar from '@/components/layout/AsideBar.vue'
 import TaskSubnav from '@/components/layout/TaskSubnav.vue'
 import PreferenceSubnav from '@/components/layout/PreferenceSubnav.vue'
@@ -54,7 +56,7 @@ function startGlobalPolling() {
   stopGlobalPolling()
   function tick() {
     if (isEngineReady()) {
-      appStore.fetchGlobalStat(aria2Api).catch(() => {})
+      appStore.fetchGlobalStat(aria2Api).catch((e) => logger.debug('MainLayout.globalStat', e))
     }
     globalStatTimer = setTimeout(tick, appStore.interval)
   }
@@ -138,11 +140,11 @@ onMounted(async () => {
           multiple: false,
           filters: [{ name: 'Torrent', extensions: ['torrent'] }],
         })
-        if (selected) appStore.showAddTaskDialog(ADD_TASK_TYPE.TORRENT, [selected as string])
+        if (typeof selected === 'string') appStore.showAddTaskDialog(ADD_TASK_TYPE.TORRENT, [selected])
         break
       }
       case 'preferences':
-        router.push('/preference').catch(() => {})
+        router.push('/preference').catch(() => { /* duplicate navigation */ })
         break
       case 'resume-all':
         taskStore.resumeAllTask().catch(console.error)

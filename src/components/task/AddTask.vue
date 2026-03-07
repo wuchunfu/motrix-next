@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/** @fileoverview Add task dialog: URI, torrent, and metalink input with options. */
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -21,6 +22,7 @@ import {
 } from 'naive-ui'
 import { useAppMessage } from '@/composables/useAppMessage'
 import type { DataTableColumns } from 'naive-ui'
+import type { Aria2EngineOptions } from '@shared/types'
 import { CloudUploadOutline, FolderOpenOutline, TrashOutline } from '@vicons/ionicons5'
 
 const props = defineProps<{ type: string; show: boolean }>()
@@ -36,7 +38,7 @@ const message = useAppMessage()
 const activeTab = ref(props.type || ADD_TASK_TYPE.URI)
 const slideDirection = ref<'left' | 'right'>('left')
 const showAdvanced = ref(false)
-const config = (preferenceStore.config || {}) as Record<string, unknown>
+const config = preferenceStore.config
 
 const torrentName = ref('')
 const torrentBase64 = ref('')
@@ -49,8 +51,8 @@ const submitting = ref(false)
 const form = ref({
   uris: '',
   out: '',
-  dir: (config.dir as string) || '',
-  split: (config.split as number) || 16,
+  dir: config.dir || '',
+  split: config.split || 16,
   userAgent: '',
   authorization: '',
   referer: '',
@@ -60,7 +62,7 @@ const form = ref({
 })
 
 const dialogTop = computed(() => showAdvanced.value ? '8vh' : '12vh')
-const maxSplit = computed(() => (config.engineMaxConnectionPerServer as number) || 64)
+const maxSplit = computed(() => config.engineMaxConnectionPerServer || 64)
 
 const fileColumns: DataTableColumns = [
   { type: 'selection' },
@@ -70,8 +72,8 @@ const fileColumns: DataTableColumns = [
     title: 'Size',
     key: 'length',
     width: 100,
-    render(row: any) {
-      return bytesToSize(row.length)
+    render(row: Record<string, unknown>) {
+      return bytesToSize(row.length as number)
     }
   },
 ]
@@ -108,7 +110,7 @@ watch(() => props.show, async (visible) => {
       if (text && detectResource(text)) {
         form.value.uris = text.trim()
       }
-    } catch {}
+    } catch (e) { logger.debug('AddTask.readClipboard', e) }
   }
 })
 
@@ -142,7 +144,7 @@ function uint8ToBase64(uint8: Uint8Array): string {
 
 async function parseTorrentData(uint8: Uint8Array) {
   try {
-    const decoded = bencode.decode(uint8) as any
+    const decoded = bencode.decode(uint8) as { info?: Record<string, unknown> & { name?: Uint8Array; files?: { path?: Uint8Array[]; length?: number; 'path.utf-8'?: Uint8Array[] }[]; length?: number }; 'creation date'?: number }
     const info = decoded.info
     if (!info) return
 
@@ -151,23 +153,23 @@ async function parseTorrentData(uint8: Uint8Array) {
     torrentInfoHash.value = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('')
 
     const textDecoder = new TextDecoder('utf-8', { fatal: false })
-    const decodeName = (v: any) => v instanceof Uint8Array ? textDecoder.decode(v) : String(v)
+    const decodeName = (v: Uint8Array | string) => v instanceof Uint8Array ? textDecoder.decode(v) : String(v)
 
     if (info.files && info.files.length > 0) {
-      torrentFiles.value = info.files.map((f: any, i: number) => {
-        const pathParts = (f.path || f['path.utf-8'] || []).map(decodeName)
+      torrentFiles.value = info.files.map((f: Record<string, unknown>, i: number) => {
+        const pathParts = ((f.path || f['path.utf-8'] || []) as (Uint8Array | string)[]).map(decodeName)
         return {
           idx: i + 1,
           path: pathParts.join('/') || `file-${i + 1}`,
-          length: f.length || 0,
+          length: Number(f.length) || 0,
         }
       })
       selectedFileIndices.value = torrentFiles.value.map(f => f.idx)
     } else if (info.name) {
       torrentFiles.value = [{
         idx: 1,
-        path: decodeName(info['name.utf-8'] || info.name),
-        length: info.length || 0,
+        path: decodeName((info['name.utf-8'] || info.name) as Uint8Array | string),
+        length: Number(info.length) || 0,
       }]
       selectedFileIndices.value = [1]
     }
@@ -216,8 +218,8 @@ function handleTabChange(name: string) {
 async function chooseDirectory() {
   try {
     const selected = await openDialog({ directory: true, multiple: false })
-    if (selected) form.value.dir = selected as string
-  } catch {}
+    if (typeof selected === 'string') form.value.dir = selected
+  } catch (e) { logger.debug('AddTask.chooseDirectory', e) }
 }
 
 async function chooseTorrentFile() {
@@ -226,8 +228,8 @@ async function chooseTorrentFile() {
       multiple: false,
       filters: [{ name: 'Torrent', extensions: ['torrent'] }]
     })
-    if (selected) await loadTorrentFromPath(selected as string)
-  } catch {}
+    if (typeof selected === 'string') await loadTorrentFromPath(selected)
+  } catch (e) { logger.debug('AddTask.chooseTorrentFile', e) }
 }
 
 function handleClose() {
@@ -242,7 +244,7 @@ async function handleSubmit() {
     if (activeTab.value === ADD_TASK_TYPE.URI) {
       if (!form.value.uris.trim()) return
       const uris = form.value.uris.split('\n').filter((u: string) => u.trim())
-      const options: Record<string, unknown> = {
+      const options: Aria2EngineOptions = {
         dir: form.value.dir,
         split: String(form.value.split),
         out: form.value.out || undefined,
@@ -280,7 +282,7 @@ async function handleSubmit() {
           return
         }
       }
-      const options: Record<string, unknown> = { dir: form.value.dir }
+      const options: Aria2EngineOptions = { dir: form.value.dir }
       if (selectedFileIndices.value.length > 0 && selectedFileIndices.value.length < torrentFiles.value.length) {
         options['select-file'] = selectedFileIndices.value.join(',')
       }
@@ -290,10 +292,10 @@ async function handleSubmit() {
     }
     handleClose()
     if (form.value.newTaskShowDownloading) {
-      router.push({ path: '/task/active' }).catch(() => {})
+      router.push({ path: '/task/active' }).catch(() => { /* duplicate navigation */ })
     }
-  } catch (e: any) {
-    const errMsg = e?.message || String(e)
+  } catch (e: unknown) {
+    const errMsg = (e instanceof Error) ? e.message : String(e)
     logger.error('AddTask.submit', e)
     if (errMsg.includes('not initialized') || !isEngineReady()) {
       message.error(t('app.engine-not-ready'), { duration: 5000, closable: true })
@@ -332,11 +334,11 @@ onUnmounted(() => { document.removeEventListener('keydown', handleHotkey) })
     <NCard
       :title="t('task.new-task')"
       closable
-      @close="handleClose"
       class="add-task-card"
       :style="{ maxWidth: '680px', minWidth: '380px', width: '70vw', marginTop: dialogTop }"
       :content-style="{ maxHeight: '60vh', overflowY: 'auto', overflowX: 'hidden' }"
       :segmented="{ footer: true }"
+      @close="handleClose"
     >
       <NForm label-placement="left" label-width="110px">
         <NTabs :value="activeTab" type="line" animated @update:value="handleTabChange">
@@ -344,10 +346,10 @@ onUnmounted(() => { document.removeEventListener('keydown', handleHotkey) })
             <div class="tab-pane-content">
               <NFormItem :show-label="false" style="margin-bottom: 0;">
                 <NInput
+                  v-model:value="form.uris"
                   type="textarea"
                   :rows="5"
                   :placeholder="t('task.uri-task-tips') || 'One URL per line'"
-                  v-model:value="form.uris"
                 />
               </NFormItem>
             </div>
@@ -372,10 +374,10 @@ onUnmounted(() => { document.removeEventListener('keydown', handleHotkey) })
                   </div>
                   <div v-if="torrentFiles.length > 0" class="torrent-file-list">
                     <NDataTable
+                      v-model:checked-row-keys="checkedRowKeys"
                       :columns="fileColumns"
                       :data="torrentFiles"
                       :row-key="(row: any) => row.idx as number"
-                      v-model:checked-row-keys="checkedRowKeys"
                       size="small"
                       :max-height="200"
                       :scroll-x="400"
@@ -392,61 +394,61 @@ onUnmounted(() => { document.removeEventListener('keydown', handleHotkey) })
             </div>
           </NTabPane>
         </NTabs>
-          <div class="tab-shared-form">
-            <NGrid :cols="24" :x-gap="12">
-              <NGridItem :span="15">
-                <NFormItem :label="t('task.task-out') + ':'">
-                  <NInput :placeholder="t('task.task-out-tips')" v-model:value="form.out" :autofocus="false" />
-                </NFormItem>
-              </NGridItem>
-              <NGridItem :span="9">
-                <NFormItem :label="t('task.task-split') + ':'">
-                  <NInputNumber v-model:value="form.split" :min="1" :max="maxSplit" style="width: 100%;" />
-                </NFormItem>
-              </NGridItem>
-            </NGrid>
-            <NFormItem :label="t('task.task-dir') + ':'">
-              <NInputGroup>
-                <NInput v-model:value="form.dir" style="flex: 1;" />
-                <NButton @click="chooseDirectory">
-                  <template #icon><NIcon><FolderOpenOutline /></NIcon></template>
-                </NButton>
-              </NInputGroup>
-            </NFormItem>
-            <NFormItem :show-label="false">
-              <NCheckbox v-model:checked="showAdvanced">
-                {{ t('task.show-advanced-options') }}
-              </NCheckbox>
-            </NFormItem>
-            <NCollapseTransition :show="showAdvanced">
-              <div>
-                <NFormItem :label="t('task.task-user-agent') + ':'">
-                  <NInput type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" v-model:value="form.userAgent" />
-                </NFormItem>
-                <NFormItem :label="t('task.task-authorization') + ':'">
-                  <NInput type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" v-model:value="form.authorization" />
-                </NFormItem>
-                <NFormItem :label="t('task.task-referer') + ':'">
-                  <NInput type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" v-model:value="form.referer" />
-                </NFormItem>
-                <NFormItem :label="t('task.task-cookie') + ':'">
-                  <NInput type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" v-model:value="form.cookie" />
-                </NFormItem>
-                <NGrid :cols="24" :x-gap="12">
-                  <NGridItem :span="16">
-                    <NFormItem :label="t('task.task-proxy') + ':'">
-                      <NInput placeholder="[http://][USER:PASSWORD@]HOST[:PORT]" v-model:value="form.allProxy" />
-                    </NFormItem>
-                  </NGridItem>
-                </NGrid>
-                <NFormItem :show-label="false">
-                  <NCheckbox v-model:checked="form.newTaskShowDownloading">
-                    {{ t('task.navigate-to-downloading') }}
-                  </NCheckbox>
-                </NFormItem>
-              </div>
-            </NCollapseTransition>
-          </div>
+        <div class="tab-shared-form">
+          <NGrid :cols="24" :x-gap="12">
+            <NGridItem :span="15">
+              <NFormItem :label="t('task.task-out') + ':'">
+                <NInput v-model:value="form.out" :placeholder="t('task.task-out-tips')" :autofocus="false" />
+              </NFormItem>
+            </NGridItem>
+            <NGridItem :span="9">
+              <NFormItem :label="t('task.task-split') + ':'">
+                <NInputNumber v-model:value="form.split" :min="1" :max="maxSplit" style="width: 100%;" />
+              </NFormItem>
+            </NGridItem>
+          </NGrid>
+          <NFormItem :label="t('task.task-dir') + ':'">
+            <NInputGroup>
+              <NInput v-model:value="form.dir" style="flex: 1;" />
+              <NButton @click="chooseDirectory">
+                <template #icon><NIcon><FolderOpenOutline /></NIcon></template>
+              </NButton>
+            </NInputGroup>
+          </NFormItem>
+          <NFormItem :show-label="false">
+            <NCheckbox v-model:checked="showAdvanced">
+              {{ t('task.show-advanced-options') }}
+            </NCheckbox>
+          </NFormItem>
+          <NCollapseTransition :show="showAdvanced">
+            <div>
+              <NFormItem :label="t('task.task-user-agent') + ':'">
+                <NInput v-model:value="form.userAgent" type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" />
+              </NFormItem>
+              <NFormItem :label="t('task.task-authorization') + ':'">
+                <NInput v-model:value="form.authorization" type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" />
+              </NFormItem>
+              <NFormItem :label="t('task.task-referer') + ':'">
+                <NInput v-model:value="form.referer" type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" />
+              </NFormItem>
+              <NFormItem :label="t('task.task-cookie') + ':'">
+                <NInput v-model:value="form.cookie" type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" />
+              </NFormItem>
+              <NGrid :cols="24" :x-gap="12">
+                <NGridItem :span="16">
+                  <NFormItem :label="t('task.task-proxy') + ':'">
+                    <NInput v-model:value="form.allProxy" placeholder="[http://][USER:PASSWORD@]HOST[:PORT]" />
+                  </NFormItem>
+                </NGridItem>
+              </NGrid>
+              <NFormItem :show-label="false">
+                <NCheckbox v-model:checked="form.newTaskShowDownloading">
+                  {{ t('task.navigate-to-downloading') }}
+                </NCheckbox>
+              </NFormItem>
+            </div>
+          </NCollapseTransition>
+        </div>
       </NForm>
       <template #footer>
         <NSpace justify="end">

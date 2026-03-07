@@ -1,3 +1,4 @@
+/** @fileoverview Deferred promise utility for JSON-RPC request tracking. */
 const DEFAULT_TIMEOUT = 15000
 
 export class Deferred<T = unknown> {

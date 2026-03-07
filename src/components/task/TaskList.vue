@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/** @fileoverview Scrollable task list container with empty state. */
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useTaskStore } from '@/stores/task'
 import { useTheme } from '@/composables/useTheme'

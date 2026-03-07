@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/** @fileoverview Task status sub-navigation tabs (active, waiting, stopped). */
 import { useI18n } from 'vue-i18n'
 import { useRouter, useRoute } from 'vue-router'
 import { NIcon } from 'naive-ui'
@@ -15,7 +16,7 @@ const items: { key: string; icon: Component; route: string }[] = [
 ]
 
 function nav(path: string) {
-  router.push({ path }).catch(() => {})
+  router.push({ path }).catch(() => { /* duplicate navigation */ })
 }
 
 function isActive(key: string) {

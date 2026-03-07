@@ -1,14 +1,14 @@
 <script setup lang="ts">
+/** @fileoverview Task list view with polling, task actions, and file delete confirmation. */
 import { computed, watch, onMounted, onBeforeUnmount, ref, h } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useTaskStore } from '@/stores/task'
 import { useAppStore } from '@/stores/app'
 import { usePreferenceStore } from '@/stores/preference'
 import { getTaskUri, getTaskName } from '@shared/utils'
-import { remove } from '@tauri-apps/plugin-fs'
-import { join } from '@tauri-apps/api/path'
 import { revealItemInDir } from '@tauri-apps/plugin-opener'
 import { isEngineReady } from '@/api/aria2'
+import { deleteTaskFiles } from '@/composables/useFileDelete'
 import type { Aria2Task } from '@shared/types'
 import { logger } from '@shared/logger'
 import { useDialog, NCheckbox } from 'naive-ui'
@@ -42,7 +42,7 @@ function startPolling() {
   stopPolling()
   function tick() {
     if (isEngineReady()) {
-      taskStore.fetchList().catch(() => {})
+      taskStore.fetchList().catch((e) => logger.debug('TaskView.fetchList', e))
     }
     refreshTimer = setTimeout(tick, appStore.interval)
   }
@@ -66,34 +66,7 @@ watch(() => props.status, changeCurrentList)
 onMounted(changeCurrentList)
 onBeforeUnmount(stopPolling)
 
-async function deleteTaskFiles(task: Aria2Task) {
-  const dir = task.dir
-  const files = task.files || []
-  const parentDirs = new Set<string>()
-
-  for (const f of files) {
-    if (!f.path) continue
-    try { await remove(f.path) } catch {}
-    try { await remove(f.path + '.aria2') } catch {}
-    const lastSep = Math.max(f.path.lastIndexOf('/'), f.path.lastIndexOf('\\'))
-    if (lastSep > 0) {
-      const parent = f.path.substring(0, lastSep)
-      if (parent !== dir) parentDirs.add(parent)
-    }
-  }
-
-  for (const pd of parentDirs) {
-    try { await remove(pd, { recursive: true }) } catch {}
-  }
-
-  if (dir) {
-    const taskName = getTaskName(task, { defaultName: '', maxLen: -1 })
-    if (taskName) {
-      const taskDir = await join(dir, taskName)
-      try { await remove(taskDir, { recursive: true }) } catch {}
-    }
-  }
-}
+// File deletion handled by @/composables/useFileDelete
 function handlePauseTask(task: Aria2Task) {
   taskStore.pauseTask(task).catch(console.error)
 }
@@ -121,7 +94,7 @@ function handleDeleteTask(task: Aria2Task) {
     negativeText: t('app.no'),
     onPositiveClick: async () => {
       d.loading = true
-      d.negativeButtonProps = { disabled: true } as Record<string, unknown>
+      d.negativeButtonProps = { disabled: true } as Record<string, boolean>
       d.closable = false
       d.maskClosable = false
       // Yield to browser so the loading spinner renders before heavy IPC work
@@ -152,7 +125,7 @@ async function handleShowInFolder(task: Aria2Task) {
   if (!filePath) return
   try {
     await revealItemInDir(filePath)
-  } catch {
+  } catch { /* file deleted or inaccessible, show warning */
     message.warning(t('task.file-not-exist'))
   }
 }
@@ -164,7 +137,7 @@ function handleStopSeeding(task: Aria2Task) {
 <template>
   <div class="task-view">
     <header class="panel-header" data-tauri-drag-region>
-      <h4 class="task-title" :key="status">{{ title }}</h4>
+      <h4 :key="status" class="task-title">{{ title }}</h4>
       <TaskActions />
     </header>
     <div class="panel-content">

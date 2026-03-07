@@ -1,3 +1,4 @@
+/** @fileoverview Aria2 WebSocket client re-export. */
 export { Aria2 } from './lib/Aria2'
 export type { Aria2Options } from './lib/Aria2'
 export { JSONRPCClient } from './lib/JSONRPCClient'

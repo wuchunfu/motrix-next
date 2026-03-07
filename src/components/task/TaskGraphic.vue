@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/** @fileoverview Visual bitfield progress graphic for download pieces. */
 import { computed, ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 
 const props = withDefaults(defineProps<{

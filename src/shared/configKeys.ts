@@ -1,3 +1,4 @@
+/** @fileoverview Defined user, system, and restart-required config key lists. */
 const userKeys = [
   'auto-check-update',
   'auto-hide-window',

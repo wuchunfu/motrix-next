@@ -1,9 +1,10 @@
+/** @fileoverview Pinia store for download task management: list, add, pause, resume, remove. */
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { EMPTY_STRING, TASK_STATUS } from '@shared/constants'
 import { checkTaskIsBT, intersection } from '@shared/utils'
 import { logger } from '@shared/logger'
-import type { Aria2Task, Aria2File, Aria2Peer, AddUriParams, AddTorrentParams, TaskOptionParams } from '@shared/types'
+import type { Aria2Task, Aria2File, Aria2Peer, Aria2EngineOptions, AddUriParams, AddTorrentParams, TaskOptionParams } from '@shared/types'
 
 export type { Aria2Task, Aria2File, Aria2Peer }
 
@@ -68,7 +69,7 @@ export const useTaskStore = defineStore('task', () => {
                 try {
                     const fresh = await api.fetchTaskItemWithPeers({ gid: currentTaskGid.value })
                     if (fresh) updateCurrentTaskItem(fresh)
-                } catch {
+                } catch { /* peer data unavailable, fallback to list data */
                     const fresh = data.find((t: Aria2Task) => t.gid === currentTaskGid.value)
                     if (fresh) updateCurrentTaskItem(fresh)
                 }
@@ -120,18 +121,18 @@ export const useTaskStore = defineStore('task', () => {
         }
     }
 
-    async function addUri(data: { uris: string[]; outs: string[]; options: Record<string, unknown> }) {
+    async function addUri(data: { uris: string[]; outs: string[]; options: Aria2EngineOptions }) {
         await api.addUri(data)
         await fetchList()
     }
 
-    async function addTorrent(data: { torrent: string; options: Record<string, unknown> }) {
+    async function addTorrent(data: { torrent: string; options: Aria2EngineOptions }) {
         const gid = await api.addTorrent(data)
         await fetchList()
         return gid
     }
 
-    async function addMetalink(data: { metalink: string; options: Record<string, unknown> }) {
+    async function addMetalink(data: { metalink: string; options: Aria2EngineOptions }) {
         await api.addMetalink(data)
         await fetchList()
     }
@@ -140,7 +141,7 @@ export const useTaskStore = defineStore('task', () => {
         return api.getOption({ gid })
     }
 
-    async function changeTaskOption(payload: { gid: string; options: Record<string, unknown> }) {
+    async function changeTaskOption(payload: { gid: string; options: Aria2EngineOptions }) {
         return api.changeOption(payload)
     }
 
@@ -177,7 +178,7 @@ export const useTaskStore = defineStore('task', () => {
     async function pauseAllTask() {
         try {
             await api.pauseAllTask()
-        } catch {
+        } catch { /* graceful pause failed, fallback to force pause */
             await api.forcePauseAllTask()
         } finally {
             await fetchList()
@@ -212,7 +213,7 @@ export const useTaskStore = defineStore('task', () => {
     }
 
     async function stopSeeding(gid: string) {
-        return changeTaskOption({ gid, options: { seedTime: 0 } })
+        return changeTaskOption({ gid, options: { seedTime: '0' } })
     }
 
     async function removeTaskRecord(task: Aria2Task) {

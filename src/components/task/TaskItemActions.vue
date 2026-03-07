@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/** @fileoverview Action buttons for individual task items. */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { TASK_STATUS } from '@shared/constants'

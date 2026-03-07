@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/** @fileoverview Application update notification dialog. */
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { NModal, NButton, NSpace, NProgress, NIcon, NText, NSpin } from 'naive-ui'
@@ -143,7 +144,7 @@ defineExpose({ open })
                 <span class="version-tag version-new">v{{ version }}</span>
               </div>
             </div>
-            <NButton type="primary" @click="startDownload" style="min-width: 160px;">
+            <NButton type="primary" style="min-width: 160px;" @click="startDownload">
               {{ t('preferences.update-and-install') }}
             </NButton>
           </div>
@@ -164,7 +165,7 @@ defineExpose({ open })
                 {{ downloadedMB }} / {{ totalMB }} MB · {{ progressPercent }}%
               </NText>
             </div>
-            <NButton size="small" quaternary @click="cancelDownload" style="opacity: 0.6;">
+            <NButton size="small" quaternary style="opacity: 0.6;" @click="cancelDownload">
               {{ t('app.cancel') || 'Cancel' }}
             </NButton>
           </div>
@@ -174,7 +175,7 @@ defineExpose({ open })
               <NIcon :size="40"><CheckmarkCircleOutline /></NIcon>
             </div>
             <NText class="update-main-text">{{ t('preferences.update-download-complete') }}</NText>
-            <NButton type="primary" @click="handleRelaunch" style="min-width: 160px;">
+            <NButton type="primary" style="min-width: 160px;" @click="handleRelaunch">
               {{ t('preferences.restart-now') }}
             </NButton>
           </div>

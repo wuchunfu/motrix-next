@@ -1,3 +1,4 @@
+/** @fileoverview Application-wide constants: themes, intervals, suffixes, limits. */
 export const EMPTY_STRING = ''
 export const IS_PORTABLE = false
 

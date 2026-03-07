@@ -1,13 +1,13 @@
 <script setup lang="ts">
+/** @fileoverview Batch task action buttons: resume all, pause all, delete all, purge. */
 import { ref, computed, h } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import { useTaskStore } from '@/stores/task'
 import { ADD_TASK_TYPE } from '@shared/constants'
 import { isEngineReady } from '@/api/aria2'
-import { remove } from '@tauri-apps/plugin-fs'
-import { join } from '@tauri-apps/api/path'
-import { getTaskName } from '@shared/utils'
+import { deleteTaskFiles } from '@/composables/useFileDelete'
+import { logger } from '@shared/logger'
 import { NButton, NIcon, NTooltip, NCheckbox, useDialog } from 'naive-ui'
 import { useAppMessage } from '@/composables/useAppMessage'
 import {
@@ -35,7 +35,7 @@ function onRefresh() {
   if (refreshTimer) clearTimeout(refreshTimer)
   refreshing.value = true
   refreshTimer = setTimeout(() => { refreshing.value = false }, 500)
-  taskStore.fetchList().catch(console.error)
+  taskStore.fetchList().catch((e: unknown) => logger.warn('TaskActions.onRefresh', (e as Error).message))
 }
 
 function onDeleteAll() {
@@ -55,7 +55,7 @@ function onDeleteAll() {
     negativeText: t('app.no'),
     onPositiveClick: async () => {
       d.loading = true
-      d.negativeButtonProps = { disabled: true } as never
+      d.negativeButtonProps = { disabled: true } as Record<string, boolean>
       d.closable = false
       d.maskClosable = false
       // Yield to browser so the loading spinner renders before heavy IPC work
@@ -63,29 +63,7 @@ function onDeleteAll() {
       if (deleteFiles.value) {
         const tasks = taskStore.taskList.filter(t => gids.includes(t.gid))
         for (const task of tasks) {
-          const dir = (task as Record<string, unknown>).dir as string
-          const files = ((task as Record<string, unknown>).files || []) as { path: string }[]
-          const parentDirs = new Set<string>()
-          for (const f of files) {
-            if (!f.path) continue
-            try { await remove(f.path) } catch {}
-            try { await remove(f.path + '.aria2') } catch {}
-            const lastSep = Math.max(f.path.lastIndexOf('/'), f.path.lastIndexOf('\\'))
-            if (lastSep > 0) {
-              const parent = f.path.substring(0, lastSep)
-              if (parent !== dir) parentDirs.add(parent)
-            }
-          }
-          for (const pd of parentDirs) {
-            try { await remove(pd, { recursive: true }) } catch {}
-          }
-          if (dir) {
-            const name = getTaskName(task as never, { defaultName: '', maxLen: -1 })
-            if (name) {
-              const taskDir = await join(dir, name)
-              try { await remove(taskDir, { recursive: true }) } catch {}
-            }
-          }
+          await deleteTaskFiles(task)
         }
       }
       await taskStore.batchRemoveTask(gids)

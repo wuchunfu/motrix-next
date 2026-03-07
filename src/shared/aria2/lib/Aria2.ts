@@ -1,4 +1,6 @@
+/** @fileoverview Aria2-specific JSON-RPC client with secret auth and method prefixing. */
 import { JSONRPCClient, JSONRPCClientOptions } from './JSONRPCClient'
+import { DEFAULT_ARIA2_PORT } from '../../timing'
 
 export interface Aria2Options extends JSONRPCClientOptions {
     secret?: string
@@ -9,7 +11,7 @@ export class Aria2 extends JSONRPCClient {
         ...JSONRPCClient.defaultOptions,
         secure: false,
         host: 'localhost',
-        port: 16800,
+        port: DEFAULT_ARIA2_PORT,
         secret: '',
         path: '/jsonrpc',
     }
@@ -43,20 +45,21 @@ export class Aria2 extends JSONRPCClient {
         if (!method) return
         const event = this.unprefix(method)
         if (event !== method) this.emit(event, params)
-        super._onnotification(notification as never)
+        // RPCResponse requires 'id' but notifications don't have it; this is a library boundary mismatch
+        super._onnotification(notification as unknown as { id: number; method?: string; params?: unknown[] })
     }
 
-    override async call(method: string, ...params: unknown[]): Promise<unknown> {
-        return super.call(this.prefix(method), this.addSecret(params))
+    override async call<T = unknown>(method: string, ...params: unknown[]): Promise<T> {
+        return super.call(this.prefix(method), this.addSecret(params)) as Promise<T>
     }
 
-    async multicall(calls: [string, ...unknown[]][]): Promise<unknown> {
+    async multicall<T = unknown>(calls: [string, ...unknown[]][]): Promise<T> {
         const multi = [
             calls.map(([method, ...params]) => {
                 return { methodName: this.prefix(method), params: this.addSecret(params) }
             }),
         ]
-        return super.call('system.multicall', multi)
+        return super.call('system.multicall', multi) as Promise<T>
     }
 
     override async batch(calls: [string, ...unknown[]][]): Promise<Promise<unknown>[]> {
@@ -69,12 +72,12 @@ export class Aria2 extends JSONRPCClient {
     }
 
     async listNotifications(): Promise<string[]> {
-        const events = (await this.call('system.listNotifications')) as string[]
+        const events = await this.call<string[]>('system.listNotifications')
         return events.map((event) => this.unprefix(event))
     }
 
     async listMethods(): Promise<string[]> {
-        const methods = (await this.call('system.listMethods')) as string[]
+        const methods = await this.call<string[]>('system.listMethods')
         return methods.map((method) => this.unprefix(method))
     }
 }

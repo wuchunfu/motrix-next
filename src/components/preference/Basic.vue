@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/** @fileoverview Basic preference form: theme, locale, download dir, speed limits. */
 import { ref, computed, onMounted, watchSyncEffect, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isEqual } from 'lodash-es'
@@ -9,6 +10,8 @@ import { open as openDialog } from '@tauri-apps/plugin-dialog'
 import { invoke } from '@tauri-apps/api/core'
 import { downloadDir } from '@tauri-apps/api/path'
 import { extractSpeedUnit } from '@shared/utils'
+import { logger } from '@shared/logger'
+import type { AppConfig } from '@shared/types'
 import {
   NForm, NFormItem, NInput, NInputNumber, NSelect, NCheckbox, NSwitch,
   NButton, NSpace, NDivider, NInputGroup, NText, NCollapseTransition, NTag, useDialog
@@ -42,18 +45,18 @@ const checkIntervalOptions = [
 ]
 
 function buildForm() {
-  const config = (preferenceStore.config || {}) as Record<string, unknown>
+  const config = preferenceStore.config
   const followTorrent = config.followTorrent !== false
   const followMetalink = config.followMetalink !== false
   const pauseMetadata = !!config.pauseMetadata
   const btAutoDownloadContent = followTorrent && followMetalink && !pauseMetadata
   return {
     autoCheckUpdate: config.autoCheckUpdate !== false,
-    autoCheckUpdateInterval: (config.autoCheckUpdateInterval as number) || 24,
-    lastCheckUpdateTime: (config.lastCheckUpdateTime as number) || 0,
-    dir: (config.dir as string) || defaultDownloadDir.value,
-    locale: (config.locale as string) || 'en-US',
-    theme: (config.theme as string) || 'dark',
+    autoCheckUpdateInterval: Number(config.autoCheckUpdateInterval) || 24,
+    lastCheckUpdateTime: config.lastCheckUpdateTime || 0,
+    dir: config.dir || defaultDownloadDir.value,
+    locale: config.locale || 'en-US',
+    theme: config.theme || 'dark',
     openAtLogin: !!config.openAtLogin,
     keepWindowState: !!config.keepWindowState,
     resumeAllWhenAppLaunched: !!config.resumeAllWhenAppLaunched,
@@ -64,16 +67,16 @@ function buildForm() {
     taskNotification: config.taskNotification !== false,
     newTaskShowDownloading: config.newTaskShowDownloading !== false,
     noConfirmBeforeDeleteTask: !!config.noConfirmBeforeDeleteTask,
-    maxConcurrentDownloads: (config.maxConcurrentDownloads as number) || 5,
-    maxConnectionPerServer: (config.maxConnectionPerServer as number) || 16,
+    maxConcurrentDownloads: config.maxConcurrentDownloads || 5,
+    maxConnectionPerServer: config.maxConnectionPerServer || 16,
     maxOverallDownloadLimit: String(config.maxOverallDownloadLimit || '0'),
     maxOverallUploadLimit: String(config.maxOverallUploadLimit || '0'),
     btSaveMetadata: !!config.btSaveMetadata,
     btAutoDownloadContent,
     btForceEncryption: !!config.btForceEncryption,
     keepSeeding: config.keepSeeding !== false,
-    seedRatio: (config.seedRatio as number) || 1,
-    seedTime: (config.seedTime as number) || 60,
+    seedRatio: config.seedRatio || 1,
+    seedTime: config.seedTime || 60,
     continue: config.continue !== false,
   }
 }
@@ -179,7 +182,7 @@ function onKeepSeedingChange(enable: boolean) {
 
 async function handleSelectDir() {
   const selected = await openDialog({ directory: true, multiple: false })
-  if (selected) form.value.dir = selected as string
+  if (typeof selected === 'string') form.value.dir = selected
 }
 
 function loadForm() {
@@ -200,7 +203,7 @@ function handleSave() {
   const newLocale = form.value.locale
   savedSnapshot.value = JSON.parse(JSON.stringify(form.value))
 
-  const data: Record<string, unknown> = { ...form.value }
+  const data: Partial<AppConfig> = { ...form.value }
 
   if (form.value.btAutoDownloadContent) {
     data.followTorrent = true
@@ -250,8 +253,8 @@ function handleCheckUpdate() {
 }
 
 onMounted(async () => {
-  try { defaultDownloadDir.value = await downloadDir() } catch {}
-  try { currentPlatform.value = platform() } catch {}
+  try { defaultDownloadDir.value = await downloadDir() } catch (e) { logger.debug('Basic.downloadDir', e) }
+  try { currentPlatform.value = platform() } catch (e) { logger.debug('Basic.platform', e) }
   loadForm()
 })
 </script>
@@ -324,7 +327,7 @@ onMounted(async () => {
       <NFormItem :label="t('preferences.default-dir')">
         <NInputGroup>
           <NInput v-model:value="form.dir" style="flex: 1;" />
-          <NButton @click="handleSelectDir" style="padding: 0 12px;">
+          <NButton style="padding: 0 12px;" @click="handleSelectDir">
             <template #icon>
               <NIcon :size="16"><FolderOpenOutline /></NIcon>
             </template>
@@ -337,15 +340,15 @@ onMounted(async () => {
         <NInputGroup>
           <NInputNumber
             :value="uploadSpeedValue"
+            :min="0"
+            :max="65535" :step="1" style="width: 140px;"
             @update:value="handleUploadValueChange"
-            :min="0" :max="65535" :step="1"
-            style="width: 140px;"
           />
           <NSelect
             :value="uploadUnit"
-            @update:value="handleUploadUnitChange"
             :options="speedUnitOptions"
             style="width: 100px;"
+            @update:value="handleUploadUnitChange"
           />
         </NInputGroup>
       </NFormItem>
@@ -353,15 +356,15 @@ onMounted(async () => {
         <NInputGroup>
           <NInputNumber
             :value="downloadSpeedValue"
+            :min="0"
+            :max="65535" :step="1" style="width: 140px;"
             @update:value="handleDownloadValueChange"
-            :min="0" :max="65535" :step="1"
-            style="width: 140px;"
           />
           <NSelect
             :value="downloadUnit"
-            @update:value="handleDownloadUnitChange"
             :options="speedUnitOptions"
             style="width: 100px;"
+            @update:value="handleDownloadUnitChange"
           />
         </NInputGroup>
       </NFormItem>

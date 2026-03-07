@@ -1,3 +1,4 @@
+/** @fileoverview Composable providing application theme detection and toggling. */
 import { ref, watch } from 'vue'
 import { usePreferenceStore } from '@/stores/preference'
 import { APP_THEME } from '@shared/constants'

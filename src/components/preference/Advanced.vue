@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/** @fileoverview Advanced preference form: proxy, tracker, RPC, port, and protocol settings. */
 import { ref, computed, h, onMounted, watchSyncEffect, onUnmounted } from 'vue'
 import { isEqual } from 'lodash-es'
 import { invoke } from '@tauri-apps/api/core'
@@ -30,6 +31,7 @@ import { useAppMessage } from '@/composables/useAppMessage'
 import {
   SyncOutline, DiceOutline,
 } from '@vicons/ionicons5'
+import { logger } from '@shared/logger'
 
 const { t } = useI18n()
 const preferenceStore = usePreferenceStore()
@@ -104,10 +106,10 @@ watchSyncEffect(() => { preferenceStore.pendingChanges = isDirty.value })
 onUnmounted(() => { preferenceStore.pendingChanges = false })
 
 function buildForm() {
-  const c = (preferenceStore.config || {}) as Record<string, unknown>
-  const proxy = (c.proxy as Record<string, unknown>) || {}
-  const protocols = (c.protocols as Record<string, boolean>) || {}
-  const savedSecret = (c.rpcSecret as string) || ''
+  const c = preferenceStore.config
+  const proxy = c.proxy || { enable: false, server: '', bypass: '', scope: [] }
+  const protocols = c.protocols || { magnet: false, thunder: false }
+  const savedSecret = c.rpcSecret || ''
   const rpcSecret = savedSecret || generateSecret()
   if (!savedSecret) {
     preferenceStore.updateAndSave({ rpcSecret })
@@ -115,25 +117,25 @@ function buildForm() {
   return {
     proxy: {
       enable: !!proxy.enable,
-      server: (proxy.server as string) || '',
-      bypass: (proxy.bypass as string) || '',
-      scope: (proxy.scope as string[]) || [...PROXY_SCOPE_OPTIONS],
+      server: proxy.server || '',
+      bypass: proxy.bypass || '',
+      scope: proxy.scope || [...PROXY_SCOPE_OPTIONS],
     },
-    trackerSource: (c.trackerSource as string[]) || [...DEFAULT_TRACKER_SOURCE],
-    btTracker: convertCommaToLine((c.btTracker as string) || ''),
+    trackerSource: c.trackerSource || [...DEFAULT_TRACKER_SOURCE],
+    btTracker: convertCommaToLine(c.btTracker || ''),
     autoSyncTracker: !!c.autoSyncTracker,
-    lastSyncTrackerTime: (c.lastSyncTrackerTime as number) || 0,
-    rpcListenPort: (c.rpcListenPort as number) || ENGINE_RPC_PORT,
+    lastSyncTrackerTime: c.lastSyncTrackerTime || 0,
+    rpcListenPort: c.rpcListenPort || ENGINE_RPC_PORT,
     rpcSecret,
     enableUpnp: c.enableUpnp !== false,
-    listenPort: (c.listenPort as number) || 21301,
-    dhtListenPort: (c.dhtListenPort as number) || 26701,
+    listenPort: Number(c.listenPort) || 21301,
+    dhtListenPort: Number(c.dhtListenPort) || 26701,
     protocols: {
       magnet: protocols.magnet !== false,
       thunder: !!protocols.thunder,
     },
-    userAgent: (c.userAgent as string) || '',
-    logLevel: (c.logLevel as string) || 'warn',
+    userAgent: c.userAgent || '',
+    logLevel: c.logLevel || 'warn',
   }
 }
 
@@ -145,12 +147,12 @@ function loadForm() {
 async function loadPaths() {
   try {
     aria2ConfPath.value = await resolveResource('engine/aria2.conf')
-  } catch { aria2ConfPath.value = '' }
+  } catch (e) { aria2ConfPath.value = ''; logger.debug('Advanced.loadConf', e) }
   try {
     const dataDir = await appDataDir()
     sessionPath.value = `${dataDir}download.session`
     logPath.value = `${dataDir}motrix-next.log`
-  } catch {}
+  } catch (e) { logger.debug('Advanced.loadPaths', e) }
 }
 
 async function handleSyncTracker() {
@@ -169,7 +171,7 @@ async function handleSyncTracker() {
     } else {
       message.error(t('preferences.bt-tracker-sync-failed'))
     }
-  } catch {
+  } catch { /* network error, show sync failed message */
     message.error(t('preferences.bt-tracker-sync-failed'))
   } finally {
     syncingTracker.value = false
@@ -208,7 +210,7 @@ function handleSessionReset() {
         await taskStore.purgeTaskRecord()
         await taskStore.pauseAllTask()
         message.success(t('preferences.session-reset'))
-      } catch {}
+      } catch (e) { logger.error('Advanced.sessionReset', e) }
     },
   })
 }
@@ -223,7 +225,7 @@ function handleFactoryReset() {
       try {
         await invoke('factory_reset')
         relaunch()
-      } catch {}
+      } catch (e) { logger.error('Advanced.factoryReset', e) }
     },
   })
 }
@@ -270,17 +272,16 @@ onMounted(() => {
 <template>
   <div class="preference-form-wrapper">
     <NForm label-placement="left" label-align="left" label-width="240px" size="small" class="form-preference">
-
       <NDivider title-placement="left">{{ t('preferences.proxy') }}</NDivider>
       <NFormItem :label="t('preferences.enable-proxy')">
         <NSwitch v-model:value="form.proxy.enable" />
       </NFormItem>
       <template v-if="form.proxy.enable">
         <NFormItem :label="t('preferences.proxy-server')">
-          <NInput placeholder="[http://][USER:PASSWORD@]HOST[:PORT]" v-model:value="form.proxy.server" />
+          <NInput v-model:value="form.proxy.server" placeholder="[http://][USER:PASSWORD@]HOST[:PORT]" />
         </NFormItem>
         <NFormItem label="Bypass">
-          <NInput type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" :placeholder="t('preferences.proxy-bypass-input-tips')" v-model:value="form.proxy.bypass" />
+          <NInput v-model:value="form.proxy.bypass" type="textarea" :autosize="{ minRows: 2, maxRows: 3 }" :placeholder="t('preferences.proxy-bypass-input-tips')" />
         </NFormItem>
         <NFormItem label="Scope">
           <NSelect v-model:value="form.proxy.scope" :options="proxyScopeOptions" multiple style="width: 100%;" />
@@ -304,14 +305,14 @@ onMounted(() => {
             clearable
             max-tag-count="responsive"
           />
-          <NButton :loading="syncingTracker" @click="handleSyncTracker" size="small" style="flex-shrink: 0;">
+          <NButton :loading="syncingTracker" size="small" style="flex-shrink: 0;" @click="handleSyncTracker">
             <template #icon><NIcon><SyncOutline /></NIcon></template>
             {{ t('preferences.bt-tracker-sync') }}
           </NButton>
         </NInputGroup>
       </NFormItem>
       <NFormItem :label="t('preferences.bt-tracker-content')">
-        <NInput type="textarea" :autosize="{ minRows: 3, maxRows: 8 }" :placeholder="t('preferences.bt-tracker-input-tips')" v-model:value="form.btTracker" />
+        <NInput v-model:value="form.btTracker" type="textarea" :autosize="{ minRows: 3, maxRows: 8 }" :placeholder="t('preferences.bt-tracker-input-tips')" />
       </NFormItem>
       <NFormItem :show-label="false">
         <div class="info-text">
@@ -331,15 +332,15 @@ onMounted(() => {
       <NFormItem :label="t('preferences.rpc-listen-port')">
         <NInputGroup>
           <NInputNumber v-model:value="form.rpcListenPort" :min="1024" :max="65535" style="width: 160px;" />
-          <NButton @click="onRpcPortDice" style="padding: 0 10px;">
+          <NButton style="padding: 0 10px;" @click="onRpcPortDice">
             <template #icon><NIcon :size="14"><DiceOutline /></NIcon></template>
           </NButton>
         </NInputGroup>
       </NFormItem>
       <NFormItem :label="t('preferences.rpc-secret')" :validation-status="form.rpcSecret ? undefined : 'error'">
         <NInputGroup>
-          <NInput type="password" show-password-on="click" v-model:value="form.rpcSecret" placeholder="RPC Secret" style="flex: 1;" :status="form.rpcSecret ? undefined : 'error'" />
-          <NButton @click="onRpcSecretDice" style="padding: 0 10px;">
+          <NInput v-model:value="form.rpcSecret" type="password" show-password-on="click" placeholder="RPC Secret" style="flex: 1;" :status="form.rpcSecret ? undefined : 'error'" />
+          <NButton style="padding: 0 10px;" @click="onRpcSecretDice">
             <template #icon><NIcon :size="14"><DiceOutline /></NIcon></template>
           </NButton>
         </NInputGroup>
@@ -352,7 +353,7 @@ onMounted(() => {
       <NFormItem :label="t('preferences.bt-port')">
         <NInputGroup>
           <NInputNumber v-model:value="form.listenPort" :min="1024" :max="65535" style="width: 160px;" />
-          <NButton @click="onBtPortDice" style="padding: 0 10px;">
+          <NButton style="padding: 0 10px;" @click="onBtPortDice">
             <template #icon><NIcon :size="14"><DiceOutline /></NIcon></template>
           </NButton>
         </NInputGroup>
@@ -360,7 +361,7 @@ onMounted(() => {
       <NFormItem :label="t('preferences.dht-port')">
         <NInputGroup>
           <NInputNumber v-model:value="form.dhtListenPort" :min="1024" :max="65535" style="width: 160px;" />
-          <NButton @click="onDhtPortDice" style="padding: 0 10px;">
+          <NButton style="padding: 0 10px;" @click="onDhtPortDice">
             <template #icon><NIcon :size="14"><DiceOutline /></NIcon></template>
           </NButton>
         </NInputGroup>
@@ -379,7 +380,7 @@ onMounted(() => {
 
       <NDivider title-placement="left">{{ t('preferences.user-agent') }}</NDivider>
       <NFormItem :label="t('preferences.mock-user-agent')">
-        <NInput type="textarea" :autosize="{ minRows: 2, maxRows: 4 }" placeholder="User-Agent" v-model:value="form.userAgent" />
+        <NInput v-model:value="form.userAgent" type="textarea" :autosize="{ minRows: 2, maxRows: 4 }" placeholder="User-Agent" />
       </NFormItem>
       <NFormItem :show-label="false">
         <NSpace align="center" :size="8">
@@ -412,7 +413,6 @@ onMounted(() => {
           <NButton type="error" ghost @click="handleFactoryReset">{{ t('preferences.factory-reset') }}</NButton>
         </NSpace>
       </NFormItem>
-
     </NForm>
     <div class="form-actions">
       <NSpace>

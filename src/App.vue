@@ -1,9 +1,10 @@
 <script setup lang="ts">
+/** @fileoverview Root application component with Naive UI theme provider and locale configuration. */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   NConfigProvider, NMessageProvider, NDialogProvider,
-  darkTheme, type GlobalThemeOverrides,
+  darkTheme, type GlobalThemeOverrides, type NLocale, type NDateLocale,
   zhCN, zhTW, jaJP, koKR, ruRU, frFR, deDE, esAR, ptBR,
   itIT, trTR, idID, viVN, plPL, thTH, arDZ, ukUA, nlNL, nbNO,
   dateZhCN, dateZhTW, dateJaJP, dateKoKR, dateRuRU, dateFrFR, dateDeDE, dateEsAR, datePtBR,
@@ -16,13 +17,13 @@ const { isDark } = useTheme()
 
 const theme = computed(() => isDark.value ? darkTheme : null)
 
-const naiveLocaleMap: Record<string, unknown> = {
+const naiveLocaleMap: Record<string, NLocale> = {
   'zh-CN': zhCN, 'zh-TW': zhTW, ja: jaJP, ko: koKR,
   ru: ruRU, fr: frFR, de: deDE, es: esAR, 'pt-BR': ptBR,
   it: itIT, tr: trTR, id: idID, vi: viVN, pl: plPL,
   th: thTH, ar: arDZ, uk: ukUA, nl: nlNL, nb: nbNO,
 }
-const naiveDateLocaleMap: Record<string, unknown> = {
+const naiveDateLocaleMap: Record<string, NDateLocale> = {
   'zh-CN': dateZhCN, 'zh-TW': dateZhTW, ja: dateJaJP, ko: dateKoKR,
   ru: dateRuRU, fr: dateFrFR, de: dateDeDE, es: dateEsAR, 'pt-BR': datePtBR,
   it: dateItIT, tr: dateTrTR, id: dateIdID, vi: dateViVN, pl: datePlPL,
@@ -45,7 +46,7 @@ const themeOverrides: GlobalThemeOverrides = {
 </script>
 
 <template>
-  <NConfigProvider :theme="theme" :theme-overrides="themeOverrides" :locale="naiveLocale as any" :date-locale="naiveDateLocale as any">
+  <NConfigProvider :theme="theme" :theme-overrides="themeOverrides" :locale="naiveLocale" :date-locale="naiveDateLocale">
     <NMessageProvider>
       <NDialogProvider>
         <router-view />

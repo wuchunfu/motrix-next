@@ -3,6 +3,7 @@ use tauri::Manager;
 use tauri_plugin_shell::process::{CommandChild, CommandEvent};
 use tauri_plugin_shell::ShellExt;
 
+/// Holds the aria2c child process handle, protected by a Mutex for thread-safe access.
 pub struct EngineState {
     child: Mutex<Option<CommandChild>>,
 }
@@ -15,6 +16,9 @@ impl EngineState {
     }
 }
 
+/// Spawns the aria2c engine process with the given configuration.
+/// Creates the download directory, cleans up stale port listeners, and passes
+/// whitelisted config keys as CLI arguments.
 pub fn start_engine(app: &tauri::AppHandle, config: &serde_json::Value) -> Result<(), String> {
     let state = app.state::<EngineState>();
     let mut child_lock = state.child.lock().map_err(|e| e.to_string())?;
@@ -99,6 +103,7 @@ pub fn start_engine(app: &tauri::AppHandle, config: &serde_json::Value) -> Resul
     Ok(())
 }
 
+/// Kills the running aria2c child process and releases the lock.
 pub fn stop_engine(app: &tauri::AppHandle) -> Result<(), String> {
     let state = app.state::<EngineState>();
     let mut child_lock = state.child.lock().map_err(|e| e.to_string())?;
@@ -112,6 +117,7 @@ pub fn stop_engine(app: &tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+/// Stops the current engine (if running) and starts a new one with fresh config.
 pub fn restart_engine(app: &tauri::AppHandle, config: &serde_json::Value) -> Result<(), String> {
     stop_engine(app)?;
     start_engine(app, config)

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/** @fileoverview Individual task row in the task list with progress and controls. */
 import { computed, ref, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { TASK_STATUS } from '@shared/constants'
@@ -29,7 +30,7 @@ const taskFullName = computed(() =>
 
 const isSeeder = computed(() => checkTaskIsSeeder(props.task))
 const isBT = computed(() => checkTaskIsBT(props.task))
-const taskStatus = computed(() => isSeeder.value ? TASK_STATUS.SEEDING : (props.task.status as string))
+const taskStatus = computed(() => isSeeder.value ? TASK_STATUS.SEEDING : props.task.status)
 const isActive = computed(() => props.task.status === TASK_STATUS.ACTIVE)
 
 const percent = computed(() => calcProgress(props.task.totalLength, props.task.completedLength))
@@ -64,7 +65,7 @@ const statusColorMap: Record<string, string> = {
 const progressColor = computed(() => statusColorMap[taskStatus.value] || '#E0A422')
 
 const finishedTag = computed(() => {
-  const s = props.task.status as string
+  const s = props.task.status
   if (s === TASK_STATUS.COMPLETE) return { label: t('task.task-complete') || 'Completed', color: '#67C23A', icon: CheckmarkCircleOutline }
   if (s === TASK_STATUS.ERROR) return { label: t('task.task-error') || 'Error', color: '#F56C6C', icon: AlertCircleOutline }
   if (s === TASK_STATUS.REMOVED) return { label: t('task.task-removed') || 'Removed', color: '#909399', icon: TrashOutline }
@@ -72,7 +73,7 @@ const finishedTag = computed(() => {
 })
 
 function onDblClick() {
-  const s = props.task.status as string
+  const s = props.task.status
   if (s === TASK_STATUS.COMPLETE) return
   if (s === TASK_STATUS.ACTIVE) emit('pause', props.task)
   else if (s === TASK_STATUS.WAITING || s === TASK_STATUS.PAUSED) emit('resume', props.task)
@@ -82,13 +83,13 @@ function onDblClick() {
 const fileMissing = ref(false)
 
 async function checkFileExists() {
-  const status = props.task.status as string
+  const status = props.task.status
   if (status === TASK_STATUS.ACTIVE || status === TASK_STATUS.WAITING) {
     fileMissing.value = false
     return
   }
-  const dir = props.task.dir as string
-  const files = props.task.files as { path?: string }[] | undefined
+  const dir = props.task.dir
+  const files = props.task.files
   if (!files || files.length === 0 || !dir) {
     fileMissing.value = false
     return
@@ -98,7 +99,7 @@ async function checkFileExists() {
     if (firstFile) {
       fileMissing.value = !(await exists(firstFile))
     }
-  } catch {
+  } catch { /* file system check failed, assume not missing */
     fileMissing.value = false
   }
 }

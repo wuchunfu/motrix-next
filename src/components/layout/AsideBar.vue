@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/** @fileoverview Sidebar navigation component. */
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
@@ -12,7 +13,7 @@ const appStore = useAppStore()
 const emit = defineEmits<{ 'show-about': [] }>()
 
 function nav(path: string) {
-  router.push({ path }).catch(() => {})
+  router.push({ path }).catch(() => { /* duplicate navigation */ })
 }
 
 function showAddTask() {
@@ -26,7 +27,7 @@ function showAddTask() {
       <h1 class="logo-mini">
         <a target="_blank" href="https://github.com/AnInsomniacy/motrix-next/">
           <svg xmlns="http://www.w3.org/2000/svg" width="40" height="18" viewBox="0 0 40 18">
-            <rect x="0.5" y="0.5" width="39" height="17" rx="4" fill="none" stroke="#888" stroke-width="1"/>
+            <rect x="0.5" y="0.5" width="39" height="17" rx="4" fill="none" stroke="#888" stroke-width="1" />
             <text x="20" y="13" fill="#FFF" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="10" text-anchor="middle" letter-spacing="1">NEXT</text>
           </svg>
         </a>

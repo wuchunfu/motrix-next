@@ -97,6 +97,7 @@ export interface Aria2RawGlobalStat {
     numWaiting: string
     numStopped: string
     numStoppedTotal: string
+    [key: string]: string
 }
 
 /** HTTP/SOCKS proxy configuration for aria2 and tracker requests. */
@@ -162,23 +163,28 @@ export interface AppConfig {
     [key: string]: unknown
 }
 
+/** Aria2 engine option dictionary passed to RPC calls (kebab-case keys after formatting). */
+export interface Aria2EngineOptions {
+    [key: string]: string | string[] | undefined
+}
+
 /** Parameters for adding a URI-based download task. */
 export interface AddUriParams {
     uris: string[]
     outs: string[]
-    options: Record<string, unknown>
+    options: Aria2EngineOptions
 }
 
 /** Parameters for adding a torrent-based download task. */
 export interface AddTorrentParams {
     torrent: string
-    options: Record<string, unknown>
+    options: Aria2EngineOptions
 }
 
 /** Parameters for changing options on an existing task. */
 export interface TaskOptionParams {
     gid: string
-    options: Record<string, unknown>
+    options: Aria2EngineOptions
 }
 
 /** Aria2File enriched with a parsed file extension (used by file filter utilities). */

@@ -1,3 +1,4 @@
+/** @fileoverview Custom error class for JSON-RPC protocol errors. */
 export class JSONRPCError extends Error {
     code: number
     data?: unknown

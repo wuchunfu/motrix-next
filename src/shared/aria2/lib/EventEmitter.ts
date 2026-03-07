@@ -1,3 +1,4 @@
+/** @fileoverview Minimal typed event emitter for JSON-RPC notifications. */
 type Listener = (...args: unknown[]) => void
 
 export class EventEmitter {

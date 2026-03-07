@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/** @fileoverview Real-time download/upload speed display widget. */
 import { computed } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { bytesToSize } from '@shared/utils'
