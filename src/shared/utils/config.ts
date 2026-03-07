@@ -13,6 +13,7 @@ import {
 import { userKeys, systemKeys, needRestartKeys } from '@shared/configKeys'
 import { ENGINE_RPC_HOST } from '@shared/constants'
 import { splitTextRows } from './format'
+import type { Aria2EngineOptions } from '@shared/types'
 
 export const changeKeysCase = (obj: Record<string, unknown>, caseConverter: (s: string) => string): Record<string, unknown> => {
     const result: Record<string, unknown> = {}
@@ -84,7 +85,7 @@ export const parseHeader = (header = ''): Record<string, string> => {
     return result
 }
 
-export const formatOptionsForEngine = (options: Record<string, unknown> = {}): Record<string, string> => {
+export const formatOptionsForEngine = (options: Aria2EngineOptions | Record<string, unknown> = {}): Record<string, string> => {
     const result: Record<string, string> = {}
     Object.keys(options).forEach((key) => {
         const val = options[key]

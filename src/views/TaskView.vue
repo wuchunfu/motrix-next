@@ -94,7 +94,7 @@ function handleDeleteTask(task: Aria2Task) {
     negativeText: t('app.no'),
     onPositiveClick: async () => {
       d.loading = true
-      d.negativeButtonProps = { disabled: true } as Record<string, boolean>
+      d.negativeButtonProps = { disabled: true }
       d.closable = false
       d.maskClosable = false
       // Yield to browser so the loading spinner renders before heavy IPC work
@@ -120,7 +120,7 @@ function handleShowInfo(task: Aria2Task) {
   taskStore.showTaskDetail(task)
 }
 async function handleShowInFolder(task: Aria2Task) {
-  const files = (task.files || []) as { path: string }[]
+  const files = task.files || []
   const filePath = files[0]?.path
   if (!filePath) return
   try {

@@ -18,7 +18,7 @@ const STORE_KEY = 'preferences'
 export const usePreferenceStore = defineStore('preference', () => {
     const engineMode = ref('MAX')
     const pendingChanges = ref(false)
-    const config = ref<AppConfig>({ theme: 'dark' } as AppConfig)
+    const config = ref<AppConfig>({ theme: 'dark', locale: 'en-US' } as AppConfig)
 
     const theme = computed(() => config.value.theme)
     const locale = computed(() => config.value.locale)
@@ -67,7 +67,7 @@ export const usePreferenceStore = defineStore('preference', () => {
 
     async function save(
         cfg: Partial<AppConfig>,
-        api: { savePreference: (c: Partial<AppConfig>) => Promise<unknown> },
+        api: { savePreference: (c: Partial<AppConfig>) => Promise<void> },
         saveSession: () => void
     ) {
         saveSession()

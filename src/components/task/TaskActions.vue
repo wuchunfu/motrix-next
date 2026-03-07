@@ -55,7 +55,7 @@ function onDeleteAll() {
     negativeText: t('app.no'),
     onPositiveClick: async () => {
       d.loading = true
-      d.negativeButtonProps = { disabled: true } as Record<string, boolean>
+      d.negativeButtonProps = { disabled: true }
       d.closable = false
       d.maskClosable = false
       // Yield to browser so the loading spinner renders before heavy IPC work

@@ -4,34 +4,34 @@ import { ref } from 'vue'
 import { EMPTY_STRING, TASK_STATUS } from '@shared/constants'
 import { checkTaskIsBT, intersection } from '@shared/utils'
 import { logger } from '@shared/logger'
-import type { Aria2Task, Aria2File, Aria2Peer, Aria2EngineOptions, AddUriParams, AddTorrentParams, TaskOptionParams } from '@shared/types'
+import type { Aria2Task, Aria2File, Aria2Peer, Aria2EngineOptions, AddUriParams, AddTorrentParams, AddMetalinkParams, TaskOptionParams } from '@shared/types'
 
 export type { Aria2Task, Aria2File, Aria2Peer }
 
 interface TaskApi {
     fetchTaskList: (params: { type: string }) => Promise<Aria2Task[]>
     fetchTaskItem: (params: { gid: string }) => Promise<Aria2Task>
-    fetchTaskItemWithPeers: (params: { gid: string }) => Promise<Aria2Task>
-    addUri: (params: AddUriParams) => Promise<unknown>
-    addTorrent: (params: AddTorrentParams) => Promise<unknown>
-    addMetalink: (params: { metalink: string; options: Record<string, unknown> }) => Promise<unknown>
-    getOption: (params: { gid: string }) => Promise<Record<string, unknown>>
-    changeOption: (params: TaskOptionParams) => Promise<unknown>
-    removeTask: (params: { gid: string }) => Promise<unknown>
-    forcePauseTask: (params: { gid: string }) => Promise<unknown>
-    pauseTask: (params: { gid: string }) => Promise<unknown>
-    resumeTask: (params: { gid: string }) => Promise<unknown>
-    pauseAllTask: () => Promise<unknown>
-    forcePauseAllTask: () => Promise<unknown>
-    resumeAllTask: () => Promise<unknown>
-    batchResumeTask: (params: { gids: string[] }) => Promise<unknown>
-    batchPauseTask: (params: { gids: string[] }) => Promise<unknown>
-    batchForcePauseTask: (params: { gids: string[] }) => Promise<unknown>
-    batchRemoveTask: (params: { gids: string[] }) => Promise<unknown>
-    removeTaskRecord: (params: { gid: string }) => Promise<unknown>
-    purgeTaskRecord: () => Promise<unknown>
-    saveSession: () => Promise<unknown>
+    fetchTaskItemWithPeers: (params: { gid: string }) => Promise<Aria2Task & { peers: Aria2Peer[] }>
     fetchActiveTaskList: () => Promise<Aria2Task[]>
+    addUri: (params: AddUriParams) => Promise<string[]>
+    addTorrent: (params: AddTorrentParams) => Promise<string>
+    addMetalink: (params: AddMetalinkParams) => Promise<string[]>
+    getOption: (params: { gid: string }) => Promise<Record<string, string>>
+    changeOption: (params: TaskOptionParams) => Promise<void>
+    removeTask: (params: { gid: string }) => Promise<string>
+    forcePauseTask: (params: { gid: string }) => Promise<string>
+    pauseTask: (params: { gid: string }) => Promise<string>
+    resumeTask: (params: { gid: string }) => Promise<string>
+    pauseAllTask: () => Promise<string>
+    forcePauseAllTask: () => Promise<string>
+    resumeAllTask: () => Promise<string>
+    batchResumeTask: (params: { gids: string[] }) => Promise<unknown[][]>
+    batchPauseTask: (params: { gids: string[] }) => Promise<unknown[][]>
+    batchForcePauseTask: (params: { gids: string[] }) => Promise<unknown[][]>
+    batchRemoveTask: (params: { gids: string[] }) => Promise<unknown[][]>
+    removeTaskRecord: (params: { gid: string }) => Promise<string>
+    purgeTaskRecord: () => Promise<string>
+    saveSession: () => Promise<string>
 }
 
 export const useTaskStore = defineStore('task', () => {
@@ -132,7 +132,7 @@ export const useTaskStore = defineStore('task', () => {
         return gid
     }
 
-    async function addMetalink(data: { metalink: string; options: Aria2EngineOptions }) {
+    async function addMetalink(data: AddMetalinkParams) {
         await api.addMetalink(data)
         await fetchList()
     }

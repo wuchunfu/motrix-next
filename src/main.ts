@@ -2,7 +2,8 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import router from './router'
-import { i18n } from './composables/useLocale'
+import { i18n } from '@/composables/useLocale'
+import { setI18nLocale } from '@shared/utils/i18n'
 import { usePreferenceStore } from './stores/preference'
 import { useTaskStore } from './stores/task'
 import { useAppStore } from './stores/app'
@@ -91,7 +92,7 @@ preferenceStore.loadPreference().then(async () => {
         preferenceStore.updateAndSave({ locale })
     }
     if (locale && i18n.global.locale) {
-        ; (i18n.global.locale as unknown as { value: string }).value = locale
+        setI18nLocale(i18n, locale)
     }
 
     const config = preferenceStore.config
@@ -105,7 +106,7 @@ preferenceStore.loadPreference().then(async () => {
         await preferenceStore.updateAndSave({ rpcSecret: secret })
     }
 
-    taskStore.setApi(aria2Api as unknown as Parameters<typeof taskStore.setApi>[0])
+    taskStore.setApi(aria2Api)
 
     try {
         const { invoke } = await import('@tauri-apps/api/core')

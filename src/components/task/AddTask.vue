@@ -14,6 +14,7 @@ import { open as openDialog } from '@tauri-apps/plugin-dialog'
 import { downloadDir } from '@tauri-apps/api/path'
 import { readFile } from '@tauri-apps/plugin-fs'
 import { logger } from '@shared/logger'
+import { parseTorrentBuffer, uint8ToBase64 } from '@/composables/useTorrentParser'
 import bencode from 'bencode'
 import {
   NModal, NCard, NTabs, NTabPane, NForm, NFormItem, NInput, NInputNumber,
@@ -134,45 +135,14 @@ async function loadTorrentFromPath(filePath: string) {
   }
 }
 
-function uint8ToBase64(uint8: Uint8Array): string {
-  let binary = ''
-  for (let i = 0; i < uint8.length; i++) {
-    binary += String.fromCharCode(uint8[i])
-  }
-  return btoa(binary)
-}
-
 async function parseTorrentData(uint8: Uint8Array) {
   try {
-    const decoded = bencode.decode(uint8) as { info?: Record<string, unknown> & { name?: Uint8Array; files?: { path?: Uint8Array[]; length?: number; 'path.utf-8'?: Uint8Array[] }[]; length?: number }; 'creation date'?: number }
-    const info = decoded.info
-    if (!info) return
+    const result = await parseTorrentBuffer(uint8, bencode)
+    if (!result) return
 
-    const infoBytes = bencode.encode(info)
-    const hashBuffer = await crypto.subtle.digest('SHA-1', new Uint8Array(infoBytes).buffer as ArrayBuffer)
-    torrentInfoHash.value = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('')
-
-    const textDecoder = new TextDecoder('utf-8', { fatal: false })
-    const decodeName = (v: Uint8Array | string) => v instanceof Uint8Array ? textDecoder.decode(v) : String(v)
-
-    if (info.files && info.files.length > 0) {
-      torrentFiles.value = info.files.map((f: Record<string, unknown>, i: number) => {
-        const pathParts = ((f.path || f['path.utf-8'] || []) as (Uint8Array | string)[]).map(decodeName)
-        return {
-          idx: i + 1,
-          path: pathParts.join('/') || `file-${i + 1}`,
-          length: Number(f.length) || 0,
-        }
-      })
-      selectedFileIndices.value = torrentFiles.value.map(f => f.idx)
-    } else if (info.name) {
-      torrentFiles.value = [{
-        idx: 1,
-        path: decodeName((info['name.utf-8'] || info.name) as Uint8Array | string),
-        length: Number(info.length) || 0,
-      }]
-      selectedFileIndices.value = [1]
-    }
+    torrentInfoHash.value = result.infoHash
+    torrentFiles.value = result.files
+    selectedFileIndices.value = result.files.map(f => f.idx)
   } catch (e) {
     logger.error('AddTask.parseTorrentData', e)
     torrentFiles.value = []
@@ -273,8 +243,8 @@ async function handleSubmit() {
       if (torrentInfoHash.value && isEngineReady()) {
         const { getClient } = await import('@/api/aria2')
         const [active, waiting] = await Promise.all([
-          getClient().call('tellActive', ['infoHash']) as Promise<{infoHash?: string}[]>,
-          getClient().call('tellWaiting', 0, 1000, ['infoHash']) as Promise<{infoHash?: string}[]>,
+          getClient().call<{infoHash?: string}[]>('tellActive', ['infoHash']),
+          getClient().call<{infoHash?: string}[]>('tellWaiting', 0, 1000, ['infoHash']),
         ])
         const existing = [...active, ...waiting].map(t => t.infoHash).filter(Boolean)
         if (existing.includes(torrentInfoHash.value)) {

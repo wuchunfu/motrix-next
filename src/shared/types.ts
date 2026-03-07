@@ -181,6 +181,12 @@ export interface AddTorrentParams {
     options: Aria2EngineOptions
 }
 
+/** Parameters for adding a metalink-based download task. */
+export interface AddMetalinkParams {
+    metalink: string
+    options: Aria2EngineOptions
+}
+
 /** Parameters for changing options on an existing task. */
 export interface TaskOptionParams {
     gid: string
@@ -190,4 +196,12 @@ export interface TaskOptionParams {
 /** Aria2File enriched with a parsed file extension (used by file filter utilities). */
 export interface EnrichedFile extends Aria2File {
     extension?: string
+}
+
+/** Tauri updater check result. */
+export interface TauriUpdate {
+    available: boolean
+    version?: string
+    body?: string
+    date?: string
 }

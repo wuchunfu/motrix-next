@@ -5,12 +5,8 @@ import { ADD_TASK_TYPE } from '@shared/constants'
 import { invoke } from '@tauri-apps/api/core'
 import { decodeThunderLink } from '@shared/utils'
 import { logger } from '@shared/logger'
-import type { Aria2RawGlobalStat, Aria2Task } from '@shared/types'
-
-const BASE_INTERVAL = 1000
-const PER_INTERVAL = 100
-const MIN_INTERVAL = 500
-const MAX_INTERVAL = 6000
+import { STAT_BASE_INTERVAL, STAT_PER_TASK_INTERVAL, STAT_MIN_INTERVAL, STAT_MAX_INTERVAL } from '@shared/timing'
+import type { Aria2RawGlobalStat, Aria2Task, Aria2EngineOptions, TauriUpdate, AppConfig } from '@shared/types'
 
 export const useAppStore = defineStore('app', () => {
     const systemTheme = ref('light')
@@ -20,8 +16,8 @@ export const useAppStore = defineStore('app', () => {
         version: '',
         enabledFeatures: [],
     })
-    const engineOptions = ref<Record<string, unknown>>({})
-    const interval = ref(BASE_INTERVAL)
+    const engineOptions = ref<Partial<AppConfig>>({})
+    const interval = ref(STAT_BASE_INTERVAL)
     const stat = ref({
         downloadSpeed: 0,
         uploadSpeed: 0,
@@ -33,29 +29,29 @@ export const useAppStore = defineStore('app', () => {
     const addTaskType = ref(ADD_TASK_TYPE.URI)
     const addTaskUrl = ref('')
     const addTaskTorrents = ref<File[]>([])
-    const addTaskOptions = ref<Record<string, unknown>>({})
+    const addTaskOptions = ref<Aria2EngineOptions>({})
     const droppedTorrentPaths = ref<string[]>([])
     const progress = ref(0)
-    const pendingUpdate = ref<unknown>(null)
+    const pendingUpdate = ref<TauriUpdate | null>(null)
 
     function updateInterval(millisecond: number) {
         let val = millisecond
-        if (val > MAX_INTERVAL) val = MAX_INTERVAL
-        if (val < MIN_INTERVAL) val = MIN_INTERVAL
+        if (val > STAT_MAX_INTERVAL) val = STAT_MAX_INTERVAL
+        if (val < STAT_MIN_INTERVAL) val = STAT_MIN_INTERVAL
         if (interval.value === val) return
         interval.value = val
     }
 
     function increaseInterval(millisecond = 100) {
-        if (interval.value < MAX_INTERVAL) interval.value += millisecond
+        if (interval.value < STAT_MAX_INTERVAL) interval.value += millisecond
     }
 
     function decreaseInterval(millisecond = 100) {
-        if (interval.value > MIN_INTERVAL) interval.value -= millisecond
+        if (interval.value > STAT_MIN_INTERVAL) interval.value -= millisecond
     }
 
     function resetInterval() {
-        interval.value = BASE_INTERVAL
+        interval.value = STAT_BASE_INTERVAL
     }
 
     function showAddTaskDialog(taskType: string, torrentPaths?: string[]) {
@@ -71,7 +67,7 @@ export const useAppStore = defineStore('app', () => {
         droppedTorrentPaths.value = []
     }
 
-    function updateAddTaskOptions(options: Record<string, unknown> = {}) {
+    function updateAddTaskOptions(options: Aria2EngineOptions = {}) {
         addTaskOptions.value = { ...options }
     }
 
@@ -95,7 +91,7 @@ export const useAppStore = defineStore('app', () => {
 
             const { numActive } = parsed
             if (numActive > 0) {
-                updateInterval(BASE_INTERVAL - PER_INTERVAL * numActive)
+                updateInterval(STAT_BASE_INTERVAL - STAT_PER_TASK_INTERVAL * numActive)
             } else {
                 parsed.downloadSpeed = 0
                 increaseInterval()
@@ -137,7 +133,7 @@ export const useAppStore = defineStore('app', () => {
                             progress.value = 0
                             await invoke('update_progress_bar', { progress: 0.0 })
                         }
-                    } catch { /* fallback */ }
+                    } catch { /* active task progress calculation failed, skip update */ }
                 } else {
                     progress.value = -1
                     await invoke('update_progress_bar', { progress: -1.0 })
@@ -153,7 +149,7 @@ export const useAppStore = defineStore('app', () => {
         engineInfo.value = { ...engineInfo.value, ...data }
     }
 
-    async function fetchEngineOptions(api: { getGlobalOption: () => Promise<Record<string, unknown>> }) {
+    async function fetchEngineOptions(api: { getGlobalOption: () => Promise<Record<string, string>> }) {
         const data = await api.getGlobalOption()
         engineOptions.value = { ...engineOptions.value, ...data }
         return data

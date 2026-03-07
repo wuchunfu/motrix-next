@@ -65,7 +65,7 @@ export async function getGlobalStat(): Promise<Aria2RawGlobalStat> {
 
 /** Updates aria2 global configuration at runtime. */
 export async function changeGlobalOption(options: Partial<AppConfig>): Promise<void> {
-    const engineOptions = formatOptionsForEngine(options as Record<string, unknown>)
+    const engineOptions = formatOptionsForEngine(options)
     await getClient().call<string>('changeGlobalOption', engineOptions)
 }
 
