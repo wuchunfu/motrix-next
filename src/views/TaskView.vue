@@ -160,6 +160,7 @@ async function handleShowInFolder(task: Aria2Task) {
 async function handleStopSeeding(task: Aria2Task) {
   if (stoppingGids.value.includes(task.gid)) return // prevent double-click
   stoppingGids.value = [...stoppingGids.value, task.gid]
+  message.info(t('task.bt-stopping-seeding-tip'), { duration: 5000, closable: true })
   try {
     await taskStore.stopSeeding(task.gid)
     // Don't remove from stoppingGids — let the spinner run

@@ -129,12 +129,12 @@ function onAction(event: string) {
       <NTooltip :delay="500" :style="action.tooltip ? 'max-width: 220px' : ''">
         <template #trigger>
           <span v-if="action.event === 'stop-seeding'" class="stop-icon-wrapper">
-            <NIcon :size="20" class="stop-icon-static" :class="{ 'fade-out': isStopping }">
-              <StopOutline />
-            </NIcon>
-            <NIcon :size="20" class="stop-icon-spin" :class="{ 'fade-in': isStopping }">
-              <SyncOutline />
-            </NIcon>
+            <span class="stop-icon-static" :class="{ 'fade-out': isStopping }">
+              <NIcon :size="20"><StopOutline /></NIcon>
+            </span>
+            <span class="stop-icon-spin" :class="{ 'fade-in': isStopping }">
+              <NIcon :size="20"><SyncOutline /></NIcon>
+            </span>
           </span>
           <NIcon v-else :size="20"><component :is="action.icon" /></NIcon>
         </template>
@@ -217,7 +217,7 @@ function onAction(event: string) {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.5s ease;
 }
 .stop-icon-static {
   opacity: 1;

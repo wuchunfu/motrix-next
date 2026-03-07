@@ -58,6 +58,7 @@ export const useTaskStore = defineStore('task', () => {
   let api: TaskApi
 
   const notifiedErrorGids = new Set<string>()
+  let initialScanDone = false
   let onTaskError: ((task: Aria2Task) => void) | null = null
 
   function setOnTaskError(fn: (task: Aria2Task) => void) {
@@ -107,9 +108,13 @@ export const useTaskStore = defineStore('task', () => {
             !notifiedErrorGids.has(task.gid)
           ) {
             notifiedErrorGids.add(task.gid)
-            onTaskError(task)
+            // Skip notifications on first scan to avoid re-alerting stale errors
+            if (initialScanDone) {
+              onTaskError(task)
+            }
           }
         }
+        initialScanDone = true
       }
     } catch (e) {
       logger.warn('TaskStore.fetchList', (e as Error).message)
