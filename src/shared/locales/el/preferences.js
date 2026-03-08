@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': 'Το μυστικό RPC είναι υποχρεωτικό για ασφάλεια',
   'update-available-title': 'Ενημέρωση διαθέσιμη',
   'update-and-install': 'Λήψη και εγκατάσταση',
+  'download-and-switch': 'Λήψη & εναλλαγή',
   'is-latest-version': 'Ήδη ενημερωμένο',
   'check-update-failed': 'Αποτυχία ελέγχου ενημερώσεων',
   'update-download-complete': 'Η λήψη ολοκληρώθηκε, έτοιμο για εγκατάσταση',

@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': 'کلید RPC برای امنیت الزامی است',
   'update-available-title': 'به‌روزرسانی موجود است',
   'update-and-install': 'دانلود و نصب',
+  'download-and-switch': 'دانلود و تغییر',
   'is-latest-version': 'در حال حاضر به‌روز است',
   'check-update-failed': 'بررسی به‌روزرسانی ناموفق بود',
   'update-download-complete': 'دانلود تکمیل شد، آماده نصب',

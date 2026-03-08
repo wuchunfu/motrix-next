@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': 'RPC-hemmelighet er påkrevd for sikkerhet',
   'update-available-title': 'Oppdatering tilgjengelig',
   'update-and-install': 'Last ned og installer',
+  'download-and-switch': 'Last ned og bytt',
   'is-latest-version': 'Allerede oppdatert',
   'check-update-failed': 'Kunne ikke sjekke oppdateringer',
   'update-download-complete': 'Nedlasting fullført, klar til installasjon',

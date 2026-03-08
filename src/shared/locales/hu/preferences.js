@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': 'Az RPC titok biztonsági okokból kötelező',
   'update-available-title': 'Frissítés elérhető',
   'update-and-install': 'Letöltés és telepítés',
+  'download-and-switch': 'Letöltés és váltás',
   'is-latest-version': 'Már naprakész',
   'check-update-failed': 'Frissítéskeresés sikertelen',
   'update-download-complete': 'Letöltés kész, telepítésre kész',

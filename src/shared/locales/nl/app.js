@@ -37,6 +37,7 @@ export default {
   'confirm-exit-message': 'Weet u zeker dat u wilt afsluiten? Actieve downloads worden gepauzeerd.',
   'engine-not-ready': 'Engine wordt gestart, even geduld...',
   'new-version-available': 'Update beschikbaar',
+  'older-version-available': 'Oudere versie beschikbaar',
   'tray-new-task': 'Nieuwe taak',
   'tray-resume-all': 'Alles hervatten',
   'tray-pause-all': 'Alles pauzeren',

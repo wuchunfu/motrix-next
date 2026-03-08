@@ -37,6 +37,7 @@ export default {
   'confirm-exit-message': 'Sigur doriți să ieșiți? Descărcările active vor fi suspendate.',
   'engine-not-ready': 'Motorul pornește, vă rugăm așteptați...',
   'new-version-available': 'Actualizare disponibilă',
+  'older-version-available': 'Versiune mai veche disponibilă',
   'tray-new-task': 'Sarcină nouă',
   'tray-resume-all': 'Reia toate',
   'tray-pause-all': 'Pune pe pauză toate',

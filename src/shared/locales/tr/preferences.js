@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': 'RPC anahtarı güvenlik için zorunludur',
   'update-available-title': 'Güncelleme mevcut',
   'update-and-install': 'İndir ve kur',
+  'download-and-switch': 'İndir ve geçiş yap',
   'is-latest-version': 'Zaten güncel',
   'check-update-failed': 'Güncelleme kontrolü başarısız',
   'update-download-complete': 'İndirme tamamlandı, kuruluma hazır',

@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': 'RPC-geheim is vereist voor beveiliging',
   'update-available-title': 'Update beschikbaar',
   'update-and-install': 'Downloaden en installeren',
+  'download-and-switch': 'Downloaden en wisselen',
   'is-latest-version': 'Al up-to-date',
   'check-update-failed': 'Controle op updates mislukt',
   'update-download-complete': 'Download voltooid, klaar om te installeren',

@@ -9,7 +9,13 @@ import { invoke } from '@tauri-apps/api/core'
 import { listen, type UnlistenFn } from '@tauri-apps/api/event'
 import { relaunch } from '@tauri-apps/plugin-process'
 import { getVersion } from '@tauri-apps/api/app'
-import { CheckmarkCircleOutline, CloseCircleOutline, ArrowUpCircleOutline } from '@vicons/ionicons5'
+import {
+  CheckmarkCircleOutline,
+  CloseCircleOutline,
+  ArrowUpCircleOutline,
+  ArrowDownCircleOutline,
+} from '@vicons/ionicons5'
+import { isDowngrade } from '@shared/utils/semver'
 import { usePreferenceStore } from '@/stores/preference'
 
 interface UpdateMetadata {
@@ -56,12 +62,19 @@ const progressPercent = computed(() => {
   return Math.round((downloadReceived.value / downloadTotal.value) * 100)
 })
 
+// ── Version direction detection ──────────────────────────────────────
+const isRollback = computed(() => {
+  if (!currentVersion.value || !version.value) return false
+  return isDowngrade(currentVersion.value, version.value)
+})
+
 // ── Action button state machine ──────────────────────────────────────
 const actionDisabled = computed(() => ['checking', 'up-to-date'].includes(phase.value))
 const actionLabel = computed(() => {
   if (phase.value === 'error') return t('app.retry')
   if (phase.value === 'downloading') return t('app.cancel')
   if (phase.value === 'ready') return t('preferences.restart-now')
+  if (isRollback.value) return t('preferences.download-and-switch')
   return t('preferences.update-and-install')
 })
 const actionType = computed(() => {
@@ -221,11 +234,16 @@ defineExpose({ open })
           </div>
 
           <div v-else-if="phase === 'available'" key="available" class="update-phase">
-            <div class="update-icon-wrap update-icon-new">
-              <NIcon :size="40"><ArrowUpCircleOutline /></NIcon>
+            <div class="update-icon-wrap" :class="isRollback ? 'update-icon-warn' : 'update-icon-new'">
+              <NIcon :size="40">
+                <ArrowDownCircleOutline v-if="isRollback" />
+                <ArrowUpCircleOutline v-else />
+              </NIcon>
             </div>
             <div class="update-version-info">
-              <NText class="update-main-text">{{ t('app.new-version-available') }}</NText>
+              <NText class="update-main-text">
+                {{ isRollback ? t('app.older-version-available') : t('app.new-version-available') }}
+              </NText>
               <div class="update-version-tags">
                 <span class="version-tag version-old">v{{ currentVersion }}</span>
                 <span class="version-arrow">→</span>
@@ -238,8 +256,11 @@ defineExpose({ open })
           </div>
 
           <div v-else-if="phase === 'downloading'" key="downloading" class="update-phase">
-            <div class="update-icon-wrap update-icon-new">
-              <NIcon :size="40"><ArrowUpCircleOutline /></NIcon>
+            <div class="update-icon-wrap" :class="isRollback ? 'update-icon-warn' : 'update-icon-new'">
+              <NIcon :size="40">
+                <ArrowDownCircleOutline v-if="isRollback" />
+                <ArrowUpCircleOutline v-else />
+              </NIcon>
             </div>
             <div class="update-progress-wrap">
               <NProgress
@@ -393,6 +414,10 @@ defineExpose({ open })
 .update-icon-new {
   background: color-mix(in srgb, var(--color-primary) 12%, transparent);
   color: var(--color-primary);
+}
+.update-icon-warn {
+  background: color-mix(in srgb, var(--m3-error) 10%, transparent);
+  color: var(--m3-tertiary);
 }
 .update-icon-error {
   background: color-mix(in srgb, var(--m3-error) 12%, transparent);

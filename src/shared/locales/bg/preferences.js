@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': 'RPC тайната е задължителна за сигурност',
   'update-available-title': 'Налично е обновление',
   'update-and-install': 'Изтегли и инсталирай',
+  'download-and-switch': 'Изтегляне и превключване',
   'is-latest-version': 'Вече е обновено',
   'check-update-failed': 'Неуспешна проверка за обновления',
   'update-download-complete': 'Изтеглянето завърши, готово за инсталиране',

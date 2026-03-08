@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': 'คีย์ RPC จำเป็นเพื่อความปลอดภัย',
   'update-available-title': 'มีอัปเดต',
   'update-and-install': 'ดาวน์โหลดและติดตั้ง',
+  'download-and-switch': 'ดาวน์โหลดและสลับ',
   'is-latest-version': 'เป็นเวอร์ชันล่าสุดแล้ว',
   'check-update-failed': 'ตรวจสอบอัปเดตไม่สำเร็จ',
   'update-download-complete': 'ดาวน์โหลดเสร็จ พร้อมติดตั้ง',

@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': 'Khóa RPC bắt buộc vì lý do bảo mật',
   'update-available-title': 'Có bản cập nhật',
   'update-and-install': 'Tải và cài đặt',
+  'download-and-switch': 'Tải xuống & chuyển đổi',
   'is-latest-version': 'Đã cập nhật',
   'check-update-failed': 'Kiểm tra cập nhật thất bại',
   'update-download-complete': 'Tải xong, sẵn sàng cài đặt',

@@ -37,6 +37,7 @@ export default {
   'confirm-exit-message': 'Σίγουρα θέλετε να βγείτε; Οι ενεργές λήψεις θα τεθούν σε παύση.',
   'engine-not-ready': 'Η μηχανή εκκινεί, παρακαλώ περιμένετε...',
   'new-version-available': 'Διαθέσιμη ενημέρωση',
+  'older-version-available': 'Διαθέσιμη παλαιότερη έκδοση',
   'tray-new-task': 'Νέα εργασία',
   'tray-resume-all': 'Συνέχιση όλων',
   'tray-pause-all': 'Παύση όλων',

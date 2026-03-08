@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': '보안을 위해 RPC 비밀키는 필수입니다',
   'update-available-title': '업데이트 사용 가능',
   'update-and-install': '다운로드 및 설치',
+  'download-and-switch': '다운로드 및 전환',
   'is-latest-version': '최신 버전입니다',
   'check-update-failed': '업데이트 확인 실패',
   'update-download-complete': '다운로드 완료, 설치 준비됨',

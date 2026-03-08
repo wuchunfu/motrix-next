@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': 'El secret RPC és obligatori per seguretat',
   'update-available-title': 'Actualització disponible',
   'update-and-install': 'Descarregar i instal·lar',
+  'download-and-switch': 'Descarrega i canvia',
   'is-latest-version': 'Ja esteu al dia',
   'check-update-failed': 'Error en comprovar actualitzacions',
   'update-download-complete': 'Descàrrega completada, preparat per instal·lar',

@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': 'RPC 密鑰不可為空，這是安全性必要項目',
   'update-available-title': '發現新版本',
   'update-and-install': '下載並安裝',
+  'download-and-switch': '下載並切換',
   'is-latest-version': '已是最新版本',
   'check-update-failed': '檢查更新失敗',
   'update-download-complete': '下載完成，準備安裝',

@@ -37,6 +37,7 @@ export default {
   'confirm-exit-message': 'Segur que voleu sortir? Les descàrregues actives es posaran en pausa.',
   'engine-not-ready': 'El motor s\'està iniciant, si us plau espereu...',
   'new-version-available': 'Actualització disponible',
+  'older-version-available': 'Versió anterior disponible',
   'tray-new-task': 'Nova tasca',
   'tray-resume-all': 'Reprendre tot',
   'tray-pause-all': 'Pausar tot',

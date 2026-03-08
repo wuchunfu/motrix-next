@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': 'Secretul RPC este obligatoriu pentru securitate',
   'update-available-title': 'Actualizare disponibilă',
   'update-and-install': 'Descarcă și instalează',
+  'download-and-switch': 'Descarcă și schimbă',
   'is-latest-version': 'Deja actualizat',
   'check-update-failed': 'Verificarea actualizărilor a eșuat',
   'update-download-complete': 'Descărcare finalizată, gata de instalare',

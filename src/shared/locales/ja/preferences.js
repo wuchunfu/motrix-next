@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': 'セキュリティのため RPC シークレットは必須です',
   'update-available-title': 'アップデートがあります',
   'update-and-install': 'ダウンロードしてインストール',
+  'download-and-switch': 'ダウンロードして切り替え',
   'is-latest-version': '最新バージョンです',
   'check-update-failed': '更新の確認に失敗しました',
   'update-download-complete': 'ダウンロード完了、インストールの準備ができました',

@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': 'Секрет RPC обов\'язковий для безпеки',
   'update-available-title': 'Доступне оновлення',
   'update-and-install': 'Завантажити і встановити',
+  'download-and-switch': 'Завантажити та переключити',
   'is-latest-version': 'Уже оновлено',
   'check-update-failed': 'Не вдалося перевірити оновлення',
   'update-download-complete': 'Завантаження завершено, готово до встановлення',

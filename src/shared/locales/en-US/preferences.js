@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': 'RPC Secret is required for security',
   'update-available-title': 'Update Available',
   'update-and-install': 'Download & Install',
+  'download-and-switch': 'Download & Switch',
   'is-latest-version': 'Already up to date',
   'check-update-failed': 'Failed to check for updates',
   'update-download-complete': 'Download complete, ready to install',

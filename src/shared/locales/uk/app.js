@@ -37,6 +37,7 @@ export default {
   'confirm-exit-message': 'Ви впевнені, що хочете вийти? Активні завантаження буде призупинено.',
   'engine-not-ready': 'Рушій запускається, зачекайте...',
   'new-version-available': 'Доступне оновлення',
+  'older-version-available': 'Доступна старіша версія',
   'tray-new-task': 'Нове завдання',
   'tray-resume-all': 'Відновити всі',
   'tray-pause-all': 'Призупинити всі',

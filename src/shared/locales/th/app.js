@@ -37,6 +37,7 @@ export default {
   'confirm-exit-message': 'คุณแน่ใจหรือไม่ว่าต้องการออก? การดาวน์โหลดที่กำลังทำจะถูกหยุดชั่วคราว',
   'engine-not-ready': 'เอนจินกำลังเริ่มต้น กรุณารอ...',
   'new-version-available': 'มีอัปเดต',
+  'older-version-available': 'มีเวอร์ชันเก่าให้ใช้งาน',
   'tray-new-task': 'งานใหม่',
   'tray-resume-all': 'ดำเนินการต่อทั้งหมด',
   'tray-pause-all': 'หยุดชั่วคราวทั้งหมด',

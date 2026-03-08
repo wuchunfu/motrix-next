@@ -161,6 +161,12 @@ preferenceStore.loadPreference().then(async () => {
   try {
     await initClient({ port, secret })
     logger.info('Engine', `RPC client connected via WebSocket on port ${port}`)
+
+    // Warm up Tauri FS plugin IPC channel to eliminate cold-start delay on first
+    // file operation (e.g. task deletion). Deferred to avoid impacting startup.
+    setTimeout(() => {
+      import('@tauri-apps/plugin-fs').then(({ exists }) => exists('/')).catch(() => {})
+    }, 500)
   } catch (e) {
     logger.warn('Engine', 'WebSocket failed, using HTTP fallback: ' + (e as Error).message)
     // Engine is running (confirmed by waitForEngine), mark as ready for HTTP RPC polling

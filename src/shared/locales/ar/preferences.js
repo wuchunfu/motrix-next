@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': 'مفتاح RPC مطلوب لأسباب أمنية',
   'update-available-title': 'تحديث متاح',
   'update-and-install': 'تنزيل وتثبيت',
+  'download-and-switch': 'تنزيل والتبديل',
   'is-latest-version': 'محدّث بالفعل',
   'check-update-failed': 'فشل التحقق من التحديثات',
   'update-download-complete': 'اكتمل التنزيل، جاهز للتثبيت',

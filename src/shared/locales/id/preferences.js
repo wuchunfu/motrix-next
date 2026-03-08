@@ -112,6 +112,7 @@ export default {
   'rpc-secret-empty-warning': 'Kunci RPC wajib untuk keamanan',
   'update-available-title': 'Pembaruan tersedia',
   'update-and-install': 'Unduh dan pasang',
+  'download-and-switch': 'Unduh & ganti',
   'is-latest-version': 'Sudah terbaru',
   'check-update-failed': 'Gagal memeriksa pembaruan',
   'update-download-complete': 'Unduhan selesai, siap dipasang',

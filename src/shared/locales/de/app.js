@@ -37,6 +37,7 @@ export default {
   'confirm-exit-message': 'Möchten Sie wirklich beenden? Aktive Downloads werden pausiert.',
   'engine-not-ready': 'Engine wird gestartet, bitte warten...',
   'new-version-available': 'Update verfügbar',
+  'older-version-available': 'Ältere Version verfügbar',
   'tray-new-task': 'Neue Aufgabe',
   'tray-resume-all': 'Alle fortsetzen',
   'tray-pause-all': 'Alle pausieren',
