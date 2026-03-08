@@ -202,6 +202,29 @@ The user's channel preference is stored as `updateChannel` in the preference sto
 
 4. **Click Publish** — CI automatically builds for all 4 platforms and uploads the updater JSON.
 
+### Updater Principles
+
+- **Channel detection** — CI checks the tag name: tags containing `-beta`, `-alpha`, or `-rc` → `beta.json`; everything else → `latest.json`
+- **Single fixed host** — Both JSON files live in a permanent `updater` Release tag (auto-created by CI on first publish). Each publish overwrites the previous JSON via `--clobber`
+- **Tag = immutable pointer** — A git tag points to a fixed commit. If a build fails, you must delete both the tag and the Release, then re-publish to pick up the fixed code
+- **CI trigger** — Only `on: release: [published]` triggers builds. Pushing a tag alone does **not** trigger the workflow
+
+### Recovering from a Failed Release
+
+```bash
+# 1. Fix the code, commit and push
+git add -A && git commit -m "fix: resolve build issue" && git push
+
+# 2. Delete the remote tag
+git push origin --delete v2.1.1
+
+# 3. Delete the local tag
+git tag -d v2.1.1
+
+# 4. Delete the failed Release on GitHub (Releases → click → Delete this release)
+# 5. Re-create the Release in the GitHub UI with the same tag name
+```
+
 > **Do NOT create tags from the command line.** Always use the GitHub Release UI — it triggers the `release.yml` workflow.
 
 ### Release Notes Conventions

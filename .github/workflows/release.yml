@@ -132,6 +132,7 @@ jobs:
             gh release create updater \
               --title "Auto-Updater Assets" \
               --notes "Managed by CI. Do not delete. Contains latest.json and beta.json for the Tauri updater." \
+              --latest=false \
               -R "${{ github.repository }}"
 
           # Upload (overwrite) the channel JSON to the fixed 'updater' tag
