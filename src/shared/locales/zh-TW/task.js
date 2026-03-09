@@ -15,6 +15,7 @@ export default {
   'file-extension': '副檔名',
   'file-size': '大小',
   'file-completed-size': '已完成',
+  'file-index': '序號',
   'selected-files-sum': '已選 {selectedFilesCount} 個檔案，共 {selectedFilesTotalSize}',
   'select-at-least-one': '請至少選擇一個檔案',
   'task-gid': 'GID',

@@ -15,6 +15,7 @@ export default {
   'file-extension': 'Разширение',
   'file-size': 'Размер',
   'file-completed-size': 'Завършено',
+  'file-index': '№',
   'selected-files-sum': 'Избрани: {selectedFilesCount} файла, общо {selectedFilesTotalSize}',
   'select-at-least-one': 'Изберете поне един файл',
   'task-gid': 'GID',

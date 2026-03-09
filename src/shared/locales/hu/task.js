@@ -15,6 +15,7 @@ export default {
   'file-extension': 'Kiterjesztés',
   'file-size': 'Méret',
   'file-completed-size': 'Befejezve',
+  'file-index': 'Ssz.',
   'selected-files-sum': 'Kiválasztva: {selectedFilesCount} fájl, összesen {selectedFilesTotalSize}',
   'select-at-least-one': 'Válasszon ki legalább egy fájlt',
   'task-gid': 'GID',

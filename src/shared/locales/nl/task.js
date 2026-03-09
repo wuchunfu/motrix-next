@@ -15,6 +15,7 @@ export default {
   'file-extension': 'Extensie',
   'file-size': 'Grootte',
   'file-completed-size': 'Voltooid',
+  'file-index': 'Nr.',
   'selected-files-sum': 'Geselecteerd: {selectedFilesCount} bestanden, totaal {selectedFilesTotalSize}',
   'select-at-least-one': 'Selecteer minimaal één bestand',
   'task-gid': 'GID',

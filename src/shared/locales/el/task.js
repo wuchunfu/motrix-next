@@ -15,6 +15,7 @@ export default {
   'file-extension': 'Επέκταση',
   'file-size': 'Μέγεθος',
   'file-completed-size': 'Ολοκληρώθηκε',
+  'file-index': 'Αρ.',
   'selected-files-sum': 'Επιλεγμένα: {selectedFilesCount} αρχεία, σύνολο {selectedFilesTotalSize}',
   'select-at-least-one': 'Επιλέξτε τουλάχιστον ένα αρχείο',
   'task-gid': 'GID',

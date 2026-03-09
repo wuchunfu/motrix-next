@@ -75,19 +75,19 @@ const form = ref({
 
 const maxSplit = computed(() => config.engineMaxConnectionPerServer || 64)
 
-const fileColumns: DataTableColumns = [
+const fileColumns = computed<DataTableColumns>(() => [
   { type: 'selection' },
-  { title: '#', key: 'idx', width: 50 },
-  { title: 'File', key: 'path', ellipsis: { tooltip: true } },
+  { title: t('task.file-index'), key: 'idx', width: 50 },
+  { title: t('task.file-name'), key: 'path', ellipsis: { tooltip: true } },
   {
-    title: 'Size',
+    title: t('task.file-size'),
     key: 'length',
     width: 100,
     render(row: Record<string, unknown>) {
       return bytesToSize(row.length as number)
     },
   },
-]
+])
 
 // ── Computed batch accessors ────────────────────────────────────────
 
@@ -228,14 +228,25 @@ async function chooseTorrentFile() {
       filters: [{ name: 'Torrent / Metalink', extensions: ['torrent', 'metalink', 'meta4'] }],
     })
     const paths = typeof selected === 'string' ? [selected] : Array.isArray(selected) ? selected : []
-    if (paths.length > 0) {
-      const items = paths.map((p) => createBatchItem(detectKind(p), p))
-      for (const item of items) {
-        await resolveFileItem(item)
-      }
-      appStore.pendingBatch = [...appStore.pendingBatch, ...items]
-      selectedBatchIndex.value = Math.max(0, fileItems.value.length - 1)
+    if (paths.length === 0) return
+
+    // Deduplicate: skip files already in the batch by source path
+    const existingSources = new Set(batch.value.map((i) => i.source))
+    const newPaths = paths.filter((p) => !existingSources.has(p))
+    if (newPaths.length === 0) {
+      message.warning(t('task.duplicate-task'))
+      return
     }
+    if (newPaths.length < paths.length) {
+      message.warning(t('task.duplicate-task'))
+    }
+
+    const items = newPaths.map((p) => createBatchItem(detectKind(p), p))
+    for (const item of items) {
+      await resolveFileItem(item)
+    }
+    appStore.pendingBatch = [...appStore.pendingBatch, ...items]
+    selectedBatchIndex.value = Math.max(0, fileItems.value.length - 1)
   } catch (e) {
     logger.debug('AddTask.chooseTorrentFile', e)
   }
@@ -423,31 +434,29 @@ function kindTagType(kind: string): 'info' | 'success' | 'warning' {
           <NTabPane :name="ADD_TASK_TYPE.TORRENT" :tab="t('task.torrent-task') || 'Torrent'">
             <div class="tab-pane-content">
               <!-- Batch list for file items -->
-              <Transition name="batch-fade">
-                <div v-if="fileItems.length > 0" class="batch-list">
-                  <TransitionGroup name="batch-item-list" tag="div">
-                    <div
-                      v-for="(item, idx) in fileItems"
-                      :key="item.id"
-                      class="batch-item"
-                      :class="{ 'batch-item-selected': idx === selectedBatchIndex }"
-                      @click="selectedBatchIndex = idx"
-                    >
-                      <div class="batch-item-main">
-                        <NEllipsis :style="{ maxWidth: '400px', flex: 1 }">{{ item.displayName }}</NEllipsis>
-                        <NSpace :size="4" align="center" :wrap="false">
-                          <NTag :type="kindTagType(item.kind)" size="small" :bordered="false">
-                            {{ item.kind === 'metalink' ? 'Metalink' : 'Torrent' }}
-                          </NTag>
-                          <NTag v-if="item.status === 'failed'" type="error" size="small" :bordered="false">✕</NTag>
-                          <NButton quaternary size="tiny" @click.stop="removeBatchItem(item)">✕</NButton>
-                        </NSpace>
-                      </div>
-                      <div v-if="item.error" class="batch-item-error">{{ item.error }}</div>
+              <div v-show="fileItems.length > 0" class="batch-list">
+                <TransitionGroup name="batch-item-list" tag="div" appear>
+                  <div
+                    v-for="(item, idx) in fileItems"
+                    :key="item.id"
+                    class="batch-item"
+                    :class="{ 'batch-item-selected': idx === selectedBatchIndex }"
+                    @click="selectedBatchIndex = idx"
+                  >
+                    <div class="batch-item-main">
+                      <NEllipsis :style="{ maxWidth: '400px', flex: 1 }">{{ item.displayName }}</NEllipsis>
+                      <NSpace :size="4" align="center" :wrap="false">
+                        <NTag :type="kindTagType(item.kind)" size="small" :bordered="false">
+                          {{ item.kind === 'metalink' ? 'Metalink' : 'Torrent' }}
+                        </NTag>
+                        <NTag v-if="item.status === 'failed'" type="error" size="small" :bordered="false">✕</NTag>
+                        <NButton quaternary size="tiny" @click.stop="removeBatchItem(item)">✕</NButton>
+                      </NSpace>
                     </div>
-                  </TransitionGroup>
-                </div>
-              </Transition>
+                    <div v-if="item.error" class="batch-item-error">{{ item.error }}</div>
+                  </div>
+                </TransitionGroup>
+              </div>
 
               <!-- Single torrent detail / upload area -->
               <Transition name="batch-fade" mode="out-in">
@@ -533,38 +542,12 @@ function kindTagType(kind: string): 'info' | 'success' | 'warning' {
   min-height: 160px;
 }
 
-/* Batch item list */
+/* Batch item list — no overflow:hidden, it clips position:absolute leave items */
 .batch-list {
   position: relative;
   margin-bottom: 8px;
   border-radius: 6px;
   border: 1px solid var(--n-border-color, rgba(255, 255, 255, 0.09));
-  overflow: hidden;
-}
-.batch-item {
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: background-color 0.15s;
-}
-.batch-item:hover {
-  background: var(--n-color-hover, rgba(255, 255, 255, 0.04));
-}
-.batch-item-selected {
-  background: var(--n-color-hover, rgba(255, 255, 255, 0.06));
-}
-.batch-item + .batch-item {
-  border-top: 1px solid var(--n-border-color, rgba(255, 255, 255, 0.06));
-}
-.batch-item-main {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-.batch-item-error {
-  color: var(--n-text-color-error, #e88080);
-  font-size: 12px;
-  margin-top: 4px;
 }
 </style>
 
@@ -617,7 +600,6 @@ function kindTagType(kind: string): 'info' | 'success' | 'warning' {
   transition:
     opacity 0.15s cubic-bezier(0.3, 0, 0.8, 0.15),
     transform 0.15s cubic-bezier(0.3, 0, 0.8, 0.15);
-  /* Take leaving item out of flow so FLIP can slide remaining items up */
   position: absolute;
   left: 0;
   right: 0;
@@ -627,5 +609,32 @@ function kindTagType(kind: string): 'info' | 'success' | 'warning' {
 }
 .batch-item-list-leave-to {
   opacity: 0;
+}
+
+/* Batch item styles — MUST be non-scoped to avoid specificity conflict with TransitionGroup */
+.batch-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.batch-item:hover {
+  background: var(--n-color-hover, rgba(255, 255, 255, 0.04));
+}
+.batch-item-selected {
+  background: var(--n-color-hover, rgba(255, 255, 255, 0.06));
+}
+.batch-item + .batch-item {
+  border-top: 1px solid var(--n-border-color, rgba(255, 255, 255, 0.06));
+}
+.batch-item-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.batch-item-error {
+  color: var(--n-text-color-error, #e88080);
+  font-size: 12px;
+  margin-top: 4px;
 }
 </style>

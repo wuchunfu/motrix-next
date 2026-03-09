@@ -15,6 +15,7 @@ export default {
   'file-extension': 'پسوند',
   'file-size': 'حجم',
   'file-completed-size': 'تکمیل شده',
+  'file-index': 'ردیف',
   'selected-files-sum': 'انتخاب شده: {selectedFilesCount} فایل، مجموع {selectedFilesTotalSize}',
   'select-at-least-one': 'حداقل یک فایل انتخاب کنید',
   'task-gid': 'GID',

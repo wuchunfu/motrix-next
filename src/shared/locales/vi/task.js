@@ -15,6 +15,7 @@ export default {
   'file-extension': 'Phần mở rộng',
   'file-size': 'Kích thước',
   'file-completed-size': 'Đã hoàn thành',
+  'file-index': 'STT',
   'selected-files-sum': 'Đã chọn: {selectedFilesCount} tệp, tổng {selectedFilesTotalSize}',
   'select-at-least-one': 'Vui lòng chọn ít nhất một tệp',
   'task-gid': 'GID',

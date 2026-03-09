@@ -66,7 +66,11 @@ export const useAppStore = defineStore('app', () => {
    */
   function enqueueBatch(items: BatchItem[]) {
     if (items.length === 0) return
-    pendingBatch.value = [...pendingBatch.value, ...items]
+    // Deduplicate: skip items whose source is already queued
+    const existingSources = new Set(pendingBatch.value.map((i) => i.source))
+    const unique = items.filter((i) => !existingSources.has(i.source))
+    if (unique.length === 0) return
+    pendingBatch.value = [...pendingBatch.value, ...unique]
     addTaskVisible.value = true
   }
 

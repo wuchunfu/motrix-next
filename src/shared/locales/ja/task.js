@@ -15,6 +15,7 @@ export default {
   'file-extension': '拡張子',
   'file-size': 'サイズ',
   'file-completed-size': '完了分',
+  'file-index': '番号',
   'selected-files-sum': '選択中：{selectedFilesCount}ファイル、合計 {selectedFilesTotalSize}',
   'select-at-least-one': '少なくとも1つのファイルを選択してください',
   'task-gid': 'GID',

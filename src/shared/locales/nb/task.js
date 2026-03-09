@@ -15,6 +15,7 @@ export default {
   'file-extension': 'Filtype',
   'file-size': 'Størrelse',
   'file-completed-size': 'Fullført',
+  'file-index': 'Nr.',
   'selected-files-sum': 'Valgt: {selectedFilesCount} filer, totalt {selectedFilesTotalSize}',
   'select-at-least-one': 'Velg minst én fil',
   'task-gid': 'GID',

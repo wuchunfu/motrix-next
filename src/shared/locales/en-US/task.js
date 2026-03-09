@@ -15,6 +15,7 @@ export default {
   'file-extension': 'Extension',
   'file-size': 'Size',
   'file-completed-size': 'Completed',
+  'file-index': 'No.',
   'selected-files-sum': 'Selected: {selectedFilesCount} files, total {selectedFilesTotalSize}',
   'select-at-least-one': 'Please select at least one file',
   'task-gid': 'GID',

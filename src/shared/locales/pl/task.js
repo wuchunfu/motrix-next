@@ -15,6 +15,7 @@ export default {
   'file-extension': 'Rozszerzenie',
   'file-size': 'Rozmiar',
   'file-completed-size': 'Ukończono',
+  'file-index': 'Nr',
   'selected-files-sum': 'Wybrano: {selectedFilesCount} plików, łącznie {selectedFilesTotalSize}',
   'select-at-least-one': 'Wybierz co najmniej jeden plik',
   'task-gid': 'GID',

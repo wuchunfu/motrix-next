@@ -15,6 +15,7 @@ export default {
   'file-extension': 'الامتداد',
   'file-size': 'الحجم',
   'file-completed-size': 'مكتمل',
+  'file-index': 'رقم',
   'selected-files-sum': 'المحدد: {selectedFilesCount} ملفات، المجموع {selectedFilesTotalSize}',
   'select-at-least-one': 'اختر ملفًا واحدًا على الأقل',
   'task-gid': 'GID',

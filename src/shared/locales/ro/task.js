@@ -15,6 +15,7 @@ export default {
   'file-extension': 'Extensie',
   'file-size': 'Dimensiune',
   'file-completed-size': 'Finalizat',
+  'file-index': 'Nr.',
   'selected-files-sum': 'Selectate: {selectedFilesCount} fișiere, total {selectedFilesTotalSize}',
   'select-at-least-one': 'Selectați cel puțin un fișier',
   'task-gid': 'GID',

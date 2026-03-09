@@ -15,6 +15,7 @@ export default {
   'file-extension': 'Uzantı',
   'file-size': 'Boyut',
   'file-completed-size': 'Tamamlandı',
+  'file-index': 'No.',
   'selected-files-sum': 'Seçili: {selectedFilesCount} dosya, toplam {selectedFilesTotalSize}',
   'select-at-least-one': 'En az bir dosya seçin',
   'task-gid': 'GID',

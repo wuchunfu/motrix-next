@@ -15,6 +15,7 @@ export default {
   'file-extension': 'Extensió',
   'file-size': 'Mida',
   'file-completed-size': 'Completat',
+  'file-index': 'Núm.',
   'selected-files-sum': 'Seleccionats: {selectedFilesCount} fitxers, total {selectedFilesTotalSize}',
   'select-at-least-one': 'Seleccioneu almenys un fitxer',
   'task-gid': 'GID',
