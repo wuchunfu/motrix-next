@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /** @fileoverview Detailed task view with file list, peers, and BT info. */
-import { ref, computed, watch, h } from 'vue'
+import { ref, computed, watch, h, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { TASK_STATUS } from '@shared/constants'
 import {
@@ -54,15 +54,16 @@ const prevTabIndex = ref(0)
 
 interface TabDef {
   key: string
+  labelKey: string
   icon: typeof InformationCircleOutline
   btOnly?: boolean
 }
 const allTabs: TabDef[] = [
-  { key: 'general', icon: InformationCircleOutline },
-  { key: 'activity', icon: PulseOutline },
-  { key: 'files', icon: DocumentOutline },
-  { key: 'peers', icon: PeopleOutline, btOnly: true },
-  { key: 'trackers', icon: ServerOutline, btOnly: true },
+  { key: 'general', labelKey: 'task.task-tab-general', icon: InformationCircleOutline },
+  { key: 'activity', labelKey: 'task.task-tab-activity', icon: PulseOutline },
+  { key: 'files', labelKey: 'task.task-tab-files', icon: DocumentOutline },
+  { key: 'peers', labelKey: 'task.task-tab-peers', icon: PeopleOutline, btOnly: true },
+  { key: 'trackers', labelKey: 'task.task-tab-trackers', icon: ServerOutline, btOnly: true },
 ]
 
 const visibleTabs = computed(() => allTabs.filter((tab) => !tab.btOnly || isBT.value))
@@ -186,8 +187,11 @@ const peers = computed(() => {
     host: `${peer.ip}:${peer.port}`,
     client: peerIdParser(peer.peerId),
     percent: peer.bitfield ? bitfieldToPercent(peer.bitfield) + '%' : '-',
+    percentRaw: peer.bitfield ? Number(bitfieldToPercent(peer.bitfield)) : 0,
     uploadSpeed: bytesToSize(peer.uploadSpeed) + '/s',
     downloadSpeed: bytesToSize(peer.downloadSpeed) + '/s',
+    uploadSpeedRaw: Number(peer.uploadSpeed) || 0,
+    downloadSpeedRaw: Number(peer.downloadSpeed) || 0,
     amChoking: peer.amChoking === 'true',
     peerChoking: peer.peerChoking === 'true',
     seeder: peer.seeder === 'true',
@@ -198,21 +202,42 @@ interface PeerRow {
   host: string
   client: string
   percent: string
+  percentRaw: number
   uploadSpeed: string
   downloadSpeed: string
+  uploadSpeedRaw: number
+  downloadSpeedRaw: number
   amChoking: boolean
   peerChoking: boolean
   seeder: boolean
 }
 
 const peerColumns = computed(() => [
-  { title: t('task.task-peer-host') || 'Host', key: 'host', minWidth: 140 },
-  { title: t('task.task-peer-client') || 'Client', key: 'client', minWidth: 100, ellipsis: { tooltip: true } },
-  { title: '%', key: 'percent', width: 55, align: 'right' as const },
-  { title: '↓', key: 'downloadSpeed', width: 90, align: 'right' as const },
-  { title: '↑', key: 'uploadSpeed', width: 90, align: 'right' as const },
+  { title: t('task.task-peer-host'), key: 'host', minWidth: 140 },
+  { title: t('task.task-peer-client'), key: 'client', minWidth: 100, ellipsis: { tooltip: true } },
   {
-    title: t('task.task-peer-flags') || 'Flags',
+    title: '%',
+    key: 'percent',
+    width: 55,
+    align: 'right' as const,
+    sorter: (a: PeerRow, b: PeerRow) => a.percentRaw - b.percentRaw,
+  },
+  {
+    title: '↓',
+    key: 'downloadSpeed',
+    width: 90,
+    align: 'right' as const,
+    sorter: (a: PeerRow, b: PeerRow) => a.downloadSpeedRaw - b.downloadSpeedRaw,
+  },
+  {
+    title: '↑',
+    key: 'uploadSpeed',
+    width: 90,
+    align: 'right' as const,
+    sorter: (a: PeerRow, b: PeerRow) => a.uploadSpeedRaw - b.uploadSpeedRaw,
+  },
+  {
+    title: t('task.task-peer-flags'),
     key: 'flags',
     width: 60,
     align: 'center' as const,
@@ -226,9 +251,10 @@ const peerColumns = computed(() => [
   {
     title: 'S',
     key: 'seeder',
-    width: 30,
+    width: 45,
     align: 'center' as const,
     render: (row: PeerRow) => (row.seeder ? '✓' : ''),
+    sorter: (a: PeerRow, b: PeerRow) => Number(a.seeder) - Number(b.seeder),
   },
 ])
 
@@ -243,15 +269,25 @@ const trackerRows = computed((): TrackerRow[] => {
   }))
 })
 
+/** Status sort priority: online (0) > checking (1) > unknown (2) > offline (3) */
+const TRACKER_STATUS_ORDER: Record<string, number> = {
+  online: 0,
+  checking: 1,
+  unknown: 2,
+  offline: 3,
+}
+
 const trackerColumns = computed(() => [
-  { title: '#', key: 'tier', width: 40, align: 'center' as const },
+  { title: t('task.task-tracker-tier'), key: 'tier', width: 55, align: 'center' as const },
   { title: 'URL', key: 'url', ellipsis: { tooltip: true } },
-  { title: t('task.task-tracker-protocol') || 'Protocol', key: 'protocol', width: 75, align: 'center' as const },
+  { title: t('task.task-tracker-protocol'), key: 'protocol', width: 75, align: 'center' as const },
   {
-    title: t('task.task-tracker-status') || 'Status',
+    title: t('task.task-tracker-status'),
     key: 'status',
-    width: 80,
+    width: 100,
     align: 'center' as const,
+    sorter: (a: TrackerRow, b: TrackerRow) =>
+      (TRACKER_STATUS_ORDER[a.status] ?? 99) - (TRACKER_STATUS_ORDER[b.status] ?? 99),
     render: (row: TrackerRow) =>
       h(
         NTag,
@@ -260,13 +296,28 @@ const trackerColumns = computed(() => [
           size: 'small',
           round: true,
         },
-        () => row.status,
+        () => t(`task.task-tracker-${row.status}`),
       ),
   },
 ])
 
+// Auto-sort trackers by status (online first) after probe completes
+const trackerSortState = ref<{ columnKey: string; order: 'ascend' | 'descend' }>({
+  columnKey: 'status',
+  order: 'ascend',
+})
+
+watch(trackerProbing, (probing, wasProbing) => {
+  if (wasProbing && !probing) {
+    nextTick(() => {
+      trackerSortState.value = { columnKey: 'status', order: 'ascend' }
+    })
+  }
+})
+
 function handleProbeTrackers() {
   const urls = trackerRows.value.map((r) => r.url)
+  trackerSortState.value = { columnKey: 'status', order: 'ascend' }
   probeTrackers(urls)
 }
 
@@ -296,7 +347,8 @@ function handleClose() {
           :class="['detail-tab', { active: activeTab === tab.key }]"
           @click="switchTab(tab.key)"
         >
-          <NIcon :size="18"><component :is="tab.icon" /></NIcon>
+          <NIcon :size="16"><component :is="tab.icon" /></NIcon>
+          <span class="detail-tab-label">{{ t(tab.labelKey) }}</span>
         </button>
       </div>
 
@@ -416,14 +468,15 @@ function handleClose() {
 
           <div v-else-if="activeTab === 'trackers'" key="trackers" class="tab-content">
             <div style="margin-bottom: 12px">
-              <NButton size="small" :loading="trackerProbing" @click="handleProbeTrackers">
-                {{ t('task.task-tracker-probe') || 'Probe' }}
+              <NButton size="small" type="primary" :loading="trackerProbing" @click="handleProbeTrackers">
+                {{ t('task.task-tracker-probe') }}
               </NButton>
             </div>
             <NDataTable
               :columns="trackerColumns"
               :data="trackerRows"
               :row-key="(row: TrackerRow) => row.url"
+              :default-sort="trackerSortState ?? undefined"
               size="small"
               :bordered="true"
               :max-height="400"
@@ -449,13 +502,16 @@ function handleClose() {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
+  gap: 5px;
+  padding: 0 12px;
   height: 36px;
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
   color: var(--task-action-color, #999);
   cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
   transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
 }
 
