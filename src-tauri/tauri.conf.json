@@ -67,6 +67,39 @@
     ],
     "windows": {
       "nsis": {
+        "installerIcon": "icons/icon.ico",
+        "headerImage": "nsis/header.bmp",
+        "sidebarImage": "nsis/sidebar.bmp",
+        "installMode": "both",
+        "displayLanguageSelector": true,
+        "languages": [
+          "Arabic",
+          "Bulgarian",
+          "Catalan",
+          "German",
+          "Greek",
+          "English",
+          "Spanish",
+          "Farsi",
+          "French",
+          "Hungarian",
+          "Indonesian",
+          "Italian",
+          "Japanese",
+          "Korean",
+          "Norwegian",
+          "Dutch",
+          "Polish",
+          "PortugueseBR",
+          "Romanian",
+          "Russian",
+          "Thai",
+          "Turkish",
+          "Ukrainian",
+          "Vietnamese",
+          "SimpChinese",
+          "TradChinese"
+        ],
         "installerHooks": "nsis/hooks.nsh"
       }
     }

@@ -107,9 +107,13 @@ function applyTranslations() {
         const key = el.getAttribute('data-i18n');
         if (key) el.textContent = t(key);
     });
+    // HTML interpolation variables — keeps locale files free of markup
+    const HTML_VARS = {
+        link: '<a href="https://github.com/agalwood/Motrix" target="_blank" rel="noopener">Motrix</a>',
+    };
     document.querySelectorAll('[data-i18n-html]').forEach(el => {
         const key = el.getAttribute('data-i18n-html');
-        if (key) el.innerHTML = t(key);
+        if (key) el.innerHTML = t(key, HTML_VARS);
     });
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
         const key = el.getAttribute('data-i18n-placeholder');
