@@ -219,6 +219,15 @@ describe('i18n — all error keys exist in all 26 locales', () => {
       expect(appContent).toContain("'engine-crash'")
     })
   }
+
+  // engine-stopped info key in app.js
+  for (const locale of ALL_LOCALES) {
+    it(`${locale}/app.js has 'engine-stopped' key`, () => {
+      const appPath = path.join(LOCALES_DIR, locale, 'app.js')
+      const appContent = fs.readFileSync(appPath, 'utf-8')
+      expect(appContent).toContain("'engine-stopped'")
+    })
+  }
 })
 
 // ─── Test Group 3: engine.rs — error handling behavior ────────────────
@@ -231,10 +240,82 @@ describe('engine.rs — stdout/stderr logging and exit code events', () => {
     engineSource = fs.readFileSync(enginePath, 'utf-8')
   })
 
+  // ── EngineState intentional_stop flag ────────────────────────────
+
+  describe('EngineState intentional_stop flag', () => {
+    it('EngineState struct contains intentional_stop: AtomicBool', () => {
+      // Extract the struct definition
+      const structIdx = engineSource.indexOf('pub struct EngineState')
+      expect(structIdx).toBeGreaterThanOrEqual(0)
+      const structBody = engineSource.slice(structIdx, structIdx + 300)
+      expect(structBody).toContain('intentional_stop')
+      expect(structBody).toContain('AtomicBool')
+    })
+
+    it('stop_engine sets intentional_stop to true BEFORE kill()', () => {
+      const fnBody = extractFnBody(engineSource, 'stop_engine')
+      expect(fnBody).toBeTruthy()
+      const storeIdx = fnBody!.indexOf('intentional_stop')
+      const killIdx = fnBody!.indexOf('.kill()')
+      expect(storeIdx).toBeGreaterThanOrEqual(0)
+      expect(killIdx).toBeGreaterThan(storeIdx)
+    })
+
+    it('restart_engine sets intentional_stop to true BEFORE kill()', () => {
+      const fnBody = extractFnBody(engineSource, 'restart_engine')
+      expect(fnBody).toBeTruthy()
+      const storeIdx = fnBody!.indexOf('intentional_stop')
+      const killIdx = fnBody!.indexOf('.kill()')
+      expect(storeIdx).toBeGreaterThanOrEqual(0)
+      expect(killIdx).toBeGreaterThan(storeIdx)
+    })
+
+    it('restart_engine resets intentional_stop to false AFTER spawning new child', () => {
+      const fnBody = extractFnBody(engineSource, 'restart_engine')
+      expect(fnBody).toBeTruthy()
+      // The spawn (.spawn()) must come before the final store(false)
+      const spawnIdx = fnBody!.indexOf('.spawn()')
+      // Find the LAST intentional_stop reference (the reset)
+      const lastStoreIdx = fnBody!.lastIndexOf('intentional_stop')
+      expect(spawnIdx).toBeGreaterThan(0)
+      expect(lastStoreIdx).toBeGreaterThan(spawnIdx)
+    })
+  })
+
+  // ── Terminated handlers check intentional_stop ──────────────────
+
+  describe('Terminated handlers gate engine-error on intentional_stop', () => {
+    it('start_engine Terminated handler checks intentional_stop before emitting', () => {
+      const terminatedBlock = extractEventHandler(engineSource, 'Terminated', 'start_engine')
+      expect(terminatedBlock).toBeTruthy()
+      expect(terminatedBlock).toContain('intentional_stop')
+      expect(terminatedBlock).toContain('engine-error')
+    })
+
+    it('restart_engine Terminated handler checks intentional_stop before emitting', () => {
+      const terminatedBlock = extractEventHandler(engineSource, 'Terminated', 'restart_engine')
+      expect(terminatedBlock).toBeTruthy()
+      expect(terminatedBlock).toContain('intentional_stop')
+      expect(terminatedBlock).toContain('engine-error')
+    })
+  })
+
+  describe('Terminated handlers emit engine-stopped for intentional kills', () => {
+    it('start_engine Terminated handler emits engine-stopped when intentional', () => {
+      const terminatedBlock = extractEventHandler(engineSource, 'Terminated', 'start_engine')
+      expect(terminatedBlock).toBeTruthy()
+      expect(terminatedBlock).toContain('engine-stopped')
+    })
+
+    it('restart_engine Terminated handler emits engine-stopped when intentional', () => {
+      const terminatedBlock = extractEventHandler(engineSource, 'Terminated', 'restart_engine')
+      expect(terminatedBlock).toBeTruthy()
+      expect(terminatedBlock).toContain('engine-stopped')
+    })
+  })
+
   describe('start_engine async monitor', () => {
     it('logs stderr output (not silently discarded)', () => {
-      // The Stderr handler must NOT be empty `=> {}`
-      // It should contain eprintln! or similar logging
       const stderrBlock = extractEventHandler(engineSource, 'Stderr', 'start_engine')
       expect(stderrBlock).toBeTruthy()
       expect(stderrBlock).not.toMatch(/=>\s*\{\s*\}/)
@@ -251,7 +332,6 @@ describe('engine.rs — stdout/stderr logging and exit code events', () => {
     it('extracts exit code from Terminated payload', () => {
       const terminatedBlock = extractEventHandler(engineSource, 'Terminated', 'start_engine')
       expect(terminatedBlock).toBeTruthy()
-      // Must actually USE the payload, not ignore it with _payload
       expect(terminatedBlock).not.toContain('_payload')
       expect(terminatedBlock).toContain('code')
     })
@@ -290,7 +370,7 @@ describe('engine.rs — stdout/stderr logging and exit code events', () => {
 
 // ─── Test Group 4: MainLayout.vue — engine-error listener ─────────────
 
-describe('MainLayout.vue — engine-error crash listener', () => {
+describe('MainLayout.vue — engine event listeners', () => {
   let layoutSource: string
 
   beforeAll(() => {
@@ -298,19 +378,36 @@ describe('MainLayout.vue — engine-error crash listener', () => {
     layoutSource = fs.readFileSync(layoutPath, 'utf-8')
   })
 
-  it('listens for "engine-error" event', () => {
-    expect(layoutSource).toContain("'engine-error'")
+  describe('engine-error crash listener', () => {
+    it('listens for "engine-error" event', () => {
+      expect(layoutSource).toContain("'engine-error'")
+    })
+
+    it('uses i18n key "app.engine-crash" for crash notification', () => {
+      expect(layoutSource).toContain('engine-crash')
+    })
+
+    it('shows an error notification (message.error)', () => {
+      const listenerBlock = extractListenerBlock(layoutSource, 'engine-error')
+      expect(listenerBlock).toBeTruthy()
+      expect(listenerBlock).toContain('message.error')
+    })
   })
 
-  it('uses i18n key "app.engine-crash" for crash notification', () => {
-    expect(layoutSource).toContain('engine-crash')
-  })
+  describe('engine-stopped info listener', () => {
+    it('listens for "engine-stopped" event', () => {
+      expect(layoutSource).toContain("'engine-stopped'")
+    })
 
-  it('shows an error notification (message.error)', () => {
-    // Find the engine-error listener block and verify it calls message.error
-    const listenerBlock = extractListenerBlock(layoutSource, 'engine-error')
-    expect(listenerBlock).toBeTruthy()
-    expect(listenerBlock).toContain('message.error')
+    it('uses i18n key "app.engine-stopped" for info notification', () => {
+      expect(layoutSource).toContain('engine-stopped')
+    })
+
+    it('shows an info notification (message.info)', () => {
+      const listenerBlock = extractListenerBlock(layoutSource, 'engine-stopped')
+      expect(listenerBlock).toBeTruthy()
+      expect(listenerBlock).toContain('message.info')
+    })
   })
 })
 
@@ -392,4 +489,23 @@ function extractListenerBlock(source: string, eventName: string): string | null 
   }
 
   return source.slice(braceStart, end + 1)
+}
+
+/**
+ * Extract the body of a named Rust function (pub fn name or pub async fn name).
+ * Returns the source from the function signature to its closing brace.
+ */
+function extractFnBody(source: string, name: string): string | null {
+  const pattern = new RegExp(`pub\\s+(?:async\\s+)?fn\\s+${name}\\b`)
+  const match = pattern.exec(source)
+  if (!match) return null
+  const start = source.indexOf('{', match.index)
+  if (start === -1) return null
+  let depth = 0
+  for (let i = start; i < source.length; i++) {
+    if (source[i] === '{') depth++
+    else if (source[i] === '}') depth--
+    if (depth === 0) return source.slice(match.index, i + 1)
+  }
+  return null
 }

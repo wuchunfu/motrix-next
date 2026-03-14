@@ -8,7 +8,7 @@ import { isDowngrade } from '@shared/utils/semver'
 
 // ── Types ───────────────────────────────────────────────────────────
 
-export type UpdatePhase = 'checking' | 'up-to-date' | 'available' | 'downloading' | 'ready' | 'error'
+export type UpdatePhase = 'checking' | 'up-to-date' | 'available' | 'downloading' | 'ready' | 'installing' | 'error'
 
 export interface UpdateProxyConfig {
   enable?: boolean
@@ -20,16 +20,16 @@ export interface UpdateProxyConfig {
 
 /** Determines whether the action button should be disabled. */
 export function isActionDisabled(phase: UpdatePhase): boolean {
-  return phase === 'checking' || phase === 'up-to-date'
+  return phase === 'checking' || phase === 'up-to-date' || phase === 'installing'
 }
 
 /** Determines the action button label key based on phase and rollback status. */
-export function getActionLabel(phase: UpdatePhase, rollback: boolean): string {
+export function getActionLabel(phase: UpdatePhase, _rollback: boolean): string {
   if (phase === 'error') return 'app.retry'
   if (phase === 'downloading') return 'app.cancel'
-  if (phase === 'ready') return 'preferences.restart-now'
-  if (rollback) return 'preferences.download-and-switch'
-  return 'preferences.update-and-install'
+  if (phase === 'ready') return 'preferences.restart-and-install'
+  if (phase === 'installing') return 'preferences.installing'
+  return 'preferences.download-update'
 }
 
 /** Determines the action button Naive UI type based on phase. */
@@ -41,10 +41,10 @@ export function getActionType(phase: UpdatePhase): 'default' | 'info' | 'primary
 }
 
 /** Determines which action to dispatch when button is clicked. */
-export function getActionTarget(phase: UpdatePhase): 'download' | 'cancel' | 'relaunch' | 'retry' | null {
+export function getActionTarget(phase: UpdatePhase): 'download' | 'cancel' | 'install' | 'retry' | null {
   if (phase === 'available') return 'download'
   if (phase === 'downloading') return 'cancel'
-  if (phase === 'ready') return 'relaunch'
+  if (phase === 'ready') return 'install'
   if (phase === 'error') return 'retry'
   return null
 }

@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'Engine đang khởi động, vui lòng đợi...',
   'engine-ready': 'Khởi động engine thành công',
   'engine-failed': 'Không thể khởi động engine',
+  'engine-stopped': 'Đã dừng engine',
   'engine-crash': 'Trình tải xuống đã dừng đột ngột (mã {code})',
   'new-version-available': 'Có bản cập nhật',
   'older-version-available': 'Có phiên bản cũ hơn',

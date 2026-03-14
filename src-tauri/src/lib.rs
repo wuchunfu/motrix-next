@@ -6,7 +6,7 @@ mod menu;
 mod tray;
 mod upnp;
 
-use crate::commands::updater::UpdateCancelState;
+use crate::commands::updater::{DownloadedUpdate, UpdateCancelState};
 use engine::EngineState;
 use tauri::{Emitter, Manager};
 use tauri_plugin_deep_link::DeepLinkExt;
@@ -54,6 +54,7 @@ pub fn run() {
         .manage(EngineState::new())
         .manage(UpnpState::new())
         .manage(std::sync::Arc::new(UpdateCancelState::new()))
+        .manage(std::sync::Arc::new(DownloadedUpdate::new()))
         .invoke_handler(tauri::generate_handler![
             commands::get_app_config,
             commands::save_preference,
@@ -70,7 +71,8 @@ pub fn run() {
             commands::update_progress_bar,
             commands::update_dock_badge,
             commands::check_for_update,
-            commands::install_update,
+            commands::download_update,
+            commands::apply_update,
             commands::cancel_update,
             commands::start_upnp_mapping,
             commands::stop_upnp_mapping,

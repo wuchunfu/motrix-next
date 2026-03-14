@@ -28,6 +28,7 @@ describe('isActionDisabled', () => {
     ['available', false],
     ['downloading', false],
     ['ready', false],
+    ['installing', true],
     ['error', false],
   ])('phase "%s" → disabled=%s', (phase, expected) => {
     expect(isActionDisabled(phase)).toBe(expected)
@@ -45,16 +46,20 @@ describe('getActionLabel', () => {
     expect(getActionLabel('downloading', false)).toBe('app.cancel')
   })
 
-  it('returns restart-now for ready phase', () => {
-    expect(getActionLabel('ready', false)).toBe('preferences.restart-now')
+  it('returns restart-and-install for ready phase', () => {
+    expect(getActionLabel('ready', false)).toBe('preferences.restart-and-install')
   })
 
-  it('returns download-and-switch for rollback', () => {
-    expect(getActionLabel('available', true)).toBe('preferences.download-and-switch')
+  it('returns download-update for rollback too (download/install are split)', () => {
+    expect(getActionLabel('available', true)).toBe('preferences.download-update')
   })
 
-  it('returns update-and-install for normal upgrade', () => {
-    expect(getActionLabel('available', false)).toBe('preferences.update-and-install')
+  it('returns download-update for normal upgrade', () => {
+    expect(getActionLabel('available', false)).toBe('preferences.download-update')
+  })
+
+  it('returns installing for installing phase', () => {
+    expect(getActionLabel('installing', false)).toBe('preferences.installing')
   })
 })
 
@@ -65,6 +70,7 @@ describe('getActionType', () => {
     ['checking', 'default'],
     ['up-to-date', 'default'],
     ['downloading', 'default'],
+    ['installing', 'default'],
     ['error', 'info'],
     ['available', 'primary'],
     ['ready', 'primary'],
@@ -79,7 +85,8 @@ describe('getActionTarget', () => {
   it.each<[UpdatePhase, string | null]>([
     ['available', 'download'],
     ['downloading', 'cancel'],
-    ['ready', 'relaunch'],
+    ['ready', 'install'],
+    ['installing', null],
     ['error', 'retry'],
     ['checking', null],
     ['up-to-date', null],

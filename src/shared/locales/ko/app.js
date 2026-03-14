@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': '엔진 시작 중입니다. 잠시만 기다려 주세요...',
   'engine-ready': '엔진이 성공적으로 시작되었습니다',
   'engine-failed': '엔진 시작 실패',
+  'engine-stopped': '엔진 중지됨',
   'engine-crash': '다운로드 엔진이 예기치 않게 종료됨 (코드 {code})',
   'new-version-available': '업데이트 가능',
   'older-version-available': '이전 버전 사용 가능',

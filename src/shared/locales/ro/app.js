@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'Motorul pornește, vă rugăm așteptați...',
   'engine-ready': 'Motorul a pornit cu succes',
   'engine-failed': 'Pornirea motorului a eșuat',
+  'engine-stopped': 'Motor oprit',
   'engine-crash': 'Motorul de descărcare s-a oprit neașteptat (cod {code})',
   'new-version-available': 'Actualizare disponibilă',
   'older-version-available': 'Versiune mai veche disponibilă',

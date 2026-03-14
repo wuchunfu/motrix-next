@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'エンジンを起動中です。お待ちください...',
   'engine-ready': 'エンジンが正常に起動しました',
   'engine-failed': 'エンジンの起動に失敗しました',
+  'engine-stopped': 'エンジン停止',
   'engine-crash': 'ダウンロードエンジンが予期しない終了 (コード {code})',
   'new-version-available': 'アップデートがあります',
   'older-version-available': '旧バージョンが利用可能',

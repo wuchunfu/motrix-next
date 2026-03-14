@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'Motoren starter, vennligst vent...',
   'engine-ready': 'Motoren startet',
   'engine-failed': 'Kunne ikke starte motoren',
+  'engine-stopped': 'Motor stoppet',
   'engine-crash': 'Nedlastingsmotoren avsluttet uventet (kode {code})',
   'new-version-available': 'Oppdatering tilgjengelig',
   'older-version-available': 'Eldre versjon tilgjengelig',

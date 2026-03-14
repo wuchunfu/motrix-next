@@ -4,7 +4,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_updater::UpdaterExt;
-use tokio::sync::Notify;
+use tokio::sync::{Mutex, Notify};
 use url::Url;
 
 /// Base URL for update JSON files on the fixed `updater` GitHub Release tag.
@@ -66,6 +66,23 @@ impl UpdateCancelState {
     }
 }
 
+/// Holds the downloaded update bytes between `download_update` and `apply_update`.
+///
+/// `download_update` stores the verified package here; `apply_update` takes it
+/// out, stops the engine, and installs.  This decouples downloading (aria2 stays
+/// alive) from installation (aria2 must be stopped).
+pub struct DownloadedUpdate {
+    bytes: Mutex<Option<Vec<u8>>>,
+}
+
+impl DownloadedUpdate {
+    pub fn new() -> Self {
+        Self {
+            bytes: Mutex::new(None),
+        }
+    }
+}
+
 /// Applies or clears the proxy environment variable for the HTTP client.
 fn apply_proxy(proxy: &Option<String>) {
     match proxy {
@@ -119,18 +136,16 @@ pub async fn check_for_update(
     }))
 }
 
-/// Downloads and installs the latest update on the specified channel.
+/// Downloads the latest update on the specified channel WITHOUT installing.
 ///
-/// Uses a three-phase approach to prevent file-lock failures on Windows:
-///   1. **Download** — aria2c keeps running; user downloads are unaffected.
-///   2. **Stop engine** — kill the aria2c sidecar so NSIS can overwrite it.
-///   3. **Install** — run the platform installer (NSIS / tar.gz replacement).
+/// The aria2c engine keeps running during download — user tasks are unaffected.
+/// Downloaded bytes are stored in `DownloadedUpdate` shared state for later
+/// installation via `apply_update`.
 ///
 /// Emits `update-progress` events to the frontend with download progress.
 /// The download can be cancelled by calling `cancel_update`.
-/// After installation, the frontend should call `relaunch()` to apply.
 #[tauri::command]
-pub async fn install_update(
+pub async fn download_update(
     app: AppHandle,
     channel: String,
     proxy: Option<String>,
@@ -158,15 +173,13 @@ pub async fn install_update(
         None => return Ok(()),
     };
 
-    // ── Phase 1: Download only ──────────────────────────────────────
-    // aria2c keeps running during download — user's tasks are unaffected.
+    // ── Download only (aria2c stays alive) ───────────────────────────
     let app_handle = app.clone();
     let cancel = cancel_state.inner().clone();
     let mut downloaded: u64 = 0;
 
     let download_fut = update.download(
         move |chunk_length, content_length| {
-            // Stop emitting progress once cancelled (download may still be in flight)
             if cancel.is_cancelled() {
                 return;
             }
@@ -190,15 +203,10 @@ pub async fn install_update(
                 },
             );
         },
-        || {
-            // Intentional no-op: the Finished event is emitted after
-            // install() completes (Phase 3), not when download finishes,
-            // so the frontend sees the correct lifecycle.
-        },
+        || {},
     );
 
     // Race the download against cancellation.
-    // On success, `bytes` holds the verified update package.
     let bytes = tokio::select! {
         result = download_fut => {
             if cancel_state.is_cancelled() {
@@ -211,10 +219,62 @@ pub async fn install_update(
         }
     };
 
-    // ── Phase 2: Stop aria2c engine BEFORE installation ─────────────
+    // Store downloaded bytes for later installation
+    let dl_state = app.state::<Arc<DownloadedUpdate>>();
+    *dl_state.bytes.lock().await = Some(bytes);
+
+    // Emit download-finished (NOT Finished — that signals post-install)
+    if !cancel_state.is_cancelled() {
+        let _ = app.emit("update-progress", UpdateProgressEvent::Finished);
+    }
+
+    Ok(())
+}
+
+/// Installs a previously downloaded update.
+///
+/// Uses a two-phase approach:
+///   1. **Stop engine** — kill the aria2c sidecar so NSIS can overwrite it.
+///   2. **Install** — run the platform installer (NSIS / tar.gz replacement).
+///
+/// The caller (frontend) should invoke this only after `download_update`
+/// succeeds and the user confirms installation.
+#[tauri::command]
+pub async fn apply_update(
+    app: AppHandle,
+    channel: String,
+    proxy: Option<String>,
+) -> Result<(), AppError> {
+    apply_proxy(&proxy);
+
+    // Take the downloaded bytes from shared state
+    let dl_state = app.state::<Arc<DownloadedUpdate>>();
+    let bytes = dl_state
+        .bytes
+        .lock()
+        .await
+        .take()
+        .ok_or_else(|| AppError::Updater("No downloaded update available".into()))?;
+
+    // Re-check the update to obtain the Update object for installation
+    let endpoint = Url::parse(&endpoint_for_channel(&channel))
+        .map_err(|e| AppError::Updater(e.to_string()))?;
+
+    let update = app
+        .updater_builder()
+        .endpoints(vec![endpoint])
+        .map_err(|e| AppError::Updater(e.to_string()))?
+        .version_comparator(|current, update| update.version.to_string() != current.to_string())
+        .build()
+        .map_err(|e| AppError::Updater(e.to_string()))?
+        .check()
+        .await
+        .map_err(|e| AppError::Updater(e.to_string()))?
+        .ok_or_else(|| AppError::Updater("Update no longer available".into()))?;
+
+    // ── Phase 1: Stop aria2c engine BEFORE installation ─────────────
     // On Windows, NSIS cannot overwrite a running .exe binary.
-    // On macOS/Linux this is harmless but prevents session file corruption
-    // and is consistent "clean shutdown before upgrade" on all platforms.
+    // On macOS/Linux this prevents session file corruption.
     {
         let app_for_stop = app.clone();
         tokio::task::spawn_blocking(move || {
@@ -224,28 +284,16 @@ pub async fn install_update(
         .map_err(|e| AppError::Engine(e.to_string()))?;
     }
 
-    // ── Phase 3: Install (NSIS / tar.gz replacement) ────────────────
-    // At this point aria2c is dead; file locks released on Windows.
+    // ── Phase 2: Install (NSIS / tar.gz replacement) ────────────────
     update
         .install(bytes)
         .map_err(|e| AppError::Updater(e.to_string()))?;
 
-    // Emit finish event after successful installation
-    if !cancel_state.is_cancelled() {
-        let _ = app.emit("update-progress", UpdateProgressEvent::Finished);
-    }
-
     // macOS: flush icon cache after OTA bundle replacement.
-    // The updater replaces the entire .app bundle, but LaunchServices may
-    // still display the cached old icon (known Tauri issue #5163).
-    // touch: invalidates Finder's modification-time-based icon cache.
-    // lsregister -f: re-registers this single app (safe, NOT -kill).
     #[cfg(target_os = "macos")]
     {
         use std::process::Command;
         if let Ok(exe) = std::env::current_exe() {
-            // Executable path: .app/Contents/MacOS/<binary>
-            // Walk up 3 levels to reach the .app bundle root.
             if let Some(app_bundle) = exe
                 .parent()
                 .and_then(|p| p.parent())
@@ -339,46 +387,69 @@ mod tests {
         assert!(url.ends_with("/latest.json"));
     }
 
-    // ── Structural: install_update must stop engine before install ──
+    // ── Structural: apply_update must stop engine before install ─────
 
-    /// Verifies that the `install_update` function source code calls
-    /// `stop_engine` before calling `install()`. This is the same
-    /// structural testing pattern used by the frontend's
-    /// `relaunchShutdown.test.ts`.
+    /// Verifies that `apply_update` calls `stop_engine` before `.install()`.
     #[test]
-    fn install_update_source_stops_engine_before_install() {
+    fn apply_update_stops_engine_before_install() {
         let source = include_str!("updater.rs");
-        let stop_pos = source
+        let fn_start = source
+            .find("pub async fn apply_update")
+            .expect("apply_update function must exist");
+        let fn_body = &source[fn_start..];
+        let stop_pos = fn_body
             .find("stop_engine")
-            .expect("install_update must call stop_engine");
-        let install_pos = source
-            .find(".install(bytes)")
-            .expect("install_update must call .install(bytes)");
+            .expect("apply_update must call stop_engine");
+        let install_pos = fn_body
+            .find(".install(")
+            .expect("apply_update must call .install()");
         assert!(
             stop_pos < install_pos,
-            "stop_engine (pos {}) must appear before .install() (pos {}) in updater.rs",
+            "stop_engine (pos {}) must appear before .install() (pos {}) in apply_update",
             stop_pos,
             install_pos
         );
     }
 
-    /// Verifies that `install_update` uses the split download/install
-    /// pattern instead of the combined method.
+    /// Verifies that `download_update` does NOT call `stop_engine`.
     #[test]
-    fn install_update_uses_separate_download_install() {
+    fn download_update_does_not_stop_engine() {
         let source = include_str!("updater.rs");
-        // Build the banned pattern at runtime so this assertion text
-        // doesn't self-match when include_str! scans the whole file.
+        let dl_start = source
+            .find("pub async fn download_update")
+            .expect("download_update function must exist");
+        let apply_start = source
+            .find("pub async fn apply_update")
+            .expect("apply_update function must exist");
+        let download_body = &source[dl_start..apply_start];
+        assert!(
+            !download_body.contains("stop_engine"),
+            "download_update must NOT call stop_engine — engine stays alive during download"
+        );
+    }
+
+    /// Verifies that `DownloadedUpdate` shared state struct exists.
+    #[test]
+    fn downloaded_update_shared_state_exists() {
+        let source = include_str!("updater.rs");
+        assert!(
+            source.contains("pub struct DownloadedUpdate"),
+            "DownloadedUpdate shared state must be defined"
+        );
+    }
+
+    /// Verifies no combined download-and-install call in production code.
+    #[test]
+    fn no_combined_download_and_install() {
+        let source = include_str!("updater.rs");
         let banned = format!("{}{}", "download_and_", "install");
-        // Exclude the #[cfg(test)] section from the search by only
-        // scanning up to the test module boundary.
         let production_end = source.find("#[cfg(test)]").unwrap_or(source.len());
         let production_code = &source[..production_end];
         assert!(
             !production_code.contains(&banned),
-            "production code in updater.rs must NOT call {} — \
-             use download() + stop_engine + install() instead",
+            "production code must NOT call {} — use download() + stop_engine + install() instead",
             banned
         );
     }
 }
+

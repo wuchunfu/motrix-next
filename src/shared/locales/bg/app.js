@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'Двигателят се стартира, моля изчакайте...',
   'engine-ready': 'Двигателят стартира успешно',
   'engine-failed': 'Неуспешно стартиране на двигателя',
+  'engine-stopped': 'Двигателят е спрян',
   'engine-crash': 'Двигателят за изтегляне спря неочаквано (код {code})',
   'new-version-available': 'Налична актуализация',
   'older-version-available': 'Налична е по-стара версия',

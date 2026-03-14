@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'A motor elindul, kérjük várjon...',
   'engine-ready': 'A motor sikeresen elindult',
   'engine-failed': 'A motor indítása sikertelen',
+  'engine-stopped': 'Motor leállítva',
   'engine-crash': 'A letöltőmotor váratlanul leállt (kód: {code})',
   'new-version-available': 'Frissítés elérhető',
   'older-version-available': 'Régebbi verzió elérhető',

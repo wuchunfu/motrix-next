@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'Silnik się uruchamia, proszę czekać...',
   'engine-ready': 'Silnik uruchomiony pomyślnie',
   'engine-failed': 'Nie udało się uruchomić silnika',
+  'engine-stopped': 'Silnik zatrzymany',
   'engine-crash': 'Silnik pobierania zakończył się nieoczekiwanie (kod {code})',
   'new-version-available': 'Aktualizacja dostępna',
   'older-version-available': 'Dostępna starsza wersja',

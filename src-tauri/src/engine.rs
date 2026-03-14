@@ -1,17 +1,24 @@
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 use tauri::{Emitter, Manager};
 use tauri_plugin_shell::process::{CommandChild, CommandEvent};
 use tauri_plugin_shell::ShellExt;
 
 /// Holds the aria2c child process handle, protected by a Mutex for thread-safe access.
+///
+/// `intentional_stop` distinguishes deliberate kills (restart, update, relaunch)
+/// from genuine crashes.  Set to `true` before `child.kill()`, checked by the
+/// async Terminated handler to suppress false `engine-error` events.
 pub struct EngineState {
     child: Mutex<Option<CommandChild>>,
+    intentional_stop: AtomicBool,
 }
 
 impl EngineState {
     pub fn new() -> Self {
         Self {
             child: Mutex::new(None),
+            intentional_stop: AtomicBool::new(false),
         }
     }
 }
@@ -107,8 +114,16 @@ pub fn start_engine(app: &tauri::AppHandle, config: &serde_json::Value) -> Resul
                     let exit_code = payload.code.unwrap_or(-1);
                     eprintln!("[aria2c] terminated with exit code: {}", exit_code);
 
-                    // Notify frontend of abnormal termination
-                    if exit_code != 0 {
+                    // Only notify frontend of UNEXPECTED termination.
+                    // Intentional stops (restart, update, relaunch) set the flag
+                    // before kill() — swap(false) atomically reads and resets.
+                    let was_intentional = if let Some(state) = app_handle.try_state::<EngineState>() {
+                        state.intentional_stop.swap(false, Ordering::SeqCst)
+                    } else {
+                        false
+                    };
+
+                    if exit_code != 0 && !was_intentional {
                         let _ = app_handle.emit(
                             "engine-error",
                             serde_json::json!({
@@ -116,6 +131,8 @@ pub fn start_engine(app: &tauri::AppHandle, config: &serde_json::Value) -> Resul
                                 "signal": payload.signal
                             }),
                         );
+                    } else if was_intentional {
+                        let _ = app_handle.emit("engine-stopped", ());
                     }
 
                     if let Some(state) = app_handle.try_state::<EngineState>() {
@@ -140,6 +157,9 @@ pub fn start_engine(app: &tauri::AppHandle, config: &serde_json::Value) -> Resul
 /// Waits briefly after kill to let the OS reclaim the process.
 pub fn stop_engine(app: &tauri::AppHandle) -> Result<(), String> {
     let state = app.state::<EngineState>();
+    // Signal intentional stop BEFORE kill so the Terminated handler
+    // knows this is deliberate and suppresses engine-error.
+    state.intentional_stop.store(true, Ordering::SeqCst);
     let mut child_lock = state.child.lock().map_err(|e| e.to_string())?;
 
     if let Some(child) = child_lock.take() {
@@ -149,7 +169,6 @@ pub fn stop_engine(app: &tauri::AppHandle) -> Result<(), String> {
             .map_err(|e| format!("Failed to kill aria2c: {}", e))?;
         eprintln!("[aria2c] stopped engine process: PID {}", pid);
         // Brief wait for the OS to fully terminate the process and release the port.
-        // Without this, a subsequent spawn can race against the dying process.
         std::thread::sleep(std::time::Duration::from_millis(100));
     }
 
@@ -168,6 +187,9 @@ pub fn stop_engine(app: &tauri::AppHandle) -> Result<(), String> {
 /// orphaned aria2c processes on all platforms.
 pub fn restart_engine(app: &tauri::AppHandle, config: &serde_json::Value) -> Result<(), String> {
     let state = app.state::<EngineState>();
+    // Signal intentional stop BEFORE kill so the old process's Terminated
+    // handler suppresses engine-error.
+    state.intentional_stop.store(true, Ordering::SeqCst);
     let mut child_lock = state.child.lock().map_err(|e| e.to_string())?;
 
     // Step 1: Kill existing child if present
@@ -235,6 +257,9 @@ pub fn restart_engine(app: &tauri::AppHandle, config: &serde_json::Value) -> Res
     let spawned_pid = child.pid();
     *child_lock = Some(child);
 
+    // New child successfully spawned — reset flag so genuine crashes get reported.
+    state.intentional_stop.store(false, Ordering::SeqCst);
+
     // Monitor for process termination (PID-guarded clear)
     let app_handle = app.clone();
     tauri::async_runtime::spawn(async move {
@@ -258,8 +283,14 @@ pub fn restart_engine(app: &tauri::AppHandle, config: &serde_json::Value) -> Res
                     let exit_code = payload.code.unwrap_or(-1);
                     eprintln!("[aria2c] restart: terminated with exit code: {}", exit_code);
 
-                    // Notify frontend of abnormal termination
-                    if exit_code != 0 {
+                    // Only notify frontend of UNEXPECTED termination.
+                    let was_intentional = if let Some(state) = app_handle.try_state::<EngineState>() {
+                        state.intentional_stop.swap(false, Ordering::SeqCst)
+                    } else {
+                        false
+                    };
+
+                    if exit_code != 0 && !was_intentional {
                         let _ = app_handle.emit(
                             "engine-error",
                             serde_json::json!({
@@ -267,6 +298,8 @@ pub fn restart_engine(app: &tauri::AppHandle, config: &serde_json::Value) -> Res
                                 "signal": payload.signal
                             }),
                         );
+                    } else if was_intentional {
+                        let _ = app_handle.emit("engine-stopped", ());
                     }
 
                     if let Some(state) = app_handle.try_state::<EngineState>() {

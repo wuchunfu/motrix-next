@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'Η μηχανή εκκινεί, παρακαλώ περιμένετε...',
   'engine-ready': 'Ο κινητήρας εκκινήθηκε επιτυχώς',
   'engine-failed': 'Αποτυχία εκκίνησης κινητήρα',
+  'engine-stopped': 'Ο κινητήρας σταμάτησε',
   'engine-crash': 'Ο κινητήρας λήψης τερματίστηκε απροσδόκητα (κωδικός {code})',
   'new-version-available': 'Διαθέσιμη ενημέρωση',
   'older-version-available': 'Διαθέσιμη παλαιότερη έκδοση',

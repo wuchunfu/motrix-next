@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'O mecanismo está iniciando, aguarde...',
   'engine-ready': 'Motor iniciado com sucesso',
   'engine-failed': 'Falha ao iniciar o motor',
+  'engine-stopped': 'Motor parado',
   'engine-crash': 'O motor de download encerrou inesperadamente (código {code})',
   'new-version-available': 'Atualização disponível',
   'older-version-available': 'Versão anterior disponível',

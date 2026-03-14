@@ -38,22 +38,38 @@ describe('graceful engine shutdown before relaunch()', () => {
   // ── UpdateDialog.vue ──────────────────────────────────────────────
 
   describe('UpdateDialog.vue', () => {
-    it('imports or calls stop_engine_command / stopEngine', () => {
-      expect(updateDialogSrc.includes('stop_engine_command') || updateDialogSrc.includes('stopEngine')).toBe(true)
+    it('imports or calls stop_engine_command / stopEngine / apply_update', () => {
+      expect(
+        updateDialogSrc.includes('stop_engine_command') ||
+          updateDialogSrc.includes('stopEngine') ||
+          updateDialogSrc.includes('apply_update'),
+      ).toBe(true)
     })
 
-    it('handleRelaunch is async (must await engine stop)', () => {
-      // handleRelaunch must be async to await stopEngine()
-      expect(updateDialogSrc).toMatch(/async\s+function\s+handleRelaunch/)
+    it('calls download_update (not install_update) for the download phase', () => {
+      expect(updateDialogSrc).toContain('download_update')
+      // install_update should no longer exist — download and install are split
+      expect(updateDialogSrc).not.toContain("'install_update'")
     })
 
-    it('handleRelaunch calls stopEngine before relaunch', () => {
-      const fn = extractFunction(updateDialogSrc, 'handleRelaunch')
+    it('handleInstallAndRelaunch is async (must await apply_update)', () => {
+      expect(updateDialogSrc).toMatch(/async\s+function\s+handleInstallAndRelaunch/)
+    })
+
+    it('handleInstallAndRelaunch calls apply_update before relaunch', () => {
+      const fn = extractFunction(updateDialogSrc, 'handleInstallAndRelaunch')
       expect(fn).toBeTruthy()
-      const stopIdx = fn!.search(/stopEngine|stop_engine_command/)
+      const applyIdx = fn!.indexOf('apply_update')
       const relaunchIdx = fn!.indexOf('relaunch()')
-      expect(stopIdx).toBeGreaterThanOrEqual(0)
-      expect(relaunchIdx).toBeGreaterThan(stopIdx)
+      expect(applyIdx).toBeGreaterThanOrEqual(0)
+      expect(relaunchIdx).toBeGreaterThan(applyIdx)
+    })
+
+    it('enforces a minimum animation duration before relaunch', () => {
+      const fn = extractFunction(updateDialogSrc, 'handleInstallAndRelaunch')
+      expect(fn).toBeTruthy()
+      // Must contain a delay/timer mechanism (Promise, setTimeout, or MIN_)
+      expect(fn!.includes('Promise') || fn!.includes('setTimeout') || fn!.includes('MIN_')).toBe(true)
     })
   })
 
@@ -92,21 +108,43 @@ describe('graceful engine shutdown before relaunch()', () => {
       updaterSrc = fs.readFileSync(UPDATER_RS, 'utf-8')
     })
 
-    it('calls stop_engine before .install()', () => {
-      const stopIdx = updaterSrc.indexOf('stop_engine')
-      const installIdx = updaterSrc.indexOf('.install(bytes)')
+    it('exposes download_update as a tauri command', () => {
+      expect(updaterSrc).toContain('pub async fn download_update')
+    })
+
+    it('exposes apply_update as a tauri command', () => {
+      expect(updaterSrc).toContain('pub async fn apply_update')
+    })
+
+    it('apply_update calls stop_engine before .install()', () => {
+      // Extract only the apply_update function body for precise assertion
+      const fnStart = updaterSrc.indexOf('pub async fn apply_update')
+      expect(fnStart).toBeGreaterThanOrEqual(0)
+      const fnBody = updaterSrc.slice(fnStart)
+      const stopIdx = fnBody.indexOf('stop_engine')
+      const installIdx = fnBody.indexOf('.install(')
       expect(stopIdx).toBeGreaterThanOrEqual(0)
-      expect(installIdx).toBeGreaterThan(0)
-      expect(stopIdx).toBeLessThan(installIdx)
+      expect(installIdx).toBeGreaterThan(stopIdx)
+    })
+
+    it('download_update does NOT call stop_engine (engine stays alive during download)', () => {
+      const fnStart = updaterSrc.indexOf('pub async fn download_update')
+      const fnEnd = updaterSrc.indexOf('pub async fn apply_update')
+      expect(fnStart).toBeGreaterThanOrEqual(0)
+      expect(fnEnd).toBeGreaterThan(fnStart)
+      const downloadFnBody = updaterSrc.slice(fnStart, fnEnd)
+      expect(downloadFnBody).not.toContain('stop_engine')
     })
 
     it('does NOT use combined download-and-install (must split download/install)', () => {
-      // Build banned pattern at runtime to avoid self-matching
       const banned = 'download_and_' + 'install'
-      // Only scan production code — exclude test module
       const testBoundary = updaterSrc.indexOf('#[cfg(test)]')
       const productionCode = testBoundary > 0 ? updaterSrc.slice(0, testBoundary) : updaterSrc
       expect(productionCode).not.toContain(banned)
+    })
+
+    it('uses shared state to pass downloaded bytes between commands', () => {
+      expect(updaterSrc).toContain('DownloadedUpdate')
     })
   })
 })

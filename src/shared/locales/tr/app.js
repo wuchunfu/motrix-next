@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'Motor başlatılıyor, lütfen bekleyin...',
   'engine-ready': 'Motor başarıyla başlatıldı',
   'engine-failed': 'Motor başlatılamadı',
+  'engine-stopped': 'Motor durduruldu',
   'engine-crash': 'İndirme motoru beklenmedik şekilde durdu (kod {code})',
   'new-version-available': 'Güncelleme mevcut',
   'older-version-available': 'Eski sürüm mevcut',

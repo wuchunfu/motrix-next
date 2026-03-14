@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'Engine wird gestartet, bitte warten...',
   'engine-ready': 'Engine erfolgreich gestartet',
   'engine-failed': 'Engine konnte nicht gestartet werden',
+  'engine-stopped': 'Engine gestoppt',
   'engine-crash': 'Download-Engine unerwartet beendet (Code {code})',
   'new-version-available': 'Update verfügbar',
   'older-version-available': 'Ältere Version verfügbar',

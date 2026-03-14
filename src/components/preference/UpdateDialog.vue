@@ -8,7 +8,6 @@ import { NModal, NButton, NProgress, NIcon, NText, NSpin, NTag } from 'naive-ui'
 import { invoke } from '@tauri-apps/api/core'
 import { listen, type UnlistenFn } from '@tauri-apps/api/event'
 import { relaunch } from '@tauri-apps/plugin-process'
-import { useIpc } from '@/composables/useIpc'
 import { getVersion } from '@tauri-apps/api/app'
 import {
   CheckmarkCircleOutline,
@@ -52,7 +51,9 @@ const { t } = useI18n()
 const preferenceStore = usePreferenceStore()
 
 const show = ref(false)
-const phase = ref<'checking' | 'up-to-date' | 'available' | 'downloading' | 'ready' | 'error'>('checking')
+const phase = ref<'checking' | 'up-to-date' | 'available' | 'downloading' | 'ready' | 'installing' | 'error'>(
+  'checking',
+)
 const version = ref('')
 const currentVersion = ref('')
 const releaseNotes = ref('')
@@ -81,7 +82,7 @@ function handleActionClick() {
   const target = getActionTarget(phase.value)
   if (target === 'download') startDownload()
   else if (target === 'cancel') cancelDownload()
-  else if (target === 'relaunch') handleRelaunch()
+  else if (target === 'install') handleInstallAndRelaunch()
   else if (target === 'retry') open()
 }
 function getUpdateProxy(): string | null {
@@ -144,7 +145,7 @@ async function startDownload() {
   })
 
   try {
-    await invoke('install_update', { channel: ch, proxy: getUpdateProxy() })
+    await invoke('download_update', { channel: ch, proxy: getUpdateProxy() })
     if (!downloadCancelled.value) {
       phase.value = 'ready'
     }
@@ -167,9 +168,14 @@ function cancelDownload() {
   })
 }
 
-async function handleRelaunch() {
-  const { stopEngine } = useIpc()
-  await stopEngine()
+/** Minimum spinner duration to prevent flicker (ms). */
+const MIN_INSTALLING_DURATION = 500
+
+async function handleInstallAndRelaunch() {
+  phase.value = 'installing'
+  const ch = activeChannel.value
+  const timer = new Promise<void>((resolve) => setTimeout(resolve, MIN_INSTALLING_DURATION))
+  await Promise.all([invoke('apply_update', { channel: ch, proxy: getUpdateProxy() }), timer])
   relaunch()
 }
 
@@ -190,10 +196,10 @@ defineExpose({ open })
 <template>
   <NModal
     v-model:show="show"
-    :mask-closable="phase !== 'downloading'"
-    :close-on-esc="phase !== 'downloading'"
+    :mask-closable="phase !== 'downloading' && phase !== 'installing'"
+    :close-on-esc="phase !== 'downloading' && phase !== 'installing'"
     transform-origin="center"
-    :closable="phase !== 'downloading'"
+    :closable="phase !== 'downloading' && phase !== 'installing'"
     @update:show="
       (v: boolean) => {
         if (!v) close()
@@ -273,6 +279,11 @@ defineExpose({ open })
               <NIcon :size="40"><CheckmarkCircleOutline /></NIcon>
             </div>
             <NText class="update-main-text">{{ t('preferences.update-download-complete') }}</NText>
+          </div>
+
+          <div v-else-if="phase === 'installing'" key="installing" class="update-phase">
+            <NSpin size="medium" />
+            <NText depth="2" class="update-hint">{{ t('preferences.installing') }}</NText>
           </div>
 
           <div v-else-if="phase === 'error'" key="error" class="update-phase">

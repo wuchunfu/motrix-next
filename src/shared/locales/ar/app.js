@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'المحرك قيد التشغيل، يرجى الانتظار...',
   'engine-ready': 'تم تشغيل المحرك بنجاح',
   'engine-failed': 'فشل في بدء المحرك',
+  'engine-stopped': 'تم إيقاف المحرك',
   'engine-crash': 'محرك التنزيل توقف بشكل غير متوقع (الرمز {code})',
   'new-version-available': 'تحديث متاح',
   'older-version-available': 'إصدار أقدم متاح',

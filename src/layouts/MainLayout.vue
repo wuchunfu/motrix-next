@@ -181,6 +181,11 @@ onMounted(async () => {
     message.error(t('app.engine-crash', { code }), { closable: true })
   })
 
+  // Notify user when the engine is intentionally stopped (restart, update, relaunch).
+  listen('engine-stopped', () => {
+    message.info(t('app.engine-stopped'))
+  })
+
   router.beforeEach((to, from) => {
     const leavingPrefs = from.path.startsWith('/preference') && !to.path.startsWith('/preference')
     const switchingPrefsTab =

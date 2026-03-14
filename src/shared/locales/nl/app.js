@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'Engine wordt gestart, even geduld...',
   'engine-ready': 'Engine succesvol gestart',
   'engine-failed': 'Engine starten mislukt',
+  'engine-stopped': 'Engine gestopt',
   'engine-crash': 'Downloadmotor onverwacht gestopt (code {code})',
   'new-version-available': 'Update beschikbaar',
   'older-version-available': 'Oudere versie beschikbaar',

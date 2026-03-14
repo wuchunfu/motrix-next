@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'موتور در حال راه‌اندازی است، لطفاً صبر کنید...',
   'engine-ready': 'موتور با موفقیت راه‌اندازی شد',
   'engine-failed': 'خطا در راه‌اندازی موتور',
+  'engine-stopped': 'موتور متوقف شد',
   'engine-crash': 'موتور دانلود به طور غیرمنتظره متوقف شد (کد {code})',
   'new-version-available': 'به‌روزرسانی موجود است',
   'older-version-available': 'نسخه قدیمی‌تر موجود است',

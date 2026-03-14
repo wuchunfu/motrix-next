@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': '引擎正在啟動，請稍候...',
   'engine-ready': '引擎已就緒',
   'engine-failed': '引擎啟動失敗',
+  'engine-stopped': '引擎已停止',
   'engine-crash': '下載引擎異常退出（代碼 {code}）',
   'new-version-available': '版本更新可用',
   'older-version-available': '可切換到舊版本',

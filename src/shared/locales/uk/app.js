@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'Рушій запускається, зачекайте...',
   'engine-ready': 'Рушій успішно запущено',
   'engine-failed': 'Не вдалося запустити двигун',
+  'engine-stopped': 'Рушій зупинено',
   'engine-crash': 'Рушій завантаження несподівано зупинився (код {code})',
   'new-version-available': 'Доступне оновлення',
   'older-version-available': 'Доступна старіша версія',

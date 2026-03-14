@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'Mesin sedang dimulai, harap tunggu...',
   'engine-ready': 'Mesin berhasil dimulai',
   'engine-failed': 'Gagal memulai mesin',
+  'engine-stopped': 'Mesin dihentikan',
   'engine-crash': 'Mesin unduhan berhenti secara tidak terduga (kode {code})',
   'new-version-available': 'Pembaruan tersedia',
   'older-version-available': 'Versi lama tersedia',

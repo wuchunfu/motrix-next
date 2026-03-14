@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'เอนจินกำลังเริ่มต้น กรุณารอ...',
   'engine-ready': 'เครื่องยนต์เริ่มทำงานสำเร็จ',
   'engine-failed': 'ไม่สามารถเริ่มเอนจินได้',
+  'engine-stopped': 'เอนจินหยุดทำงาน',
   'engine-crash': 'เครื่องมือดาวน์โหลดหยุดทำงานโดยไม่คาดคิด (รหัส {code})',
   'new-version-available': 'มีอัปเดต',
   'older-version-available': 'มีเวอร์ชันเก่าให้ใช้งาน',

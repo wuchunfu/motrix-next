@@ -38,6 +38,7 @@ export default {
   'engine-not-ready': 'El motor s\'està iniciant, si us plau espereu...',
   'engine-ready': 'El motor ha arrancat correctament',
   'engine-failed': 'No s\'ha pogut iniciar el motor',
+  'engine-stopped': 'El motor s\'ha aturat',
   'engine-crash': 'El motor de descàrrega s\'ha aturat inesperadament (codi {code})',
   'new-version-available': 'Actualització disponible',
   'older-version-available': 'Versió anterior disponible',
