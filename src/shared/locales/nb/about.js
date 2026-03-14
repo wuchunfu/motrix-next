@@ -3,5 +3,6 @@ export default {
   'license': 'Lisens',
   'about': 'Om',
   'release': 'Utgivelsesmerknader',
-  'support': 'Brukerstøtte'
+  'support': 'Brukerstøtte',
+  'description': 'En fullt utstyrt nedlastingsbehandler, bygget opp fra bunnen med Tauri, Vue 3 og TypeScript.',
 }

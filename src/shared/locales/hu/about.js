@@ -3,5 +3,6 @@ export default {
   'license': 'Licenc',
   'about': 'Névjegy',
   'release': 'Kiadási megjegyzések',
-  'support': 'Támogatás'
+  'support': 'Támogatás',
+  'description': 'Teljes funkcionalitású letöltéskezelő, az alapoktól újraépítve Tauri, Vue 3 és TypeScript használatával.',
 }

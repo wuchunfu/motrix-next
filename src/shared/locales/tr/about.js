@@ -3,5 +3,6 @@ export default {
   'license': 'Lisans',
   'about': 'Hakkında',
   'release': 'Sürüm notları',
-  'support': 'Destek'
+  'support': 'Destek',
+  'description': 'Tauri, Vue 3 ve TypeScript ile sıfırdan yeniden inşa edilmiş tam özellikli bir indirme yöneticisi.',
 }

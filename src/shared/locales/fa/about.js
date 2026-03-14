@@ -3,5 +3,6 @@ export default {
   'license': 'مجوز',
   'about': 'درباره',
   'release': 'یادداشت‌های انتشار',
-  'support': 'پشتیبانی'
+  'support': 'پشتیبانی',
+  'description': 'یک مدیر دانلود کامل، از پایه با Tauri، Vue 3 و TypeScript بازسازی شده است.',
 }

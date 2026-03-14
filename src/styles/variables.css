@@ -136,6 +136,11 @@
   --dialog-bg: var(--m3-surface-container-high);
   --preference-text: var(--m3-on-surface-variant);
 
+  --about-glass-bg: rgba(254, 251, 246, 0.96);
+  --about-glass-ring: rgba(0, 0, 0, 0.08);
+  --about-card-bg: var(--m3-surface-container-lowest);
+  --about-card-hover-bg: var(--m3-surface-container-high);
+
   --window-ctrl-border: rgba(0, 0, 0, 0.15);
   --window-ctrl-bg: rgba(0, 0, 0, 0.05);
   --window-ctrl-color: rgba(0, 0, 0, 0.55);
@@ -257,6 +262,11 @@
   --window-ctrl-hover-bg: rgba(255, 255, 255, 0.12);
   --window-ctrl-hover-border: rgba(255, 255, 255, 0.2);
   --window-ctrl-hover-color: rgba(255, 255, 255, 0.9);
+
+  --about-glass-bg: rgba(32, 30, 27, 0.96);
+  --about-glass-ring: rgba(255, 255, 255, 0.1);
+  --about-card-bg: var(--m3-surface-container);
+  --about-card-hover-bg: var(--m3-surface-container-highest);
 }
 
 /* ── Global Reset ──────────────────────────────────────────────────── */

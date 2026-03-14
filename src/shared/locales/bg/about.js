@@ -3,5 +3,6 @@ export default {
   'license': 'Лиценз',
   'about': 'Относно',
   'release': 'Бележки към изданието',
-  'support': 'Поддръжка'
+  'support': 'Поддръжка',
+  'description': 'Пълнофункционален мениджър за изтегляне, изграден отново от нулата с Tauri, Vue 3 и TypeScript.',
 }
