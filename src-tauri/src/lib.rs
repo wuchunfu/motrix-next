@@ -22,15 +22,18 @@ pub fn run() {
         log::error!("PANIC: {}", info);
     }));
 
-    // ── Pre-read log-level from user.json before plugin init ──────────
+    // ── Pre-read log-level from config.json before plugin init ─────────
     // tauri-plugin-store isn't available until after Builder.build(), so we
     // read the raw JSON file directly.  Falls back to Info if absent.
+    //
+    // The Pinia preference store persists to config.json under the key
+    // "preferences", with camelCase field names (e.g. "logLevel").
     let log_level = (|| -> Option<log::LevelFilter> {
         let data_dir = dirs::data_dir()?.join("com.motrix.next");
-        let store_path = data_dir.join("user.json");
+        let store_path = data_dir.join("config.json");
         let content = std::fs::read_to_string(store_path).ok()?;
         let json: serde_json::Value = serde_json::from_str(&content).ok()?;
-        let level_str = json.get("log-level")?.as_str()?;
+        let level_str = json.get("preferences")?.get("logLevel")?.as_str()?;
         match level_str {
             "error" => Some(log::LevelFilter::Error),
             "warn" => Some(log::LevelFilter::Warn),

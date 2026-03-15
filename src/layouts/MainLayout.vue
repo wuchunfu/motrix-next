@@ -78,6 +78,18 @@ function stopGlobalPolling() {
   }
 }
 
+/**
+ * Handle the maximize-toggled event from WindowControls.
+ * Query isMaximized() after a delay to let the native animation settle.
+ * This is safe on all platforms — the bug only triggers inside onResized.
+ */
+async function onMaximizeToggled() {
+  setTimeout(async () => {
+    const appWindow = getCurrentWindow()
+    isMaximized.value = await appWindow.isMaximized()
+  }, 300)
+}
+
 watch(
   () => appStore.pendingUpdate,
   (update) => {
@@ -167,14 +179,19 @@ onMounted(async () => {
   // On Windows, transparent + decorations:false windows leak transparent
   // pixels through CSS border-radius corners when the HWND is maximized.
   //
-  // SKIP on macOS: isMaximized() IPC triggers a new resize event on macOS
-  // (tauri-apps/tauri#5812), creating an infinite loop that freezes the UI.
-  // With decorations:false there is no native maximize button anyway, so
-  // isMaximized is always false — no tracking needed.
+  // macOS: Cannot use onResized — isMaximized() IPC triggers a new resize
+  // event (tauri-apps/tauri#5812), creating an infinite loop.  Instead,
+  // the maximize state is updated via the "maximize-toggled" event emitted
+  // by WindowControls on button click, with a small delay to let the
+  // native animation settle before querying.
   {
+    const appWindow = getCurrentWindow()
     const isMacOS = navigator.userAgent.includes('Macintosh')
-    if (!isMacOS) {
-      const appWindow = getCurrentWindow()
+
+    if (isMacOS) {
+      // Initial check is safe (not inside a resize handler).
+      isMaximized.value = await appWindow.isMaximized()
+    } else {
       isMaximized.value = await appWindow.isMaximized()
       unlistenResize = await appWindow.onResized(() => {
         throttledResizeHandler(async () => {
@@ -499,7 +516,12 @@ onUnmounted(() => {
         </Transition>
       </router-view>
     </main>
-    <WindowControls class="window-controls" @close="showExitDialog = true" />
+    <WindowControls
+      class="window-controls"
+      :is-maximized="isMaximized"
+      @close="showExitDialog = true"
+      @maximize-toggled="onMaximizeToggled"
+    />
     <Speedometer />
     <AboutPanel :show="showAbout" @close="showAbout = false" />
     <AddTask :show="appStore.addTaskVisible" @close="appStore.hideAddTaskDialog()" />

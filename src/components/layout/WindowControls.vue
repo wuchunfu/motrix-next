@@ -1,12 +1,17 @@
 <script setup lang="ts">
-/** @fileoverview Custom window control buttons (minimize, maximize, close). */
+/** @fileoverview Custom window control buttons (minimize, maximize/restore, close). */
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { NIcon } from 'naive-ui'
-import { RemoveOutline, CopyOutline, CloseOutline } from '@vicons/ionicons5'
+import { RemoveOutline, CopyOutline, SquareOutline, CloseOutline } from '@vicons/ionicons5'
 import { usePreferenceStore } from '@/stores/preference'
+
+defineProps<{
+  isMaximized: boolean
+}>()
 
 const emit = defineEmits<{
   close: []
+  'maximize-toggled': []
 }>()
 
 const appWindow = getCurrentWindow()
@@ -18,6 +23,7 @@ function minimize() {
 
 function toggleMaximize() {
   appWindow.toggleMaximize()
+  emit('maximize-toggled')
 }
 
 async function close() {
@@ -43,8 +49,13 @@ async function close() {
     <button class="ctrl-btn" title="Minimize" @click="minimize">
       <NIcon :size="14"><RemoveOutline /></NIcon>
     </button>
-    <button class="ctrl-btn" title="Maximize" @click="toggleMaximize">
-      <NIcon :size="14"><CopyOutline /></NIcon>
+    <button class="ctrl-btn" :title="isMaximized ? 'Restore' : 'Maximize'" @click="toggleMaximize">
+      <NIcon :size="14">
+        <Transition name="icon-swap" mode="out-in">
+          <CopyOutline v-if="isMaximized" key="restore" />
+          <SquareOutline v-else key="maximize" />
+        </Transition>
+      </NIcon>
     </button>
     <button class="ctrl-btn close" title="Close" @click="close">
       <NIcon :size="14"><CloseOutline /></NIcon>
@@ -82,5 +93,21 @@ async function close() {
   background: rgba(255, 59, 48, 0.75);
   border-color: rgba(255, 59, 48, 0.9);
   color: #fff;
+}
+
+/* Icon cross-fade animation for maximize ↔ restore toggle */
+.icon-swap-enter-active,
+.icon-swap-leave-active {
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+}
+.icon-swap-enter-from {
+  opacity: 0;
+  transform: scale(0.75);
+}
+.icon-swap-leave-to {
+  opacity: 0;
+  transform: scale(0.75);
 }
 </style>

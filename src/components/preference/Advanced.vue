@@ -618,21 +618,27 @@ onMounted(() => {
         <NInput :value="sessionPath" readonly />
       </NFormItem>
       <NFormItem :label="t('preferences.app-log-path')">
-        <NInputGroup>
-          <NInput :value="logPath" readonly style="flex: 1" />
-          <NSelect v-model:value="form.logLevel" :options="logLevelOptions" style="width: 110px" />
-        </NInputGroup>
+        <NInput :value="logPath" readonly />
       </NFormItem>
-      <NFormItem :show-label="false">
-        <NSpace>
+      <NFormItem :label="t('preferences.log-level')">
+        <div class="log-level-row">
+          <NSelect v-model:value="form.logLevel" :options="logLevelOptions" style="width: 110px" />
           <NButton class="export-logs-btn" ghost :loading="exportingLogs" @click="handleExportLogs">
             <template #icon>
               <NIcon><DownloadOutline /></NIcon>
             </template>
             {{ t('preferences.export-diagnostic-logs') }}
           </NButton>
-          <NButton type="warning" ghost @click="handleSessionReset">{{ t('preferences.session-reset') }}</NButton>
-          <NButton type="error" ghost @click="handleFactoryReset">{{ t('preferences.factory-reset') }}</NButton>
+        </div>
+      </NFormItem>
+      <NFormItem :show-label="false">
+        <NSpace>
+          <NButton class="session-reset-btn" type="warning" ghost @click="handleSessionReset">
+            {{ t('preferences.session-reset') }}
+          </NButton>
+          <NButton class="factory-reset-btn" type="error" ghost @click="handleFactoryReset">
+            {{ t('preferences.factory-reset') }}
+          </NButton>
         </NSpace>
       </NFormItem>
     </NForm>
@@ -726,6 +732,50 @@ onMounted(() => {
 }
 .export-logs-btn :deep(.n-button__state-border) {
   border-color: var(--btn-primary) !important;
+  transition: border-color 0.35s cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* ── Log-level row — select + export button inline ───────────────── */
+.log-level-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+/* ── Session Reset — warning-toned ghost button with M3 easing ───── */
+.session-reset-btn {
+  --btn-warning: #d4a04a;
+  transition:
+    color 0.35s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.35s cubic-bezier(0.2, 0, 0, 1),
+    border-color 0.35s cubic-bezier(0.2, 0, 0, 1);
+}
+.session-reset-btn:hover {
+  background-color: color-mix(in srgb, var(--btn-warning) 12%, transparent) !important;
+}
+.session-reset-btn :deep(.n-button__border) {
+  transition: border-color 0.35s cubic-bezier(0.2, 0, 0, 1);
+}
+.session-reset-btn :deep(.n-button__state-border) {
+  transition: border-color 0.35s cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* ── Factory Reset — error-toned ghost button with M3 easing ─────── */
+.factory-reset-btn {
+  --btn-error: #e5534b;
+  transition:
+    color 0.35s cubic-bezier(0.2, 0, 0, 1),
+    background-color 0.35s cubic-bezier(0.2, 0, 0, 1),
+    border-color 0.35s cubic-bezier(0.2, 0, 0, 1);
+}
+.factory-reset-btn:hover {
+  background-color: color-mix(in srgb, var(--btn-error) 12%, transparent) !important;
+}
+.factory-reset-btn :deep(.n-button__border) {
+  transition: border-color 0.35s cubic-bezier(0.2, 0, 0, 1);
+}
+.factory-reset-btn :deep(.n-button__state-border) {
   transition: border-color 0.35s cubic-bezier(0.2, 0, 0, 1);
 }
 
