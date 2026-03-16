@@ -207,4 +207,5 @@ export default {
   'select-files': '选择文件',
   'task-type': '类型',
   'task-completed-at': '完成时间',
+  'restart-not-available': '没有可用的下载链接，无法重新下载',
 }

@@ -207,4 +207,5 @@ export default {
   'select-files': 'Seleccionar fitxers',
   'task-type': 'Tipus',
   'task-completed-at': 'Completat el',
+  'restart-not-available': 'No hi ha enllaços disponibles per reiniciar',
 }

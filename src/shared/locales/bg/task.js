@@ -207,4 +207,5 @@ export default {
   'select-files': 'Избор на файлове',
   'task-type': 'Тип',
   'task-completed-at': 'Завършено на',
+  'restart-not-available': 'Няма налични линкове за повторно изтегляне',
 }

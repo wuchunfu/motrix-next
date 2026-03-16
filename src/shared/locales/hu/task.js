@@ -207,4 +207,5 @@ export default {
   'select-files': 'Fájlok kiválasztása',
   'task-type': 'Típus',
   'task-completed-at': 'Befejezve',
+  'restart-not-available': 'Nincs elérhető letöltési link az újraindításhoz',
 }

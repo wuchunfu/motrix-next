@@ -207,4 +207,5 @@ export default {
   'select-files': 'اختيار الملفات',
   'task-type': 'النوع',
   'task-completed-at': 'وقت الاكتمال',
+  'restart-not-available': 'لا تتوفر روابط تحميل لإعادة التشغيل',
 }

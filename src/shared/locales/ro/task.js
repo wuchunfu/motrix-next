@@ -207,4 +207,5 @@ export default {
   'select-files': 'Selectare fișiere',
   'task-type': 'Tip',
   'task-completed-at': 'Finalizat la',
+  'restart-not-available': 'Nu există linkuri de descărcare disponibile pentru repornire',
 }

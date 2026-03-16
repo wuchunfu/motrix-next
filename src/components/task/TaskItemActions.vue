@@ -20,7 +20,6 @@ import {
 } from '@vicons/ionicons5'
 import { type Component } from 'vue'
 import type { Aria2Task } from '@shared/types'
-import { canRestart } from '@shared/utils'
 
 const props = defineProps<{ task: Aria2Task; status: string; fileMissing?: boolean }>()
 const stoppingGids = inject<Ref<string[]>>('stoppingGids')
@@ -46,7 +45,6 @@ interface ActionDef {
   event: string
   tooltip?: string
   cls?: string
-  disabled?: boolean
 }
 
 const actionsMap = computed<Record<string, ActionDef[]>>(() => ({
@@ -63,36 +61,18 @@ const actionsMap = computed<Record<string, ActionDef[]>>(() => ({
     { key: 'delete', icon: CloseOutline, label: t('task.delete-task'), event: 'delete' },
   ],
   [TASK_STATUS.ERROR]: [
-    { key: 'open', icon: OpenOutline, label: t('task.open-file'), event: 'open-file', disabled: props.fileMissing },
-    {
-      key: 'restart',
-      icon: RefreshOutline,
-      label: t('task.resume-task'),
-      event: 'resume',
-      disabled: !canRestart(props.task),
-    },
+    { key: 'open', icon: OpenOutline, label: t('task.open-file'), event: 'open-file' },
+    { key: 'restart', icon: RefreshOutline, label: t('task.resume-task'), event: 'resume' },
     { key: 'trash', icon: TrashOutline, label: t('task.remove-record'), event: 'delete-record' },
   ],
   [TASK_STATUS.COMPLETE]: [
-    { key: 'open', icon: OpenOutline, label: t('task.open-file'), event: 'open-file', disabled: props.fileMissing },
-    {
-      key: 'restart',
-      icon: RefreshOutline,
-      label: t('task.restart-task'),
-      event: 'resume',
-      disabled: !canRestart(props.task),
-    },
+    { key: 'open', icon: OpenOutline, label: t('task.open-file'), event: 'open-file' },
+    { key: 'restart', icon: RefreshOutline, label: t('task.restart-task'), event: 'resume' },
     { key: 'trash', icon: TrashOutline, label: t('task.remove-record'), event: 'delete-record' },
   ],
   [TASK_STATUS.REMOVED]: [
-    { key: 'open', icon: OpenOutline, label: t('task.open-file'), event: 'open-file', disabled: props.fileMissing },
-    {
-      key: 'restart',
-      icon: RefreshOutline,
-      label: t('task.restart-task'),
-      event: 'resume',
-      disabled: !canRestart(props.task),
-    },
+    { key: 'open', icon: OpenOutline, label: t('task.open-file'), event: 'open-file' },
+    { key: 'restart', icon: RefreshOutline, label: t('task.restart-task'), event: 'resume' },
     { key: 'trash', icon: TrashOutline, label: t('task.remove-record'), event: 'delete-record' },
   ],
   [TASK_STATUS.SEEDING]: [
@@ -112,16 +92,8 @@ const actionsMap = computed<Record<string, ActionDef[]>>(() => ({
 
 const actions = computed(() => {
   const primary = actionsMap.value[props.status] || []
-  const isStopped =
-    props.status === TASK_STATUS.COMPLETE || props.status === TASK_STATUS.ERROR || props.status === TASK_STATUS.REMOVED
   const common: ActionDef[] = [
-    {
-      key: 'folder',
-      icon: FolderOpenOutline,
-      label: t('task.show-in-folder'),
-      event: 'folder',
-      disabled: isStopped && props.fileMissing,
-    },
+    { key: 'folder', icon: FolderOpenOutline, label: t('task.show-in-folder'), event: 'folder' },
     { key: 'link', icon: LinkOutline, label: t('task.copy-link'), event: 'copy-link' },
     { key: 'info', icon: InformationCircleOutline, label: t('task.task-detail-title'), event: 'show-info' },
   ]
@@ -198,13 +170,12 @@ function onRelease(ev: PointerEvent) {
         action.cls,
         {
           'is-stopping': action.event === 'stop-seeding' && isStopping,
-          'is-disabled': action.disabled,
         },
       ]"
       @pointerdown="onPress"
       @pointerup="onRelease"
       @pointerleave="onRelease"
-      @click.stop="!action.disabled && onAction(action.event)"
+      @click.stop="onAction(action.event)"
     >
       <MTooltip :style="action.tooltip ? 'max-width: 220px' : ''">
         <template #trigger>
@@ -287,11 +258,6 @@ function onRelease(ev: PointerEvent) {
 .task-item-action.is-stopping {
   color: var(--m3-warning);
   pointer-events: none;
-}
-.task-item-action.is-disabled {
-  opacity: 0.3;
-  pointer-events: none;
-  cursor: not-allowed;
 }
 
 /* Icon crossfade wrapper */

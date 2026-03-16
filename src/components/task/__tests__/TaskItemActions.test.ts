@@ -244,68 +244,47 @@ describe('TaskItemActions', () => {
     })
   })
 
-  describe('disabled actions', () => {
-    it('applies is-disabled class to restart when task has no URIs (COMPLETE)', () => {
+  describe('always-clickable actions (no disabled state)', () => {
+    it('all actions are clickable even when task has no URIs (COMPLETE)', () => {
+      const wrapper = createWrapper(TASK_STATUS.COMPLETE, 'no-uri', { hasUri: false })
+      const disabledActions = wrapper.findAll('.task-item-action.is-disabled')
+      expect(disabledActions.length).toBe(0)
+    })
+
+    it('all actions emit events when task has no URIs (COMPLETE)', async () => {
       const wrapper = createWrapper(TASK_STATUS.COMPLETE, 'no-uri', { hasUri: false })
       const actions = wrapper.findAll('.task-item-action')
-      const disabledActions = actions.filter((a) => a.classes().includes('is-disabled'))
-      expect(disabledActions.length).toBe(1) // only restart is disabled
+      for (const action of actions) {
+        await action.trigger('click')
+      }
+      // resume (restart) should be emitted — action-level guard handles the toast
+      expect(wrapper.emitted('resume')).toBeTruthy()
     })
 
-    it('does NOT apply is-disabled when task has URIs (COMPLETE)', () => {
-      const wrapper = createWrapper(TASK_STATUS.COMPLETE)
-      const disabledActions = wrapper.findAll('.task-item-action.is-disabled')
-      expect(disabledActions.length).toBe(0)
-    })
-
-    it('applies is-disabled to restart for ERROR tasks without URIs', () => {
-      const wrapper = createWrapper(TASK_STATUS.ERROR, 'no-uri', { hasUri: false })
-      const disabledActions = wrapper.findAll('.task-item-action.is-disabled')
-      expect(disabledActions.length).toBe(1)
-    })
-
-    it('disabled action does not emit event on click', async () => {
-      const wrapper = createWrapper(TASK_STATUS.COMPLETE, 'no-uri', { hasUri: false })
-      const disabledAction = wrapper.find('.task-item-action.is-disabled')
-      expect(disabledAction.exists()).toBe(true)
-      await disabledAction.trigger('click')
-      // resume/restart should NOT be emitted
-      expect(wrapper.emitted('resume')).toBeFalsy()
-    })
-  })
-
-  describe('fileMissing disables file-dependent actions', () => {
-    it('disables open-file and folder when fileMissing=true (COMPLETE)', () => {
+    it('all actions are clickable when fileMissing=true (COMPLETE)', () => {
       const wrapper = createWrapper(TASK_STATUS.COMPLETE, 'fm', { fileMissing: true })
       const disabledActions = wrapper.findAll('.task-item-action.is-disabled')
-      // open-file + folder = 2 disabled
-      expect(disabledActions.length).toBe(2)
-    })
-
-    it('does not disable open-file or folder when fileMissing=false', () => {
-      const wrapper = createWrapper(TASK_STATUS.COMPLETE)
-      const disabledActions = wrapper.findAll('.task-item-action.is-disabled')
       expect(disabledActions.length).toBe(0)
     })
 
-    it('disabled folder does not emit on click when fileMissing', async () => {
+    it('open-file and folder emit events even with fileMissing=true', async () => {
       const wrapper = createWrapper(TASK_STATUS.COMPLETE, 'fm', { fileMissing: true })
       const allActions = wrapper.findAll('.task-item-action')
-      // Click every action — folder + open-file should not emit
       for (const action of allActions) {
         await action.trigger('click')
       }
-      expect(wrapper.emitted('folder')).toBeFalsy()
-      expect(wrapper.emitted('open-file')).toBeFalsy()
+      // Events are emitted — action-level guard in useTaskActions shows toast
+      expect(wrapper.emitted('folder')).toBeTruthy()
+      expect(wrapper.emitted('open-file')).toBeTruthy()
     })
 
-    it('disables open-file and folder for ERROR tasks with fileMissing', () => {
-      const wrapper = createWrapper(TASK_STATUS.ERROR, 'fm', { fileMissing: true })
+    it('ERROR tasks are never visually disabled', () => {
+      const wrapper = createWrapper(TASK_STATUS.ERROR, 'fm', { fileMissing: true, hasUri: false })
       const disabledActions = wrapper.findAll('.task-item-action.is-disabled')
-      expect(disabledActions.length).toBe(2)
+      expect(disabledActions.length).toBe(0)
     })
 
-    it('ACTIVE tasks are never affected by fileMissing', () => {
+    it('ACTIVE tasks remain unaffected by fileMissing', () => {
       const wrapper = createWrapper(TASK_STATUS.ACTIVE, 'fm', { fileMissing: true })
       const disabledActions = wrapper.findAll('.task-item-action.is-disabled')
       expect(disabledActions.length).toBe(0)

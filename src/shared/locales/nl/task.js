@@ -207,4 +207,5 @@ export default {
   'select-files': 'Bestanden selecteren',
   'task-type': 'Type',
   'task-completed-at': 'Voltooid op',
+  'restart-not-available': 'Geen downloadlinks beschikbaar om opnieuw te starten',
 }

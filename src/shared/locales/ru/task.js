@@ -207,4 +207,5 @@ export default {
   'select-files': 'Выбор файлов',
   'task-type': 'Тип',
   'task-completed-at': 'Завершено',
+  'restart-not-available': 'Нет доступных ссылок для повторной загрузки',
 }

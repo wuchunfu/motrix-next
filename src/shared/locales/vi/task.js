@@ -207,4 +207,5 @@ export default {
   'select-files': 'Chọn tệp',
   'task-type': 'Loại',
   'task-completed-at': 'Hoàn thành lúc',
+  'restart-not-available': 'Không có URL tải xuống để khởi động lại',
 }

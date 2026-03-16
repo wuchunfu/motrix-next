@@ -207,4 +207,5 @@ export default {
   'select-files': 'انتخاب فایل‌ها',
   'task-type': 'نوع',
   'task-completed-at': 'زمان اتمام',
+  'restart-not-available': 'لینک دانلود برای شروع مجدد موجود نیست',
 }

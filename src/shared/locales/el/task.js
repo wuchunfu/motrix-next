@@ -207,4 +207,5 @@ export default {
   'select-files': 'Επιλογή αρχείων',
   'task-type': 'Τύπος',
   'task-completed-at': 'Ολοκληρώθηκε στις',
+  'restart-not-available': 'Δεν υπάρχουν διαθέσιμοι σύνδεσμοι για επανεκκίνηση',
 }

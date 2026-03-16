@@ -207,4 +207,5 @@ export default {
   'select-files': 'ファイルを選択',
   'task-type': '種類',
   'task-completed-at': '完了日時',
+  'restart-not-available': '再ダウンロードに利用できるURLがありません',
 }

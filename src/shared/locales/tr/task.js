@@ -207,4 +207,5 @@ export default {
   'select-files': 'Dosyaları seç',
   'task-type': 'Tür',
   'task-completed-at': 'Tamamlanma Tarihi',
+  'restart-not-available': 'Yeniden başlatmak için indirme bağlantısı yok',
 }

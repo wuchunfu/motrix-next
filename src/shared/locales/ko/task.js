@@ -207,4 +207,5 @@ export default {
   'select-files': '파일 선택',
   'task-type': '유형',
   'task-completed-at': '완료 시간',
+  'restart-not-available': '다시 시작할 수 있는 다운로드 URL이 없습니다',
 }

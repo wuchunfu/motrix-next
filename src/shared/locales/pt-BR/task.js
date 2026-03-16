@@ -207,4 +207,5 @@ export default {
   'select-files': 'Selecionar arquivos',
   'task-type': 'Tipo',
   'task-completed-at': 'Concluído em',
+  'restart-not-available': 'Nenhum link de download disponível para reiniciar',
 }

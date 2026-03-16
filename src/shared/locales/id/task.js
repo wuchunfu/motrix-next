@@ -207,4 +207,5 @@ export default {
   'select-files': 'Pilih File',
   'task-type': 'Tipe',
   'task-completed-at': 'Selesai Pada',
+  'restart-not-available': 'Tidak ada URL unduhan untuk memulai ulang',
 }

@@ -207,4 +207,5 @@ export default {
   'select-files': 'Velg filer',
   'task-type': 'Type',
   'task-completed-at': 'Fullført',
+  'restart-not-available': 'Ingen nedlastingslenker tilgjengelig for omstart',
 }

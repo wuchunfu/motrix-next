@@ -6,7 +6,7 @@
  * i18n, dialog, and message are passed in via the options object.
  */
 import { ref, type Ref, h } from 'vue'
-import { getTaskUri, getTaskName, resolveOpenTarget } from '@shared/utils'
+import { getTaskUri, getTaskName, resolveOpenTarget, canRestart } from '@shared/utils'
 import { revealItemInDir, openPath } from '@tauri-apps/plugin-opener'
 import { exists, stat } from '@tauri-apps/plugin-fs'
 import { deleteTaskFiles } from '@/composables/useFileDelete'
@@ -53,6 +53,10 @@ export function useTaskActions(deps: TaskActionsDeps) {
     const taskName = getTaskName(task, { defaultName: 'Unknown' })
     const { COMPLETE, ERROR, REMOVED } = TASK_STATUS
     if (task.status === ERROR || task.status === COMPLETE || task.status === REMOVED) {
+      if (!canRestart(task)) {
+        message.warning(t('task.restart-not-available'))
+        return
+      }
       taskStore
         .restartTask(task)
         .then(() => message.success(t('task.restart-task-success', { taskName })))

@@ -207,4 +207,5 @@ export default {
   'select-files': 'เลือกไฟล์',
   'task-type': 'ประเภท',
   'task-completed-at': 'เสร็จสิ้นเมื่อ',
+  'restart-not-available': 'ไม่มี URL ดาวน์โหลดสำหรับเริ่มใหม่',
 }
