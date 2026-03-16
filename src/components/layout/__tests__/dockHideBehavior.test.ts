@@ -147,8 +147,8 @@ describe('MainLayout.vue — Dock hide on window close paths', () => {
       // Tray quit bypasses the exit dialog entirely — it calls
       // handleExitConfirm() directly, matching industry standard behavior
       // (Discord, Telegram, Steam). No rememberChoice sync is needed.
-      // Tray-menu-action handlers extracted to appMenuHandlers module.
-      const eventsSource = fs.readFileSync(path.join(SRC_ROOT, 'src', 'composables', 'appMenuHandlers.ts'), 'utf-8')
+      // Tray-menu-action handler is inline in useAppEvents module.
+      const eventsSource = fs.readFileSync(path.join(SRC_ROOT, 'src', 'composables', 'useAppEvents.ts'), 'utf-8')
       const quitIdx = eventsSource.indexOf("case 'quit':")
       expect(quitIdx).toBeGreaterThanOrEqual(0)
       const quitBlock = eventsSource.slice(quitIdx, eventsSource.indexOf('break', quitIdx) + 10)

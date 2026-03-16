@@ -75,8 +75,8 @@ describe('MainLayout.vue — tray quit direct exit', () => {
   let quitCaseBlock: string | null
 
   beforeAll(() => {
-    // Tray-menu-action handler extracted to appMenuHandlers module
-    const handlersPath = path.join(PROJECT_ROOT, 'src', 'composables', 'appMenuHandlers.ts')
+    // Tray-menu-action handler is inline in useAppEvents module
+    const handlersPath = path.join(PROJECT_ROOT, 'src', 'composables', 'useAppEvents.ts')
     source = fs.readFileSync(handlersPath, 'utf-8')
     quitCaseBlock = extractTrayQuitCase(source)
   })

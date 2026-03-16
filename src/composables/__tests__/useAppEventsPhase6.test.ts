@@ -21,9 +21,9 @@ describe('Phase 6: useAppEvents.ts ≤ 250 lines', () => {
     source = fs.readFileSync(APP_EVENTS, 'utf-8')
   })
 
-  it('file is ≤ 300 lines', () => {
+  it('file is ≤ 350 lines', () => {
     const lines = source.split('\n').length
-    expect(lines).toBeLessThanOrEqual(300)
+    expect(lines).toBeLessThanOrEqual(350)
   })
 
   it('exports useAppEvents function', () => {
@@ -74,8 +74,8 @@ describe('useAppEvents.ts — sub-function decomposition', () => {
     expect(source).toContain('function setupMenuListener(')
   })
 
-  it('has setupTrayListener imported from appMenuHandlers', () => {
-    expect(source).toContain("from './appMenuHandlers'")
+  it('has setupTrayListener function inline', () => {
+    expect(source).toContain('function setupTrayListener(')
   })
 
   it('setupListeners calls all sub-functions', () => {
@@ -85,7 +85,7 @@ describe('useAppEvents.ts — sub-function decomposition', () => {
     expect(setupBody).toContain('setupEngineWatchers()')
     expect(setupBody).toContain('setupNavGuard()')
     expect(setupBody).toContain('setupMenuListener()')
-    expect(setupBody).toContain('setupTrayListenerImpl(')
+    expect(setupBody).toContain('setupTrayListener()')
   })
 
   it('still listens for engine-crashed event', () => {
@@ -96,9 +96,8 @@ describe('useAppEvents.ts — sub-function decomposition', () => {
     expect(source).toContain("'engine-stopped'")
   })
 
-  it('still listens for tray-menu-action event (in appMenuHandlers)', () => {
-    const handlersSource = fs.readFileSync(path.join(SRC_ROOT, 'src', 'composables', 'appMenuHandlers.ts'), 'utf-8')
-    expect(handlersSource).toContain("'tray-menu-action'")
+  it('still listens for tray-menu-action event', () => {
+    expect(source).toContain("'tray-menu-action'")
   })
 
   it('still listens for menu-event event', () => {

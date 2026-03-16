@@ -12,10 +12,9 @@ import { open as openDialog } from '@tauri-apps/plugin-dialog'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { useRouter } from 'vue-router'
 import { logger } from '@shared/logger'
-import { setEngineReady } from '@/api/aria2'
+import { setEngineReady, isEngineReady } from '@/api/aria2'
 import { detectKind, createBatchItem } from '@shared/utils/batchHelpers'
 import { watch, type Ref } from 'vue'
-import { setupTrayListener as setupTrayListenerImpl } from './appMenuHandlers'
 
 interface AppEventsDeps {
   t: (key: string, params?: Record<string, unknown>) => string
@@ -199,6 +198,89 @@ export function useAppEvents(deps: AppEventsDeps): AppEventsReturn {
     })
   }
 
+  // ─── Tray menu actions (system-tray right-click menu) ──────────────
+  async function setupTrayListener() {
+    return listen<string>('tray-menu-action', async (event) => {
+      const action = event.payload
+      const mainWindow = getCurrentWindow()
+      switch (action) {
+        case 'show':
+          await mainWindow.show()
+          await mainWindow.setFocus()
+          break
+        case 'new-task':
+          await mainWindow.show()
+          await mainWindow.setFocus()
+          appStore.showAddTaskDialog()
+          break
+        case 'resume-all':
+          await mainWindow.show()
+          await mainWindow.setFocus()
+          if (!(await taskStore.hasPausedTasks())) {
+            message.info(t('task.no-paused-tasks'))
+            break
+          }
+          if (!isEngineReady()) {
+            message.warning(t('app.engine-not-ready'))
+          } else {
+            navDialog.warning({
+              title: t('task.resume-all-task'),
+              content: t('task.resume-all-task-confirm') || 'Resume all tasks?',
+              positiveText: t('app.yes'),
+              negativeText: t('app.no'),
+              onPositiveClick: () => {
+                taskStore
+                  .resumeAllTask()
+                  .then(() => message.success(t('task.resume-all-task-success')))
+                  .catch(() => message.error(t('task.resume-all-task-fail')))
+              },
+            })
+          }
+          break
+        case 'pause-all':
+          await mainWindow.show()
+          await mainWindow.setFocus()
+          if (!(await taskStore.hasActiveTasks())) {
+            message.info(t('task.no-active-tasks'))
+            break
+          }
+          if (!isEngineReady()) {
+            message.warning(t('app.engine-not-ready'))
+          } else {
+            const d = navDialog.warning({
+              title: t('task.pause-all-task'),
+              content: t('task.pause-all-task-confirm') || 'Pause all tasks?',
+              positiveText: t('app.yes'),
+              negativeText: t('app.no'),
+              onPositiveClick: () => {
+                d.loading = true
+                d.negativeButtonProps = { disabled: true }
+                d.closable = false
+                d.maskClosable = false
+                taskStore
+                  .pauseAllTask()
+                  .then(async () => {
+                    await new Promise((r) => setTimeout(r, 500))
+                    await taskStore.fetchList()
+                    message.success(t('task.pause-all-task-success'))
+                    d.destroy()
+                  })
+                  .catch(() => {
+                    message.error(t('task.pause-all-task-fail'))
+                    d.destroy()
+                  })
+                return false
+              },
+            })
+          }
+          break
+        case 'quit':
+          await handleExitConfirm()
+          break
+      }
+    })
+  }
+
   // ─── Drag & drop .torrent / .metalink files ──────────────────────
   async function setupDragDropListener() {
     const webview = getCurrentWebview()
@@ -242,8 +324,7 @@ export function useAppEvents(deps: AppEventsDeps): AppEventsReturn {
 
     const unlistenDragDrop = await setupDragDropListener()
     const unlistenMenuEvent = await setupMenuListener()
-    const trayDeps = { t, appStore, taskStore, message, navDialog, isExiting, handleExitConfirm }
-    const unlistenTrayMenu = await setupTrayListenerImpl(trayDeps)
+    const unlistenTrayMenu = await setupTrayListener()
     const { unlistenDeepLink, unlistenSingleInstance } = await setupExternalInputListeners()
 
     return { unlistenDragDrop, unlistenMenuEvent, unlistenTrayMenu, unlistenDeepLink, unlistenSingleInstance }
