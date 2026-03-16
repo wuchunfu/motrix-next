@@ -135,7 +135,7 @@ export default {
   'engine-restarted': 'Dong co aria2 da khoi dong lai',
   'engine-restart-failed': 'Khoi dong lai dong co aria2 that bai',
   'engine-restart-title': 'Khoi dong lai dong co aria2',
-  'engine-restart-confirm': 'Thay đổi cổng hoặc mật khẩu RPC yêu cầu khởi động lại engine tải xuống. Các tải xuống đang hoạt động sẽ bị gián đoạn ngắn nhưng sẽ tự động tiếp tục sau khi khởi động lại.',
+  'engine-restart-confirm': 'Một số thay đổi yêu cầu khởi động lại công cụ tải xuống để có hiệu lực. Các bản tải xuống đang hoạt động sẽ bị gián đoạn ngắn nhưng sẽ tự động tiếp tục sau khi khởi động lại.',
   'engine-restart-now': 'Khởi động lại ngay',
   'engine-restart-later': 'Để sau',
   'engine-restarting': 'Dang khoi dong lai dong co aria2...',

@@ -40,6 +40,14 @@ vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: (key: string) => key }),
 }))
 
+// ── Mock aria2 API (changeGlobalOption + isEngineReady) ─────────────
+const mockChangeGlobalOption = vi.fn().mockResolvedValue(undefined)
+const mockIsEngineReady = vi.fn().mockReturnValue(true)
+vi.mock('@/api/aria2', () => ({
+  changeGlobalOption: (...args: unknown[]) => mockChangeGlobalOption(...args),
+  isEngineReady: () => mockIsEngineReady(),
+}))
+
 import { usePreferenceStore } from '@/stores/preference'
 import { usePreferenceForm } from '../usePreferenceForm'
 
@@ -237,6 +245,39 @@ describe('usePreferenceForm', () => {
     const { handleSave } = result
 
     await expect(handleSave()).rejects.toThrow('Preference persistence failed')
+
+    unmount()
+  })
+
+  it('hot-reloads changeable keys to aria2 via changeGlobalOption on save', async () => {
+    const store = usePreferenceStore()
+    store.updateAndSave = vi.fn().mockResolvedValue(true)
+    mockIsEngineReady.mockReturnValue(true)
+
+    const { result, unmount } = withSetup(() => usePreferenceForm(makeOptions()))
+    const { handleSave } = result
+
+    await handleSave()
+
+    // Should call changeGlobalOption with filtered keys (no restart-only keys)
+    expect(mockChangeGlobalOption).toHaveBeenCalledWith(
+      expect.objectContaining({ dir: '/downloads', 'max-concurrent-downloads': '5' }),
+    )
+
+    unmount()
+  })
+
+  it('skips hot-reload when engine is not ready', async () => {
+    const store = usePreferenceStore()
+    store.updateAndSave = vi.fn().mockResolvedValue(true)
+    mockIsEngineReady.mockReturnValue(false)
+
+    const { result, unmount } = withSetup(() => usePreferenceForm(makeOptions()))
+    const { handleSave } = result
+
+    await handleSave()
+
+    expect(mockChangeGlobalOption).not.toHaveBeenCalled()
 
     unmount()
   })

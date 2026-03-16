@@ -13,6 +13,7 @@ import {
   buildRpcUrl,
   formatOptionsForEngine,
   parseHeader,
+  filterHotReloadableKeys,
 } from '../config'
 
 describe('changeKeysToCamelCase', () => {
@@ -208,5 +209,62 @@ describe('parseHeader', () => {
   })
   it('returns empty for whitespace-only string', () => {
     expect(parseHeader('   ')).toEqual({})
+  })
+})
+
+describe('filterHotReloadableKeys', () => {
+  it('passes through hot-reloadable keys unchanged', () => {
+    const config = {
+      'max-concurrent-downloads': '10',
+      'max-connection-per-server': '16',
+      'max-overall-download-limit': '0',
+      dir: '/downloads',
+    }
+    expect(filterHotReloadableKeys(config)).toEqual(config)
+  })
+
+  it('strips restart-required keys (ports + secret)', () => {
+    const config = {
+      'rpc-listen-port': '16800',
+      'rpc-secret': 'abc',
+      'listen-port': '21301',
+      'dht-listen-port': '26701',
+    }
+    expect(filterHotReloadableKeys(config)).toEqual({})
+  })
+
+  it('strips aria2 changeGlobalOption exclusions', () => {
+    const config = {
+      checksum: 'sha-256=abc',
+      'index-out': '0=file.txt',
+      out: 'output.zip',
+      pause: 'true',
+      'select-file': '1-3',
+      'rpc-save-upload-metadata': 'true',
+    }
+    expect(filterHotReloadableKeys(config)).toEqual({})
+  })
+
+  it('strips log-level (needs app relaunch, not engine restart)', () => {
+    expect(filterHotReloadableKeys({ 'log-level': 'debug' })).toEqual({})
+  })
+
+  it('returns empty for empty input', () => {
+    expect(filterHotReloadableKeys({})).toEqual({})
+  })
+
+  it('separates hot-reloadable from non-hot-reloadable in mixed input', () => {
+    const config = {
+      'max-concurrent-downloads': '8',
+      'rpc-listen-port': '16800',
+      'bt-tracker': 'udp://t.example.org:6969',
+      'rpc-secret': 'secret',
+      'user-agent': 'Motrix/3.4.1',
+    }
+    expect(filterHotReloadableKeys(config)).toEqual({
+      'max-concurrent-downloads': '8',
+      'bt-tracker': 'udp://t.example.org:6969',
+      'user-agent': 'Motrix/3.4.1',
+    })
   })
 })

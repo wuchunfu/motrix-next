@@ -135,7 +135,7 @@ export default {
   'engine-restarted': 'aria2 engine restarted',
   'engine-restart-failed': 'aria2 engine restart failed',
   'engine-restart-title': 'Restart aria2 Engine',
-  'engine-restart-confirm': 'Changing the port or RPC secret requires restarting the download engine. Active downloads will be briefly interrupted but will resume automatically after restart.',
+  'engine-restart-confirm': 'Some changes require restarting the download engine to take effect. Active downloads will be briefly interrupted but will resume automatically after restart.',
   'engine-restart-now': 'Restart Now',
   'engine-restart-later': 'Later',
   'engine-restarting': 'Restarting aria2 engine...',

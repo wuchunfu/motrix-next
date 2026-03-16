@@ -135,7 +135,7 @@ export default {
   'engine-restarted': 'aria2 引擎已重啟',
   'engine-restart-failed': 'aria2 引擎重啟失敗',
   'engine-restart-title': '重啟 aria2 引擎',
-  'engine-restart-confirm': '更改連接埠或 RPC 密鑰需要重新啟動下載引擎。正在進行的下載將短暫中斷，但會在重新啟動後自動恢復。',
+  'engine-restart-confirm': '部分設定需要重啟下載引擎才能生效。活動下載將被短暫中斷，但會在重啟後自動恢復。',
   'engine-restart-now': '立即重新啟動',
   'engine-restart-later': '稍後',
   'engine-restarting': '正在重啟 aria2 引擎...',

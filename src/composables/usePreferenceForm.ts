@@ -11,6 +11,8 @@ import { isEqual } from 'lodash-es'
 import { invoke } from '@tauri-apps/api/core'
 import { usePreferenceStore } from '@/stores/preference'
 import { useAppMessage } from '@/composables/useAppMessage'
+import { filterHotReloadableKeys } from '@shared/utils/config'
+import { changeGlobalOption, isEngineReady } from '@/api/aria2'
 import type { AppConfig } from '@shared/types'
 
 export interface UsePreferenceFormOptions<T extends Record<string, unknown>> {
@@ -92,6 +94,20 @@ export function usePreferenceForm<T extends Record<string, unknown>>(options: Us
     const systemConfig = options.buildSystemConfig(form.value as T)
     if (Object.keys(systemConfig).length > 0) {
       await invoke('save_system_config', { config: systemConfig })
+
+      // Hot-reload changeable options to the running aria2 engine via RPC.
+      // Keys that require an engine restart (ports, secret) are filtered out;
+      // the afterSave hook is responsible for prompting the user to restart.
+      if (isEngineReady()) {
+        const hotKeys = filterHotReloadableKeys(systemConfig)
+        if (Object.keys(hotKeys).length > 0) {
+          try {
+            await changeGlobalOption(hotKeys as Partial<AppConfig>)
+          } catch {
+            // Engine may be mid-restart — settings will apply on next start.
+          }
+        }
+      }
     }
 
     // Only mark as saved AFTER both stores persist successfully.

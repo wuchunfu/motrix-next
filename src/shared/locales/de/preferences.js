@@ -135,7 +135,7 @@ export default {
   'engine-restarted': 'aria2-Engine neu gestartet',
   'engine-restart-failed': 'Neustart der aria2-Engine fehlgeschlagen',
   'engine-restart-title': 'aria2-Engine neu starten',
-  'engine-restart-confirm': 'Das Ändern des Ports oder des RPC-Schlüssels erfordert einen Neustart der Download-Engine. Aktive Downloads werden kurz unterbrochen, aber nach dem Neustart automatisch fortgesetzt.',
+  'engine-restart-confirm': 'Einige Änderungen erfordern einen Neustart der Download-Engine, um wirksam zu werden. Aktive Downloads werden kurz unterbrochen, aber nach dem Neustart automatisch fortgesetzt.',
   'engine-restart-now': 'Jetzt neu starten',
   'engine-restart-later': 'Später',
   'engine-restarting': 'aria2-Engine wird neu gestartet...',

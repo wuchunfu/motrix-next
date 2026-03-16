@@ -135,7 +135,7 @@ export default {
   'engine-restarted': 'aria2 エンジンを再起動しました',
   'engine-restart-failed': 'aria2 エンジンの再起動に失敗しました',
   'engine-restart-title': 'aria2 エンジンの再起動',
-  'engine-restart-confirm': 'ポートまたはRPCシークレットを変更するには、ダウンロードエンジンの再起動が必要です。アクティブなダウンロードは一時的に中断されますが、再起動後に自動的に再開されます。',
+  'engine-restart-confirm': '一部の変更はダウンロードエンジンの再起動が必要です。アクティブなダウンロードは一時中断されますが、再起動後に自動的に再開されます。',
   'engine-restart-now': '今すぐ再起動',
   'engine-restart-later': '後で',
   'engine-restarting': 'aria2 エンジンを再起動中...',

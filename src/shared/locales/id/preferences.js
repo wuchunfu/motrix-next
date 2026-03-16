@@ -135,7 +135,7 @@ export default {
   'engine-restarted': 'Mesin aria2 dimulai ulang',
   'engine-restart-failed': 'Gagal memulai ulang mesin aria2',
   'engine-restart-title': 'Mulai ulang mesin aria2',
-  'engine-restart-confirm': 'Mengubah port atau kunci RPC memerlukan mulai ulang mesin unduhan. Unduhan aktif akan terganggu sebentar tetapi akan dilanjutkan secara otomatis setelah mulai ulang.',
+  'engine-restart-confirm': 'Beberapa perubahan memerlukan restart mesin unduhan agar berlaku. Unduhan aktif akan terputus sebentar tetapi akan dilanjutkan secara otomatis setelah restart.',
   'engine-restart-now': 'Mulai ulang sekarang',
   'engine-restart-later': 'Nanti',
   'engine-restarting': 'Memulai ulang mesin aria2...',

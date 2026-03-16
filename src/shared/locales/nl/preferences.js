@@ -135,7 +135,7 @@ export default {
   'engine-restarted': 'aria2-engine opnieuw opgestart',
   'engine-restart-failed': 'aria2-engine opnieuw opstarten mislukt',
   'engine-restart-title': 'aria2-engine opnieuw opstarten',
-  'engine-restart-confirm': 'Het wijzigen van de poort of RPC-sleutel vereist een herstart van de downloadengine. Actieve downloads worden kort onderbroken maar worden automatisch hervat na herstart.',
+  'engine-restart-confirm': 'Sommige wijzigingen vereisen een herstart van de downloadengine om van kracht te worden. Actieve downloads worden even onderbroken maar worden automatisch hervat na de herstart.',
   'engine-restart-now': 'Nu herstarten',
   'engine-restart-later': 'Later',
   'engine-restarting': 'aria2-engine wordt opnieuw opgestart...',

@@ -124,6 +124,31 @@ export const checkIsNeedRestart = (changed: Record<string, unknown> = {}): boole
   return result
 }
 
+/**
+ * Keys excluded from runtime hot-reload via aria2 `changeGlobalOption`.
+ * - needRestartKeys: bound at process startup (ports, RPC secret)
+ * - aria2 docs exclusions: not accepted by `changeGlobalOption`
+ * - log-level: needs full app relaunch (tauri-plugin-log init), not engine restart
+ */
+const NON_HOT_RELOADABLE = new Set([
+  ...needRestartKeys,
+  'checksum',
+  'index-out',
+  'out',
+  'pause',
+  'select-file',
+  'rpc-save-upload-metadata',
+  'log-level',
+])
+
+/**
+ * Filters a system config object to only keys that aria2 accepts via
+ * `changeGlobalOption` RPC. Used to hot-reload settings at runtime
+ * without requiring an engine restart.
+ */
+export const filterHotReloadableKeys = (config: Record<string, string>): Record<string, string> =>
+  Object.fromEntries(Object.entries(config).filter(([key]) => !NON_HOT_RELOADABLE.has(key)))
+
 export const checkIsNeedRun = (enable: boolean, lastTime: number, interval: number): boolean => {
   if (!enable) return false
   return Date.now() - lastTime > interval

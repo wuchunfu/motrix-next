@@ -135,7 +135,7 @@ export default {
   'engine-restarted': 'Motor aria2 reiniciado',
   'engine-restart-failed': 'Error al reiniciar el motor aria2',
   'engine-restart-title': 'Reiniciar motor aria2',
-  'engine-restart-confirm': 'Cambiar el puerto o la clave RPC requiere reiniciar el motor de descarga. Las descargas activas se interrumpirán brevemente pero se reanudarán automáticamente después del reinicio.',
+  'engine-restart-confirm': 'Algunos cambios requieren reiniciar el motor de descarga para aplicarse. Las descargas activas se interrumpirán brevemente pero se reanudarán automáticamente después del reinicio.',
   'engine-restart-now': 'Reiniciar ahora',
   'engine-restart-later': 'Más tarde',
   'engine-restarting': 'Reiniciando motor aria2...',

@@ -135,7 +135,7 @@ export default {
   'engine-restarted': 'aria2-motoren startet pa nytt',
   'engine-restart-failed': 'Kunne ikke starte aria2-motoren pa nytt',
   'engine-restart-title': 'Start aria2-motoren pa nytt',
-  'engine-restart-confirm': 'Endring av port eller RPC-nøkkel krever omstart av nedlastingsmotoren. Aktive nedlastinger vil bli avbrutt kort, men fortsetter automatisk etter omstart.',
+  'engine-restart-confirm': 'Noen endringer krever omstart av nedlastingsmotoren for å tre i kraft. Aktive nedlastinger vil bli kort avbrutt, men vil gjenopptas automatisk etter omstart.',
   'engine-restart-now': 'Start på nytt nå',
   'engine-restart-later': 'Senere',
   'engine-restarting': 'Starter aria2-motoren pa nytt...',

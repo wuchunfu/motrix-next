@@ -135,7 +135,7 @@ export default {
   'engine-restarted': 'aria2 엔진이 재시작되었습니다',
   'engine-restart-failed': 'aria2 엔진 재시작 실패',
   'engine-restart-title': 'aria2 엔진 재시작',
-  'engine-restart-confirm': '포트 또는 RPC 비밀 키를 변경하면 다운로드 엔진을 재시작해야 합니다. 활성 다운로드가 잠시 중단되지만 재시작 후 자동으로 재개됩니다.',
+  'engine-restart-confirm': '일부 변경 사항은 다운로드 엔진을 다시 시작해야 적용됩니다. 활성 다운로드가 잠시 중단되지만 다시 시작한 후 자동으로 재개됩니다.',
   'engine-restart-now': '지금 재시작',
   'engine-restart-later': '나중에',
   'engine-restarting': 'aria2 엔진 재시작 중...',

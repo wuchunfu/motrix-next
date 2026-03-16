@@ -135,7 +135,7 @@ export default {
   'engine-restarted': 'Silnik aria2 uruchomiony ponownie',
   'engine-restart-failed': 'Nie udalo sie ponownie uruchomic silnika aria2',
   'engine-restart-title': 'Uruchom silnik aria2 ponownie',
-  'engine-restart-confirm': 'Zmiana portu lub klucza RPC wymaga ponownego uruchomienia silnika pobierania. Aktywne pobierania zostaną na krótko przerwane, ale zostaną automatycznie wznowione po ponownym uruchomieniu.',
+  'engine-restart-confirm': 'Niektóre zmiany wymagają ponownego uruchomienia silnika pobierania, aby wejść w życie. Aktywne pobierania zostaną na chwilę przerwane, ale zostaną automatycznie wznowione po ponownym uruchomieniu.',
   'engine-restart-now': 'Uruchom ponownie teraz',
   'engine-restart-later': 'Później',
   'engine-restarting': 'Ponowne uruchamianie silnika aria2...',

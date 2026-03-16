@@ -135,7 +135,7 @@ export default {
   'engine-restarted': 'aria2 motor ujrainditva',
   'engine-restart-failed': 'aria2 motor ujrainditasa sikertelen',
   'engine-restart-title': 'aria2 motor ujrainditasa',
-  'engine-restart-confirm': 'A port vagy az RPC kulcs megváltoztatása a letöltőmotor újraindítását igényli. Az aktív letöltések rövid időre megszakadnak, de az újraindítás után automatikusan folytatódnak.',
+  'engine-restart-confirm': 'Egyes változtatások a letöltési motor újraindítását igénylik az érvénybe lépéshez. Az aktív letöltések rövid időre megszakadnak, de az újraindítás után automatikusan folytatódnak.',
   'engine-restart-now': 'Újraindítás most',
   'engine-restart-later': 'Később',
   'engine-restarting': 'aria2 motor ujrainditasa...',

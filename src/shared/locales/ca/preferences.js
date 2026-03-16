@@ -135,7 +135,7 @@ export default {
   'engine-restarted': 'El motor aria2 ha estat reiniciat',
   'engine-restart-failed': 'No s\u0027ha pogut reiniciar el motor aria2',
   'engine-restart-title': 'Reiniciar el motor aria2',
-  'engine-restart-confirm': 'Canviar el port o la clau RPC requereix reiniciar el motor de descàrrega. Les descàrregues actives s\u0027interrompran breument però es reprendran automàticament després del reinici.',
+  'engine-restart-confirm': 'Alguns canvis requereixen reiniciar el motor de descàrregues per tenir efecte. Les descàrregues actives s\'interrompran breument però es reprendran automàticament després del reinici.',
   'engine-restart-now': 'Reiniciar ara',
   'engine-restart-later': 'Més tard',
   'engine-restarting': 'Reiniciant el motor aria2...',

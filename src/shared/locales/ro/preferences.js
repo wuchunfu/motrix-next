@@ -135,7 +135,7 @@ export default {
   'engine-restarted': 'Motorul aria2 a fost repornit',
   'engine-restart-failed': 'Repornirea motorului aria2 a esuat',
   'engine-restart-title': 'Repornire motor aria2',
-  'engine-restart-confirm': 'Modificarea portului sau a cheii RPC necesită repornirea motorului de descărcare. Descărcările active vor fi întrerupte pentru scurt timp, dar vor fi reluate automat după repornire.',
+  'engine-restart-confirm': 'Unele modificări necesită repornirea motorului de descărcare pentru a avea efect. Descărcările active vor fi întrerupte scurt, dar se vor relua automat după repornire.',
   'engine-restart-now': 'Repornește acum',
   'engine-restart-later': 'Mai târziu',
   'engine-restarting': 'Se reporneste motorul aria2...',
