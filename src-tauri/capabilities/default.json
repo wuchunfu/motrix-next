@@ -18,10 +18,7 @@
     "opener:default",
     {
       "identifier": "opener:allow-open-path",
-      "allow": [
-        { "path": "$HOME/**" },
-        { "path": "$DOWNLOAD/**" }
-      ]
+      "allow": [{ "path": "**" }]
     },
     "store:default",
     "shell:default",
@@ -43,21 +40,10 @@
     {
       "identifier": "fs:scope",
       "allow": [
-        {
-          "path": "$DOWNLOAD/**"
-        },
-        {
-          "path": "$HOME/**"
-        },
-        {
-          "path": "$APPDATA/**"
-        },
-        {
-          "path": "$APPLOG/**"
-        },
-        {
-          "path": "$TEMP/**"
-        }
+        { "path": "$APPDATA/**" },
+        { "path": "$APPLOG/**" },
+        { "path": "$TEMP/**" },
+        { "path": "**" }
       ]
     },
     "clipboard-manager:allow-read-text",

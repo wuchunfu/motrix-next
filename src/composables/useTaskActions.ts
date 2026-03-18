@@ -179,16 +179,16 @@ export function useTaskActions(deps: TaskActionsDeps) {
     const files = task.files || []
     const filePath = files[0]?.path
     if (!filePath) return
-    const fileExists = await exists(filePath)
-    if (!fileExists) {
-      message.warning(t('task.file-not-exist'))
-      return
-    }
     try {
+      const fileExists = await exists(filePath)
+      if (!fileExists) {
+        message.warning(t('task.file-not-exist'))
+        return
+      }
       await revealItemInDir(filePath)
       message.success(t('task.open-folder-success'))
     } catch (e) {
-      logger.debug('TaskView.showInFolder', e)
+      logger.warn('TaskView.showInFolder', String(e))
       message.warning(t('task.file-not-exist'))
     }
   }
@@ -196,17 +196,17 @@ export function useTaskActions(deps: TaskActionsDeps) {
   async function handleOpenFile(task: Aria2Task) {
     const target = resolveOpenTarget(task)
     if (!target) return
-    const fileExists = await exists(target)
-    if (!fileExists) {
-      message.warning(t('task.file-not-exist'))
-      return
-    }
     try {
+      const fileExists = await exists(target)
+      if (!fileExists) {
+        message.warning(t('task.file-not-exist'))
+        return
+      }
       const info = await stat(target)
       await openPath(target)
       message.success(t(info.isDirectory ? 'task.open-folder-success' : 'task.open-file-success'))
     } catch (e) {
-      logger.debug('TaskView.openFile error', e)
+      logger.warn('TaskView.openFile error', String(e))
       message.warning(t('task.file-not-exist'))
     }
   }
