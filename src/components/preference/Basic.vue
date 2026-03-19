@@ -310,7 +310,7 @@ onMounted(async () => {
 
 <template>
   <div class="preference-form-wrapper">
-    <NForm label-placement="left" label-align="left" label-width="300px" size="small" class="form-preference">
+    <NForm label-placement="left" label-align="left" label-width="260px" size="small" class="form-preference">
       <NDivider title-placement="left">
         {{ locale === 'en-US' ? t('preferences.language') : `${t('preferences.language')} · Language` }}
       </NDivider>

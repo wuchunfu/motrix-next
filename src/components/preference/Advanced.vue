@@ -295,7 +295,7 @@ onMounted(() => {
 
 <template>
   <div class="preference-form-wrapper">
-    <NForm label-placement="left" label-align="left" label-width="300px" size="small" class="form-preference">
+    <NForm label-placement="left" label-align="left" label-width="260px" size="small" class="form-preference">
       <NDivider title-placement="left">{{ t('preferences.proxy') }}</NDivider>
       <NFormItem :label="t('preferences.enable-proxy')">
         <NSwitch v-model:value="form.proxy.enable" />
