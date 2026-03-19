@@ -82,13 +82,15 @@ async function close() {
           </svg>
         </button>
         <button class="tl tl-maximize" :title="isMaximized ? 'Restore' : 'Maximize'" @click="toggleMaximize">
-          <svg v-if="!isMaximized" class="tl-icon" viewBox="0 0 12 12">
-            <path d="M2.5 9L5 6.5M9.5 3L7 5.5" />
-            <path d="M3 5.5V9H6.5M9 6.5V3H5.5" />
+          <!-- Fullscreen: two filled triangles pointing to opposite corners -->
+          <svg v-if="!isMaximized" class="tl-icon tl-icon--filled" viewBox="0 0 12 12">
+            <polygon points="2.5,9.5 2.5,5 7,9.5" />
+            <polygon points="9.5,2.5 9.5,7 5,2.5" />
           </svg>
-          <svg v-else class="tl-icon" viewBox="0 0 12 12">
-            <path d="M5 9.5L7.5 7M7 2.5L4.5 5" />
-            <path d="M7.5 10V7H10.5M4.5 2V5H1.5" />
+          <!-- Restore: two filled triangles pointing inward -->
+          <svg v-else class="tl-icon tl-icon--filled" viewBox="0 0 12 12">
+            <polygon points="5.5,6.5 5.5,10.5 1.5,6.5" />
+            <polygon points="6.5,5.5 6.5,1.5 10.5,5.5" />
           </svg>
         </button>
       </div>
@@ -238,6 +240,10 @@ async function close() {
 .traffic-lights:hover .tl-icon {
   opacity: 1;
   transform: scale(1);
+}
+.tl-icon--filled {
+  fill: rgba(0, 0, 0, 0.5);
+  stroke: none;
 }
 
 /* Individual button press feedback */
