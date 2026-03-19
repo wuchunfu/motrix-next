@@ -106,8 +106,8 @@ fn build_updater(
     channel: &str,
     proxy: &Option<String>,
 ) -> Result<tauri_plugin_updater::Updater, AppError> {
-    let endpoint = Url::parse(&endpoint_for_channel(channel))
-        .map_err(|e| AppError::Updater(e.to_string()))?;
+    let endpoint =
+        Url::parse(&endpoint_for_channel(channel)).map_err(|e| AppError::Updater(e.to_string()))?;
 
     let mut builder = app
         .updater_builder()
