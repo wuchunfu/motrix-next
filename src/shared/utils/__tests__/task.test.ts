@@ -1,5 +1,5 @@
 /** @fileoverview Tests for task metadata utilities: progress, naming, BT detection, magnet links. */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import {
   calcProgress,
   calcRatio,
@@ -16,6 +16,12 @@ import {
   resolveOpenTarget,
 } from '../task'
 import type { Aria2Task, Aria2File } from '@shared/types'
+
+// Mock Tauri's path.join() — used by resolveOpenTarget for platform-safe path joining.
+// In tests, we simulate it with simple string concatenation using '/'.
+vi.mock('@tauri-apps/api/path', () => ({
+  join: vi.fn((...parts: string[]) => Promise.resolve(parts.join('/'))),
+}))
 
 function createMockTask(overrides: Partial<Aria2Task> = {}): Aria2Task {
   return {
@@ -433,7 +439,7 @@ describe('mergeTaskResult', () => {
 })
 
 describe('resolveOpenTarget', () => {
-  it('returns torrent root directory for BT multi-file tasks', () => {
+  it('returns torrent root directory for BT multi-file tasks', async () => {
     const task = createMockTask({
       dir: '/downloads',
       bittorrent: { info: { name: 'MyTorrent' } },
@@ -456,10 +462,10 @@ describe('resolveOpenTarget', () => {
         },
       ],
     })
-    expect(resolveOpenTarget(task)).toBe('/downloads/MyTorrent')
+    expect(await resolveOpenTarget(task)).toBe('/downloads/MyTorrent')
   })
 
-  it('returns file path for BT single-file tasks', () => {
+  it('returns file path for BT single-file tasks', async () => {
     const task = createMockTask({
       dir: '/downloads',
       bittorrent: { info: { name: 'movie.mp4' } },
@@ -474,10 +480,10 @@ describe('resolveOpenTarget', () => {
         },
       ],
     })
-    expect(resolveOpenTarget(task)).toBe('/downloads/movie.mp4')
+    expect(await resolveOpenTarget(task)).toBe('/downloads/movie.mp4')
   })
 
-  it('returns file path for HTTP single-file tasks', () => {
+  it('returns file path for HTTP single-file tasks', async () => {
     const task = createMockTask({
       dir: '/downloads',
       files: [
@@ -491,10 +497,10 @@ describe('resolveOpenTarget', () => {
         },
       ],
     })
-    expect(resolveOpenTarget(task)).toBe('/downloads/file.zip')
+    expect(await resolveOpenTarget(task)).toBe('/downloads/file.zip')
   })
 
-  it('prefers selected files over unselected', () => {
+  it('prefers selected files over unselected', async () => {
     const task = createMockTask({
       dir: '/downloads',
       files: [
@@ -516,22 +522,22 @@ describe('resolveOpenTarget', () => {
         },
       ],
     })
-    expect(resolveOpenTarget(task)).toBe('/downloads/wanted.mkv')
+    expect(await resolveOpenTarget(task)).toBe('/downloads/wanted.mkv')
   })
 
-  it('falls back to task.dir when files array is empty', () => {
+  it('falls back to task.dir when files array is empty', async () => {
     const task = createMockTask({
       dir: '/downloads',
       files: [],
     })
-    expect(resolveOpenTarget(task)).toBe('/downloads')
+    expect(await resolveOpenTarget(task)).toBe('/downloads')
   })
 
-  it('falls back to task.dir when no file path available', () => {
+  it('falls back to task.dir when no file path available', async () => {
     const task = createMockTask({
       dir: '/downloads',
       files: [{ index: '1', path: '', length: '0', completedLength: '0', selected: 'true', uris: [] }],
     })
-    expect(resolveOpenTarget(task)).toBe('/downloads')
+    expect(await resolveOpenTarget(task)).toBe('/downloads')
   })
 })

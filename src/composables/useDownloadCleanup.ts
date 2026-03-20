@@ -116,7 +116,7 @@ export async function cleanupTorrentMetadataFiles(
     const candidates = entries.filter((e) => e.isFile && HEX40_TORRENT_RE.test(e.name))
 
     for (const entry of candidates) {
-      const filePath = `${dir}/${entry.name}`
+      const filePath = await join(dir, entry.name)
       try {
         const hash = await extractHash(filePath)
         if (hash === infoHash) {

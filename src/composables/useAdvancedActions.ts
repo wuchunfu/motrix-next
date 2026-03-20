@@ -289,8 +289,7 @@ export function useAdvancedActions(deps: AdvancedActionsDeps) {
         message.warning(t('task.file-not-exist'))
         return
       }
-      const { revealItemInDir } = await import('@tauri-apps/plugin-opener')
-      await revealItemInDir(filePath)
+      await invoke('show_item_in_dir', { path: filePath })
       message.success(t('task.open-folder-success'))
     } catch (e) {
       logger.warn('Advanced.revealPath', String(e))
@@ -301,8 +300,7 @@ export function useAdvancedActions(deps: AdvancedActionsDeps) {
   async function handleOpenConfigFolder() {
     try {
       const dir = await appDataDir()
-      const { openPath } = await import('@tauri-apps/plugin-opener')
-      await openPath(dir)
+      await invoke('open_path_normalized', { path: dir })
       message.success(t('task.open-folder-success'))
     } catch (e) {
       logger.error('Advanced.openConfigFolder', e)

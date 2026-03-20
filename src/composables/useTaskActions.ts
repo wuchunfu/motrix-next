@@ -7,7 +7,6 @@
  */
 import { ref, type Ref, h } from 'vue'
 import { getTaskUri, getTaskDisplayName, resolveOpenTarget, canRestart } from '@shared/utils'
-import { revealItemInDir, openPath } from '@tauri-apps/plugin-opener'
 import { invoke } from '@tauri-apps/api/core'
 import { deleteTaskFiles } from '@/composables/useFileDelete'
 import { TASK_STATUS } from '@shared/constants'
@@ -187,7 +186,7 @@ export function useTaskActions(deps: TaskActionsDeps) {
         message.warning(t('task.file-not-exist'))
         return
       }
-      await revealItemInDir(filePath)
+      await invoke('show_item_in_dir', { path: filePath })
       message.success(t('task.open-folder-success'))
     } catch (e) {
       logger.warn('TaskView.showInFolder', String(e))
@@ -196,7 +195,7 @@ export function useTaskActions(deps: TaskActionsDeps) {
   }
 
   async function handleOpenFile(task: Aria2Task) {
-    const target = resolveOpenTarget(task)
+    const target = await resolveOpenTarget(task)
     if (!target) return
     try {
       const fileExists = await invoke<boolean>('check_path_exists', { path: target })
@@ -205,7 +204,7 @@ export function useTaskActions(deps: TaskActionsDeps) {
         return
       }
       const isDir = await invoke<boolean>('check_path_is_dir', { path: target })
-      await openPath(target)
+      await invoke('open_path_normalized', { path: target })
       message.success(t(isDir ? 'task.open-folder-success' : 'task.open-file-success'))
     } catch (e) {
       logger.warn('TaskView.openFile error', String(e))

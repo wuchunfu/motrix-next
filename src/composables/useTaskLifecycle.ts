@@ -73,8 +73,9 @@ export function historyRecordToTask(record: HistoryRecord): Aria2Task {
     }
   }
 
-  // Synthesize files[0] — path is dir/name, uris from record.uri
-  const filePath = dir && record.name ? `${dir}/${record.name}` : record.name
+  // Synthesize files[0] — path is dir + separator + name.
+  // dir may end with `\\` (Windows) or `/` (Unix); avoid double separators.
+  const filePath = dir && record.name ? `${dir.replace(/[\\/]+$/, '')}/${record.name}` : record.name
   const uris = record.uri ? [{ uri: record.uri, status: 'used' as const }] : []
   const file = { index: '1', path: filePath, length: totalLength, completedLength, selected: 'true', uris }
 

@@ -2,6 +2,7 @@ use crate::engine;
 use crate::error::AppError;
 use crate::tray::TrayMenuState;
 use serde_json::Value;
+use std::path::Path;
 use tauri::window::ProgressBarState;
 use tauri::AppHandle;
 use tauri::Manager;
@@ -536,6 +537,148 @@ mod tests {
     fn check_path_is_dir_returns_false_for_empty_string() {
         assert!(!check_path_is_dir(String::new()));
     }
+
+    // ── normalize_path ─────────────────────────────────────────────────
+
+    #[test]
+    fn normalize_path_preserves_simple_unix_path() {
+        let result = normalize_path("/home/user/downloads/file.txt");
+        assert_eq!(result, "/home/user/downloads/file.txt");
+    }
+
+    #[test]
+    fn normalize_path_preserves_path_with_spaces() {
+        let result = normalize_path("/home/user/my downloads/file name.txt");
+        assert_eq!(result, "/home/user/my downloads/file name.txt");
+    }
+
+    #[test]
+    fn normalize_path_handles_empty_string() {
+        let result = normalize_path("");
+        assert_eq!(result, "");
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn normalize_path_fixes_mixed_separators_windows() {
+        // aria2 returns `Z:\\` + JS joins with `/` → `Z:\\/file.exe`
+        let result = normalize_path("Z:\\/MotrixNext_setup.exe");
+        assert_eq!(result, "Z:\\MotrixNext_setup.exe");
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn normalize_path_fixes_double_backslash_forward_slash() {
+        let result = normalize_path("D:\\/downloads/subfolder/file.zip");
+        assert_eq!(result, "D:\\downloads\\subfolder\\file.zip");
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn normalize_path_strips_extended_length_prefix() {
+        // std::fs::canonicalize adds \\?\\
+        let result = normalize_path("\\\\?\\C:\\Users\\test\\file.txt");
+        assert_eq!(result, "C:\\Users\\test\\file.txt");
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn normalize_path_handles_windows_unc_path() {
+        let result = normalize_path("\\\\server\\share\\file.txt");
+        assert_eq!(result, "\\\\server\\share\\file.txt");
+    }
+
+    #[test]
+    fn normalize_path_handles_forward_slash_only() {
+        // Pure forward-slash paths (cross-platform compatible)
+        let result = normalize_path("/var/log/app.log");
+        assert_eq!(result, "/var/log/app.log");
+    }
+
+    // ── show_item_in_dir structural tests ──────────────────────────────
+
+    /// Verifies show_item_in_dir calls normalize_path before reveal.
+    #[test]
+    fn show_item_in_dir_calls_normalize_path() {
+        let source = include_str!("app.rs");
+        let fn_start = source
+            .find("pub fn show_item_in_dir")
+            .expect("show_item_in_dir function must exist");
+        let fn_body = &source[fn_start..fn_start + 500];
+        let norm_pos = fn_body
+            .find("normalize_path")
+            .expect("show_item_in_dir must call normalize_path");
+        let reveal_pos = fn_body
+            .find("reveal_item_in_dir")
+            .expect("show_item_in_dir must call reveal_item_in_dir");
+        assert!(
+            norm_pos < reveal_pos,
+            "normalize_path (pos {}) must appear before reveal_item_in_dir (pos {})",
+            norm_pos,
+            reveal_pos
+        );
+    }
+
+    /// Verifies open_path_normalized calls normalize_path before open.
+    #[test]
+    fn open_path_normalized_calls_normalize_path() {
+        let source = include_str!("app.rs");
+        let fn_start = source
+            .find("pub fn open_path_normalized")
+            .expect("open_path_normalized function must exist");
+        let fn_body = &source[fn_start..fn_start + 500];
+        let norm_pos = fn_body
+            .find("normalize_path")
+            .expect("open_path_normalized must call normalize_path");
+        let _open_pos = fn_body
+            .find("open_path")
+            .expect("open_path_normalized must call open_path");
+        // normalize_path appears in the function name itself, so check
+        // that there's a second occurrence (the actual call)
+        let second_norm = fn_body[norm_pos + 1..]
+            .find("normalize_path")
+            .map(|p| p + norm_pos + 1);
+        assert!(
+            second_norm.is_some(),
+            "open_path_normalized must call normalize_path (not just contain it in the name)"
+        );
+    }
+
+    /// Verifies normalize_path uses dunce::simplified for prefix stripping.
+    #[test]
+    fn normalize_path_uses_dunce() {
+        let source = include_str!("app.rs");
+        let fn_start = source
+            .find("pub(crate) fn normalize_path")
+            .expect("normalize_path function must exist");
+        let fn_end = source[fn_start..]
+            .find("\npub")
+            .map(|p| fn_start + p)
+            .unwrap_or(source.len());
+        let fn_body = &source[fn_start..fn_end];
+        assert!(
+            fn_body.contains("dunce::simplified"),
+            "normalize_path must use dunce::simplified for \\\\?\\ prefix stripping"
+        );
+    }
+
+    /// Verifies normalize_path includes debug logging.
+    #[test]
+    fn normalize_path_has_debug_logging() {
+        let source = include_str!("app.rs");
+        let fn_start = source
+            .find("pub(crate) fn normalize_path")
+            .expect("normalize_path function must exist");
+        let fn_end = source[fn_start..]
+            .find("\npub")
+            .map(|p| fn_start + p)
+            .unwrap_or(source.len());
+        let fn_body = &source[fn_start..fn_end];
+        assert!(
+            fn_body.contains("log::debug!"),
+            "normalize_path must include debug logging"
+        );
+    }
 }
 
 /// Returns `true` when the current process was launched by the OS
@@ -654,6 +797,53 @@ pub fn check_path_is_dir(path: String) -> bool {
     let result = std::path::Path::new(&path).is_dir();
     log::debug!("check_path_is_dir: path={path:?} result={result}");
     result
+}
+
+/// Normalizes a file-system path for safe use with OS shell APIs.
+///
+/// Handles three classes of path issues that cause "file not found" errors:
+/// 1. **Mixed separators** — aria2 on Windows may return `Z:\\` while JS
+///    joins with `/`, producing `Z:\\/file.exe`. `Path::new()` normalizes
+///    this to the platform's native separator.
+/// 2. **`\\?\\` prefix** — `std::fs::canonicalize()` on Windows may return
+///    extended-length paths (`\\?\\C:\\...`). `dunce::simplified()` strips
+///    this prefix when safe, since Win32 Shell APIs like `ILCreateFromPathW`
+///    do not support it.
+/// 3. **Trailing separators** — Ensures paths ending in `\\` or `/` do not
+///    confuse shell APIs.
+pub(crate) fn normalize_path(raw: &str) -> String {
+    let normalized = dunce::simplified(Path::new(raw));
+    log::debug!("normalize_path: raw={raw:?} normalized={normalized:?}");
+    normalized.to_string_lossy().to_string()
+}
+
+/// Reveals a file or directory in the system file explorer.
+///
+/// Normalizes the path before calling `tauri_plugin_opener::reveal_item_in_dir`
+/// to handle mixed separators from aria2 (e.g. `Z:\\/file.exe` → `Z:\\file.exe`).
+///
+/// This command replaces direct frontend calls to `revealItemInDir` from
+/// `@tauri-apps/plugin-opener`, which passes paths to `ILCreateFromPathW`
+/// without normalization — causing `os error 2` on drive-root paths.
+#[tauri::command]
+pub fn show_item_in_dir(path: String) -> Result<(), AppError> {
+    let normalized = normalize_path(&path);
+    tauri_plugin_opener::reveal_item_in_dir(normalized)
+        .map_err(|e| AppError::Io(format!("Failed to reveal {}: {}", path, e)))
+}
+
+/// Opens a file or directory with the system's default application.
+///
+/// Normalizes the path before calling the opener to handle mixed separators.
+/// Counterpart to [`show_item_in_dir`] — used when the target is a directory
+/// (opens in file manager) or a file (opens with default app).
+#[tauri::command]
+pub fn open_path_normalized(app: AppHandle, path: String) -> Result<(), AppError> {
+    use tauri_plugin_opener::OpenerExt;
+    let normalized = normalize_path(&path);
+    app.opener()
+        .open_path(&normalized, None::<&str>)
+        .map_err(|e| AppError::Io(format!("Failed to open {}: {}", path, e)))
 }
 
 /// Moves a file to the OS trash / recycle bin.

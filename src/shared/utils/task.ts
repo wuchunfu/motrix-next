@@ -1,5 +1,6 @@
 /** @fileoverview Task metadata operations: naming, progress, BT detection, magnet links. */
 import { difference, parseInt } from 'lodash-es'
+import { join } from '@tauri-apps/api/path'
 import type { Aria2Task, Aria2File } from '@shared/types'
 
 /** Calculates download progress as a percentage. */
@@ -167,12 +168,12 @@ export const mergeTaskResult = (response: unknown[][] = []): unknown[] => {
  * - BT single-file / HTTP: opens the downloaded file directly
  * - Fallback: opens the download directory when no file path is available
  */
-export const resolveOpenTarget = (task: Aria2Task): string => {
+export const resolveOpenTarget = async (task: Aria2Task): Promise<string> => {
   const { files, bittorrent, dir } = task
 
   // BT multi-file: the torrent creates a subdirectory under `dir`
   if (bittorrent?.info?.name && files.length > 1) {
-    return `${dir}/${bittorrent.info.name}`
+    return await join(dir, bittorrent.info.name)
   }
 
   // Single file (BT or HTTP): prefer user-selected files
