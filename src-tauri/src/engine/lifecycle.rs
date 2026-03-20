@@ -5,7 +5,7 @@ use tauri_plugin_shell::ShellExt;
 
 use super::args::build_start_args;
 use super::cleanup::cleanup_port;
-use super::state::{log_engine_stdout, EngineState};
+use super::state::{log_engine_stdout, path_to_safe_string, EngineState};
 
 /// Spawns the aria2c engine process with the given configuration.
 /// Creates the download directory, cleans up stale port listeners, and passes
@@ -38,7 +38,7 @@ pub fn start_engine(app: &tauri::AppHandle, config: &serde_json::Value) -> Resul
         .path()
         .resolve("binaries/aria2.conf", tauri::path::BaseDirectory::Resource)
         .map_err(|e| format!("Failed to resolve conf path: {}", e))?;
-    let conf_str = conf_path.to_string_lossy().to_string();
+    let conf_str = path_to_safe_string(&conf_path);
 
     // Session file for persisting active/paused downloads across restarts
     let session_path = app
@@ -46,7 +46,7 @@ pub fn start_engine(app: &tauri::AppHandle, config: &serde_json::Value) -> Resul
         .app_data_dir()
         .map_err(|e| format!("Failed to get app data dir: {}", e))?
         .join("download.session");
-    let session_str = session_path.to_string_lossy().to_string();
+    let session_str = path_to_safe_string(&session_path);
 
     // Ensure the app data directory exists
     if let Some(parent) = session_path.parent() {
@@ -225,14 +225,14 @@ pub fn restart_engine(app: &tauri::AppHandle, config: &serde_json::Value) -> Res
         .path()
         .resolve("binaries/aria2.conf", tauri::path::BaseDirectory::Resource)
         .map_err(|e| format!("Failed to resolve conf path: {}", e))?;
-    let conf_str = conf_path.to_string_lossy().to_string();
+    let conf_str = path_to_safe_string(&conf_path);
 
     let session_path = app
         .path()
         .app_data_dir()
         .map_err(|e| format!("Failed to get app data dir: {}", e))?
         .join("download.session");
-    let session_str = session_path.to_string_lossy().to_string();
+    let session_str = path_to_safe_string(&session_path);
 
     if let Some(parent) = session_path.parent() {
         let _ = std::fs::create_dir_all(parent);

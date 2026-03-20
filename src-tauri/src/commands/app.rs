@@ -152,7 +152,7 @@ pub fn get_engine_conf_path(app: AppHandle) -> Result<String, AppError> {
         .path()
         .resolve("binaries/aria2.conf", tauri::path::BaseDirectory::Resource)
         .map_err(|e| AppError::Io(e.to_string()))?;
-    Ok(conf_path.to_string_lossy().to_string())
+    Ok(crate::engine::path_to_safe_string(&conf_path))
 }
 
 /// Updates the system tray title text.
@@ -562,7 +562,7 @@ pub async fn export_diagnostic_logs(app: AppHandle, save_path: String) -> Result
         .map_err(|e| AppError::Io(format!("Failed to finalize zip: {}", e)))?;
 
     log::info!("Exported diagnostic logs to {}", zip_path.display());
-    Ok(zip_path.to_string_lossy().to_string())
+    Ok(crate::engine::path_to_safe_string(&zip_path))
 }
 
 /// Moves a file to the OS trash / recycle bin.
