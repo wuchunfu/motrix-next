@@ -85,6 +85,14 @@ export function createTaskOperations(deps: TaskOperationsDeps) {
     const { gid } = task
     await api.forcePauseTask({ gid })
     await api.removeTask({ gid })
+    // Purge from aria2's stopped list so force-save=true won't persist it
+    // in the session file. Without this, the stopped BT task reloads on
+    // restart and enters seeding again (bt-seed-unverified=true).
+    try {
+      await api.removeTaskRecord({ gid })
+    } catch {
+      /* best-effort: task may already be gone */
+    }
     const record = buildHistoryRecord(task)
     record.status = 'complete'
     const historyStore = useHistoryStore()

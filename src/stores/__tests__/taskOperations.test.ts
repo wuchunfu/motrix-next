@@ -312,11 +312,22 @@ describe('stopSeeding', () => {
     ops = createTaskOperations(deps)
   })
 
-  it('force-pauses then removes the task', async () => {
+  it('force-pauses then removes the task then purges from stopped list', async () => {
     const task = makeTask({ gid: 'seed-1' })
     await ops.stopSeeding(task)
     expect(api.forcePauseTask).toHaveBeenCalledWith({ gid: 'seed-1' })
     expect(api.removeTask).toHaveBeenCalledWith({ gid: 'seed-1' })
+    // Must also call removeTaskRecord (aria2.removeDownloadResult) to purge
+    // from the stopped list — otherwise force-save=true persists stopped tasks
+    // in the session file and they restart as seeding on next launch.
+    expect(api.removeTaskRecord).toHaveBeenCalledWith({ gid: 'seed-1' })
+  })
+
+  it('does not throw if removeTaskRecord fails (best-effort purge)', async () => {
+    const task = makeTask({ gid: 'seed-1b' })
+    ;(api.removeTaskRecord as Mock).mockRejectedValueOnce(new Error('not found'))
+    // Should NOT throw — removeTaskRecord is best-effort
+    await expect(ops.stopSeeding(task)).resolves.not.toThrow()
   })
 
   it('adds a history record with status "complete"', async () => {
