@@ -83,7 +83,6 @@ const systemKeys = [
   'file-allocation',
   'follow-metalink',
   'follow-torrent',
-  'force-save',
   'force-sequential',
   'ftp-passwd',
   'ftp-pasv',

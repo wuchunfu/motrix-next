@@ -71,7 +71,6 @@ pub(crate) fn build_start_args(
         "file-allocation",
         "follow-metalink",
         "follow-torrent",
-        "force-save",
         "force-sequential",
         "ftp-passwd",
         "ftp-pasv",
@@ -346,25 +345,20 @@ mod tests {
     }
 
     #[test]
-    fn build_args_force_save_true_persists_seeding_tasks() {
-        // force-save=true is essential for BT seeding persistence.
-        // Without it, aria2's SessionSerializer skips FINISHED (seeding) tasks.
+    fn build_args_force_save_rejected_from_cli() {
+        // force-save is now per-download only (set via RPC addTorrent/addMetalink).
+        // It must NOT be passed as a CLI arg — doing so makes it the global
+        // default for ALL downloads, causing completed HTTP tasks to persist
+        // in the session file and re-download on restart.
+        // See: aria2 SessionSerializer.cc:288
         let config = json!({ "force-save": true });
         let args = build_start_args(&config, None, "/tmp/s", false);
-        assert!(args.iter().any(|a| a == "--force-save=true"));
+        assert!(!args.iter().any(|a| a.contains("force-save")));
     }
 
     #[test]
-    fn build_args_force_save_string_true_also_works() {
-        // Frontend may send String("true") instead of Bool(true)
+    fn build_args_force_save_string_also_rejected() {
         let config = json!({ "force-save": "true" });
-        let args = build_start_args(&config, None, "/tmp/s", false);
-        assert!(args.iter().any(|a| a == "--force-save=true"));
-    }
-
-    #[test]
-    fn build_args_no_force_save_when_absent() {
-        let config = json!({ "dir": "/tmp" });
         let args = build_start_args(&config, None, "/tmp/s", false);
         assert!(!args.iter().any(|a| a.contains("force-save")));
     }
