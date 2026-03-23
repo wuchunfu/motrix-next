@@ -82,27 +82,73 @@ What changed is everything underneath. Every transition and micro-interaction ha
 
 Download the latest release from [GitHub Releases](https://github.com/AnInsomniacy/motrix-next/releases).
 
-### macOS (Homebrew)
+### macOS
+
+**Homebrew (recommended):**
 
 ```bash
 brew tap AnInsomniacy/motrix-next
 brew install --cask --no-quarantine motrix-next
 ```
 
-### macOS (Manual)
+Or download `MotrixNext_aarch64.app.tar.gz` (Apple Silicon) / `MotrixNext_x64.app.tar.gz` (Intel) from [Releases](https://github.com/AnInsomniacy/motrix-next/releases) and drag to `/Applications`.
+
+> [!TIP]
+> If macOS says the app is **"damaged and can't be opened"**, see the [FAQ below](#faq).
+
+### Windows
+
+Download the installer from [Releases](https://github.com/AnInsomniacy/motrix-next/releases):
+
+| Architecture | File |
+|-------------|------|
+| x64 (most PCs) | `MotrixNext_x.x.x_x64-setup.exe` |
+| ARM64 | `MotrixNext_x.x.x_arm64-setup.exe` |
+
+Run the installer — it takes about 10 seconds, no reboot required.
+
+### Linux
+
+Download from [Releases](https://github.com/AnInsomniacy/motrix-next/releases):
+
+**Debian / Ubuntu:**
+
+```bash
+sudo dpkg -i MotrixNext_x.x.x_amd64.deb
+```
+
+**Other distributions** — use the `.AppImage`:
+
+```bash
+chmod +x MotrixNext_x.x.x_amd64.AppImage
+./MotrixNext_x.x.x_amd64.AppImage
+```
+
+Both x64 and ARM64 builds are available.
+
+## FAQ
+
+<details>
+<summary><strong>macOS says the app is "damaged and can't be opened"</strong></summary>
+
+<br>
 
 This app is not code-signed — Apple charges $99/year and I'm a PhD student surviving on instant noodles 🍜
 
-> If macOS says the app is **"damaged and can't be opened"**, open Terminal and run:
->
-> ```bash
-> xattr -cr /Applications/MotrixNext.app
-> ```
->
-> This removes the quarantine flag that macOS Gatekeeper applies to unsigned apps.
+Open Terminal and run:
 
+```bash
+xattr -cr /Applications/MotrixNext.app
+```
 
-### Why No Portable Version?
+This removes the quarantine flag that macOS Gatekeeper applies to unsigned apps. If you installed via Homebrew with `--no-quarantine`, you won't hit this issue.
+
+</details>
+
+<details>
+<summary><strong>Why is there no portable version?</strong></summary>
+
+<br>
 
 Motrix Next relies on [aria2](https://aria2.github.io/) as a sidecar process — a separate executable that Tauri launches at runtime. The aria2 binaries are [compiled from source](https://github.com/AnInsomniacy/aria2-builder) as fully static builds covering all 6 supported platforms. This architecture means:
 
@@ -113,6 +159,8 @@ Motrix Next relies on [aria2](https://aria2.github.io/) as a sidecar process —
 These are fundamental constraints of the Tauri sidecar model and the Windows operating system, not limitations we can work around. Notable Tauri projects like [Clash Verge Rev](https://github.com/clash-verge-rev/clash-verge-rev) (80k+ stars) previously shipped portable builds but [discontinued them](https://clash-verge.com/) due to the same set of issues.
 
 We provide **NSIS installers** for Windows — lightweight (~20 MB), fast to install, and fully featured.
+
+</details>
 
 ## Development
 
@@ -177,7 +225,9 @@ motrix-next/
 └── website/                    # Landing page (static HTML)
 ```
 
+## Contributing
 
+PRs and issues are welcome! Please read the [Contributing Guide](docs/CONTRIBUTING.md) and [Code of Conduct](docs/CODE_OF_CONDUCT.md) before getting started.
 
 ## Acknowledgements
 
@@ -190,10 +240,6 @@ motrix-next/
 My supervisor doesn't know about this side project — [see what I'm supposed to be doing](https://github.com/AnInsomniacy).
 
 [Buy me a coffee ☕](https://github.com/AnInsomniacy/AnInsomniacy/blob/main/SPONSOR.md) and maybe I'll finally afford that Apple certificate!
-
-## Contributing
-
-PRs and issues are welcome! Please read the [Contributing Guide](docs/CONTRIBUTING.md) and [Code of Conduct](docs/CODE_OF_CONDUCT.md) before getting started.
 
 ## Star History
 
