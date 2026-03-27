@@ -4,9 +4,9 @@ use serde_json::Value;
 /// Classifies a tracker URL's protocol to determine probing strategy.
 ///
 /// - `"probeable"` — HTTP/HTTPS trackers that can be checked with HEAD requests
-/// - `"unknown"` — UDP/WSS trackers that cannot be probed from HTTP
+/// - `"unknown"` — UDP/WS/WSS trackers that cannot be probed from HTTP
 fn classify_tracker_protocol(url: &str) -> &'static str {
-    if url.starts_with("udp://") || url.starts_with("wss://") {
+    if url.starts_with("udp://") || url.starts_with("ws://") || url.starts_with("wss://") {
         "unknown"
     } else {
         "probeable"
@@ -142,6 +142,14 @@ mod tests {
     fn classify_wss_as_unknown() {
         assert_eq!(
             classify_tracker_protocol("wss://tracker.example.com/announce"),
+            "unknown"
+        );
+    }
+
+    #[test]
+    fn classify_ws_as_unknown() {
+        assert_eq!(
+            classify_tracker_protocol("ws://tracker.example.com/announce"),
             "unknown"
         );
     }

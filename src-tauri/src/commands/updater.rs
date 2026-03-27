@@ -19,6 +19,20 @@ pub struct UpdateMetadata {
     pub date: Option<String>,
 }
 
+/// Outcome of a download_update command.
+#[derive(Debug, Clone, Copy, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum DownloadUpdateStatus {
+    Downloaded,
+    NoUpdate,
+}
+
+/// Structured result returned to the frontend after checking/downloading.
+#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+pub struct DownloadUpdateResult {
+    pub status: DownloadUpdateStatus,
+}
+
 /// Progress event emitted to the frontend during update download.
 #[derive(Debug, Clone, Serialize)]
 #[serde(tag = "event", content = "data")]
@@ -108,6 +122,31 @@ fn endpoint_for_channel(channel: &str) -> String {
     format!("{}/{}", UPDATER_BASE_URL, file)
 }
 
+fn redact_proxy_for_log(proxy: &Option<String>) -> String {
+    let Some(proxy) = proxy.as_deref() else {
+        return "disabled".into();
+    };
+    if proxy.is_empty() {
+        return "disabled".into();
+    }
+    match Url::parse(proxy) {
+        Ok(url) => {
+            let host = url.host_str().unwrap_or("invalid-host");
+            let port = url
+                .port()
+                .map(|p| format!(":{p}"))
+                .unwrap_or_default();
+            let has_auth = !url.username().is_empty() || url.password().is_some();
+            if has_auth {
+                format!("{}://[REDACTED]@{host}{port}", url.scheme())
+            } else {
+                format!("{}://{host}{port}", url.scheme())
+            }
+        }
+        Err(_) => "invalid".into(),
+    }
+}
+
 /// Constructs a configured `Updater` ready to call `.check()`.
 ///
 /// Centralises endpoint resolution, proxy configuration, and the
@@ -132,9 +171,9 @@ fn build_updater(
     // Apply proxy at the HTTP client level — no env var mutation.
     if let Some(p) = proxy {
         if !p.is_empty() {
-            if let Ok(proxy_url) = Url::parse(p) {
-                builder = builder.proxy(proxy_url);
-            }
+            let proxy_url = Url::parse(p)
+                .map_err(|e| AppError::Updater(format!("Invalid update proxy config: {e}")))?;
+            builder = builder.proxy(proxy_url);
         }
     }
 
@@ -156,7 +195,10 @@ pub async fn check_for_update(
     channel: String,
     proxy: Option<String>,
 ) -> Result<Option<UpdateMetadata>, AppError> {
-    log::info!("updater:check channel={channel} proxy={proxy:?}");
+    log::info!(
+        "updater:check channel={channel} proxy={}",
+        redact_proxy_for_log(&proxy)
+    );
     let update = build_updater(&app, &channel, &proxy)?
         .check()
         .await
@@ -191,8 +233,11 @@ pub async fn download_update(
     app: AppHandle,
     channel: String,
     proxy: Option<String>,
-) -> Result<(), AppError> {
-    log::info!("updater:download channel={channel} proxy={proxy:?}");
+) -> Result<DownloadUpdateResult, AppError> {
+    log::info!(
+        "updater:download channel={channel} proxy={}",
+        redact_proxy_for_log(&proxy)
+    );
     let cancel_state = app.state::<Arc<UpdateCancelState>>();
     cancel_state.reset();
 
@@ -203,7 +248,12 @@ pub async fn download_update(
 
     let update = match update {
         Some(u) => u,
-        None => return Ok(()),
+        None => {
+            log::info!("updater:download result=no-update");
+            return Ok(DownloadUpdateResult {
+                status: DownloadUpdateStatus::NoUpdate,
+            });
+        }
     };
 
     // ── Download only (aria2c stays alive) ───────────────────────────
@@ -272,7 +322,9 @@ pub async fn download_update(
         let _ = app.emit("update-progress", UpdateProgressEvent::Finished);
     }
 
-    Ok(())
+    Ok(DownloadUpdateResult {
+        status: DownloadUpdateStatus::Downloaded,
+    })
 }
 
 /// Installs a previously downloaded update.
@@ -289,7 +341,10 @@ pub async fn apply_update(
     channel: String,
     proxy: Option<String>,
 ) -> Result<(), AppError> {
-    log::info!("updater:apply channel={channel}");
+    log::info!(
+        "updater:apply channel={channel} proxy={}",
+        redact_proxy_for_log(&proxy)
+    );
     // Re-check the update to obtain the Update object for installation.
     // This MUST happen before take() — if check() fails (network flap,
     // JSON changed between download and install), the already-downloaded
@@ -301,11 +356,10 @@ pub async fn apply_update(
         .map_err(|e| AppError::Updater(e.to_string()))?
         .ok_or_else(|| AppError::Updater("Update no longer available".into()))?;
 
-    // Take the cached package AFTER check() succeeds.
     let dl_state = app.state::<Arc<DownloadedUpdate>>();
-    let mut pkg_guard = dl_state.package.lock().await;
+    let pkg_guard = dl_state.package.lock().await;
     let cached = pkg_guard
-        .take()
+        .as_ref()
         .ok_or_else(|| AppError::Updater("No downloaded update available".into()))?;
 
     // Version-drift guard: if the remote channel moved to a different version
@@ -317,13 +371,11 @@ pub async fn apply_update(
             update.version
         );
         let cached_ver = cached.downloaded_version.clone();
-        *pkg_guard = Some(cached);
         return Err(AppError::Updater(format!(
             "Downloaded v{cached_ver} but channel now points to v{}; please re-download",
             update.version
         )));
     }
-    let bytes = cached.bytes;
     drop(pkg_guard); // release lock before engine stop
 
     // ── Phase 1: Stop aria2c engine BEFORE installation ─────────────
@@ -331,13 +383,19 @@ pub async fn apply_update(
     // On macOS/Linux this prevents session file corruption.
     {
         let app_for_stop = app.clone();
-        tokio::task::spawn_blocking(move || {
-            let _ = crate::engine::stop_engine(&app_for_stop);
-        })
+        tokio::task::spawn_blocking(move || crate::engine::stop_engine(&app_for_stop).map_err(AppError::Engine))
         .await
-        .map_err(|e| AppError::Engine(e.to_string()))?;
+        .map_err(|e| AppError::Engine(e.to_string()))??;
     }
     log::info!("updater:apply phase=engine-stopped");
+
+    let cached = dl_state
+        .package
+        .lock()
+        .await
+        .take()
+        .ok_or_else(|| AppError::Updater("No downloaded update available".into()))?;
+    let bytes = cached.bytes;
 
     // ── Phase 2: Install (NSIS / tar.gz replacement) ────────────────
     // On install failure, restart the engine so download functionality is
@@ -488,6 +546,21 @@ mod tests {
     fn endpoint_for_unknown_channel_falls_back_to_latest() {
         let url = endpoint_for_channel("nightly");
         assert!(url.ends_with("/latest.json"));
+    }
+
+    #[test]
+    fn redact_proxy_for_log_hides_credentials() {
+        let proxy = Some("http://user:pass@example.com:8080".to_string());
+        assert_eq!(
+            redact_proxy_for_log(&proxy),
+            "http://[REDACTED]@example.com:8080"
+        );
+    }
+
+    #[test]
+    fn redact_proxy_for_log_marks_invalid_proxy() {
+        let proxy = Some("://not-a-url".to_string());
+        assert_eq!(redact_proxy_for_log(&proxy), "invalid");
     }
 
     // ── Structural: apply_update must stop engine before install ─────

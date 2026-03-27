@@ -59,8 +59,11 @@ const title = computed(() => {
 
 let refreshTimer: ReturnType<typeof setTimeout> | null = null
 let pollStopped = true
+let isUnmounted = false
+let changeRequestId = 0
 
 function startPolling() {
+  if (isUnmounted) return
   stopPolling()
   pollStopped = false
   async function tick() {
@@ -84,15 +87,27 @@ function stopPolling() {
 
 async function changeCurrentList() {
   stopPolling()
+  const requestId = ++changeRequestId
   await taskStore.changeCurrentList(props.status)
+  if (isUnmounted || requestId !== changeRequestId) return
   startPolling()
 }
 
-watch(() => props.status, changeCurrentList)
+watch(
+  () => props.status,
+  () => {
+    void changeCurrentList()
+  },
+)
 onMounted(() => {
-  changeCurrentList()
+  isUnmounted = false
+  void changeCurrentList()
 })
-onBeforeUnmount(stopPolling)
+onBeforeUnmount(() => {
+  isUnmounted = true
+  changeRequestId += 1
+  stopPolling()
+})
 // Task action handlers are now provided by useTaskActions composable above.
 // Magnet file selection is handled at app-level in MainLayout.vue.
 </script>

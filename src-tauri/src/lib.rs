@@ -376,7 +376,13 @@ fn handle_run_event(app: &tauri::AppHandle, event: tauri::RunEvent) {
             let _ = engine::stop_engine(app);
             // Clean up UPnP port mappings on exit.
             if let Some(state) = app.try_state::<UpnpState>() {
-                tauri::async_runtime::block_on(upnp::stop_mapping(state.inner()));
+                tauri::async_runtime::block_on(async {
+                    let _ = tokio::time::timeout(
+                        std::time::Duration::from_secs(2),
+                        upnp::stop_mapping(state.inner()),
+                    )
+                    .await;
+                });
             }
         }
         #[cfg(target_os = "macos")]

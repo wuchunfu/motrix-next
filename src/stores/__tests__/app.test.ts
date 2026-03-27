@@ -371,6 +371,15 @@ describe('useAppStore', () => {
       ])
     })
 
+    it('normalizes Windows file URIs without leaving a leading slash before the drive letter', () => {
+      const store = useAppStore()
+      store.handleDeepLinkUrls(['file:///C:/Users/test/Downloads/Space%20Name.torrent'])
+
+      expect(store.pendingBatch.map((i) => ({ kind: i.kind, source: i.source }))).toEqual([
+        { kind: 'torrent', source: 'C:/Users/test/Downloads/Space Name.torrent' },
+      ])
+    })
+
     it('handles magnet links', () => {
       const store = useAppStore()
       store.handleDeepLinkUrls(['magnet:?xt=urn:btih:abc123'])

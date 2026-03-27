@@ -257,20 +257,20 @@ describe('engine/ — stdout/stderr logging and exit code events', () => {
       expect(structBody).toContain('AtomicBool')
     })
 
-    it('stop_engine sets intentional_stop to true BEFORE kill()', () => {
+    it('stop_engine sets intentional_stop to true BEFORE attempting the kill helper', () => {
       const fnBody = extractFnBody(engineSource, 'stop_engine')
       expect(fnBody).toBeTruthy()
       const storeIdx = fnBody!.indexOf('intentional_stop')
-      const killIdx = fnBody!.indexOf('.kill()')
+      const killIdx = fnBody!.indexOf('kill_process_by_pid')
       expect(storeIdx).toBeGreaterThanOrEqual(0)
       expect(killIdx).toBeGreaterThan(storeIdx)
     })
 
-    it('restart_engine sets intentional_stop to true BEFORE kill()', () => {
+    it('restart_engine sets intentional_stop to true BEFORE attempting the kill helper', () => {
       const fnBody = extractFnBody(engineSource, 'restart_engine')
       expect(fnBody).toBeTruthy()
       const storeIdx = fnBody!.indexOf('intentional_stop')
-      const killIdx = fnBody!.indexOf('.kill()')
+      const killIdx = fnBody!.indexOf('kill_process_by_pid')
       expect(storeIdx).toBeGreaterThanOrEqual(0)
       expect(killIdx).toBeGreaterThan(storeIdx)
     })
@@ -284,6 +284,33 @@ describe('engine/ — stdout/stderr logging and exit code events', () => {
       const lastStoreIdx = fnBody!.lastIndexOf('intentional_stop')
       expect(spawnIdx).toBeGreaterThan(0)
       expect(lastStoreIdx).toBeGreaterThan(spawnIdx)
+    })
+
+    it('start_engine also resets intentional_stop to false after spawning new child', () => {
+      const fnBody = extractFnBody(engineSource, 'start_engine')
+      expect(fnBody).toBeTruthy()
+      const spawnIdx = fnBody!.indexOf('.spawn()')
+      const resetIdx = fnBody!.lastIndexOf('intentional_stop')
+      expect(spawnIdx).toBeGreaterThan(0)
+      expect(resetIdx).toBeGreaterThan(spawnIdx)
+    })
+
+    it('stop_engine does not take child before kill succeeds', () => {
+      const fnBody = extractFnBody(engineSource, 'stop_engine')
+      expect(fnBody).toBeTruthy()
+      const takeIdx = fnBody!.indexOf('.take()')
+      const killIdx = fnBody!.indexOf('kill_process_by_pid')
+      expect(killIdx).toBeGreaterThanOrEqual(0)
+      expect(takeIdx).toBe(-1)
+    })
+
+    it('restart_engine does not take child before kill succeeds', () => {
+      const fnBody = extractFnBody(engineSource, 'restart_engine')
+      expect(fnBody).toBeTruthy()
+      const takeIdx = fnBody!.indexOf('.take()')
+      const killIdx = fnBody!.indexOf('kill_process_by_pid')
+      expect(killIdx).toBeGreaterThanOrEqual(0)
+      expect(takeIdx).toBe(-1)
     })
   })
 

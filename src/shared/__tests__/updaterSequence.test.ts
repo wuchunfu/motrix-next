@@ -48,6 +48,18 @@ describe('updater.rs — apply_update sequence', () => {
     const matches = applyUpdateBody.match(/\.take\(\)/g)
     expect(matches).toHaveLength(1)
   })
+
+  it('handles stop_engine errors instead of discarding the result', () => {
+    expect(applyUpdateBody).not.toContain('let _ = crate::engine::stop_engine')
+    expect(applyUpdateBody).toContain('crate::engine::stop_engine')
+  })
+
+  it('only consumes cached bytes after stop_engine succeeds', () => {
+    const stopIdx = applyUpdateBody.indexOf('crate::engine::stop_engine')
+    const bytesIdx = applyUpdateBody.indexOf('let bytes =')
+    expect(stopIdx).toBeGreaterThan(0)
+    expect(bytesIdx).toBeGreaterThan(stopIdx)
+  })
 })
 
 describe('updater.rs — version-pinned package cache', () => {
@@ -78,11 +90,24 @@ describe('updater.rs — version-pinned package cache', () => {
     expect(body).toContain('update.version')
   })
 
-  it('apply_update preserves cache on version mismatch (puts package back)', () => {
+  it('apply_update preserves cache on version mismatch without consuming the package', () => {
     const body = extractRustFnBody(updaterSource, 'pub async fn apply_update')
     expect(body).toBeTruthy()
-    // The version-mismatch branch must reassign Some(...) back to the guard
-    // to preserve the downloaded bytes for retry
-    expect(body).toMatch(/Some\(cached\)/)
+    expect(body).toContain('.as_ref()')
+    expect(body).toContain('Downloaded v{cached_ver}')
+  })
+
+  it('download_update exposes a structured result status', () => {
+    expect(updaterSource).toContain('DownloadUpdateResult')
+    expect(updaterSource).toContain('DownloadUpdateStatus')
+    expect(updaterSource).toContain('NoUpdate')
+    expect(updaterSource).toContain('Downloaded')
+  })
+
+  it('build_updater rejects invalid proxy strings instead of silently ignoring them', () => {
+    const body = extractRustFnBody(updaterSource, 'fn build_updater')
+    expect(body).toBeTruthy()
+    expect(body).toContain('Url::parse')
+    expect(body).not.toContain('if let Ok(proxy_url)')
   })
 })

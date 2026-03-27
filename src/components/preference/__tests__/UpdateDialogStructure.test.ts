@@ -76,6 +76,13 @@ describe('startDownload error handling (regression)', () => {
     expect(snippet).toContain('try')
     expect(snippet).toContain('catch')
   })
+
+  it('uses the structured download result instead of assuming any success means ready', () => {
+    const start = SOURCE.indexOf('async function startDownload')
+    expect(start).toBeGreaterThanOrEqual(0)
+    const snippet = SOURCE.slice(start, start + 1400)
+    expect(snippet).toContain('resolvePhaseAfterDownload')
+  })
 })
 
 // ── open function error handling (regression guard) ──────────────────
@@ -88,5 +95,18 @@ describe('open function error handling (regression)', () => {
     expect(snippet).toContain('try')
     expect(snippet).toContain('catch')
     expect(snippet).toContain("phase.value = 'error'")
+  })
+})
+
+describe('close behavior during protected phases', () => {
+  it('disables modal close affordances via a shared helper', () => {
+    expect(SOURCE).toContain('shouldAllowUpdateDialogClose')
+  })
+
+  it('guards the custom header close button during installing/downloading', () => {
+    const closeStart = SOURCE.indexOf('function close()')
+    expect(closeStart).toBeGreaterThanOrEqual(0)
+    const closeSnippet = SOURCE.slice(closeStart, closeStart + 400)
+    expect(closeSnippet).toContain('shouldAllowUpdateDialogClose')
   })
 })

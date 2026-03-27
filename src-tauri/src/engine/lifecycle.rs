@@ -7,6 +7,32 @@ use super::args::build_start_args;
 use super::cleanup::cleanup_port;
 use super::state::{log_engine_stdout, path_to_safe_string, EngineState};
 
+fn kill_process_by_pid(pid: u32) -> Result<(), String> {
+    #[cfg(windows)]
+    {
+        let status = std::process::Command::new("taskkill")
+            .args(["/PID", &pid.to_string(), "/T", "/F"])
+            .status()
+            .map_err(|e| format!("Failed to execute taskkill for PID {pid}: {e}"))?;
+        if status.success() {
+            return Ok(());
+        }
+        return Err(format!("taskkill failed for PID {pid}: {status}"));
+    }
+
+    #[cfg(not(windows))]
+    {
+        let status = std::process::Command::new("kill")
+            .args(["-TERM", &pid.to_string()])
+            .status()
+            .map_err(|e| format!("Failed to execute kill for PID {pid}: {e}"))?;
+        if status.success() {
+            return Ok(());
+        }
+        Err(format!("kill failed for PID {pid}: {status}"))
+    }
+}
+
 /// Spawns the aria2c engine process with the given configuration.
 /// Creates the download directory, cleans up stale port listeners, and passes
 /// whitelisted config keys as CLI arguments.
@@ -83,6 +109,7 @@ pub fn start_engine(app: &tauri::AppHandle, config: &serde_json::Value) -> Resul
 
     let spawned_pid = child.pid();
     *child_lock = Some(child);
+    state.intentional_stop.store(false, Ordering::SeqCst);
     let my_gen = state.next_generation();
 
     let app_handle = app.clone();
@@ -221,11 +248,10 @@ pub fn stop_engine(app: &tauri::AppHandle) -> Result<(), String> {
     state.intentional_stop.store(true, Ordering::SeqCst);
     let mut child_lock = state.child.lock().map_err(|e| e.to_string())?;
 
-    if let Some(child) = child_lock.take() {
+    if let Some(child) = child_lock.as_ref() {
         let pid = child.pid();
-        child
-            .kill()
-            .map_err(|e| format!("Failed to kill aria2c: {}", e))?;
+        kill_process_by_pid(pid)?;
+        *child_lock = None;
         log::info!("stopped engine process: PID {}", pid);
         // Brief wait for the OS to fully terminate the process and release the port.
         std::thread::sleep(std::time::Duration::from_millis(100));
@@ -252,11 +278,10 @@ pub fn restart_engine(app: &tauri::AppHandle, config: &serde_json::Value) -> Res
     let mut child_lock = state.child.lock().map_err(|e| e.to_string())?;
 
     // Step 1: Kill existing child if present
-    if let Some(child) = child_lock.take() {
+    if let Some(child) = child_lock.as_ref() {
         let pid = child.pid();
-        child
-            .kill()
-            .map_err(|e| format!("Failed to kill aria2c: {}", e))?;
+        kill_process_by_pid(pid)?;
+        *child_lock = None;
         log::info!("restart: killed old engine process: PID {}", pid);
         // Wait for the OS to reclaim the process and release the port
         std::thread::sleep(std::time::Duration::from_millis(500));

@@ -110,6 +110,15 @@ describe('mergeUriLines', () => {
 
     expect(merged).toBe('https://a.example/file')
   })
+
+  it('normalizes bare info hashes in incoming payloads before deduping and merging', () => {
+    const hash = 'd8988e034cb5de79d319242e3365bf30a7741a6e'
+    const merged = mergeUriLines(`magnet:?xt=urn:btih:${hash}`, [hash, 'TCIY4A2MWXPHTUYZEQUOMNS7GCDXOQTG'])
+
+    expect(merged).toBe(
+      [`magnet:?xt=urn:btih:${hash}`, 'magnet:?xt=urn:btih:TCIY4A2MWXPHTUYZEQUOMNS7GCDXOQTG'].join('\n'),
+    )
+  })
 })
 
 describe('createBatchItem', () => {

@@ -385,6 +385,6 @@ export const DOCUMENT_SUFFIXES = [
   '.ppt',
   '.pptx',
   '.txt',
-  '.xsl',
-  '.xslx',
+  '.xls',
+  '.xlsx',
 ]

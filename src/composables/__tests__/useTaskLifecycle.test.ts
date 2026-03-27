@@ -6,6 +6,7 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import type { Aria2Task, HistoryRecord } from '@shared/types'
+import { getRestartDescriptors } from '@shared/utils'
 
 vi.mock('@tauri-apps/plugin-fs', () => ({
   exists: vi.fn().mockResolvedValue(true),
@@ -155,6 +156,26 @@ describe('buildHistoryRecord', () => {
     expect(record.meta).toBeDefined()
     const meta = JSON.parse(record.meta!)
     expect(meta.infoHash).toBe('deadbeef1234567890abcdef')
+  })
+
+  it('stores announceList in meta JSON for BT tasks', () => {
+    const task = makeTask({
+      bittorrent: {
+        info: { name: 'Ubuntu 24.04' },
+        announceList: [
+          ['udp://tracker1.example:80/announce'],
+          ['https://tracker2.example/announce', 'https://tracker3.example/announce'],
+        ],
+      },
+      infoHash: 'deadbeef1234567890abcdef',
+    })
+    const record = buildHistoryRecord(task)
+    expect(record.meta).toBeDefined()
+    const meta = JSON.parse(record.meta!)
+    expect(meta.announceList).toEqual([
+      ['udp://tracker1.example:80/announce'],
+      ['https://tracker2.example/announce', 'https://tracker3.example/announce'],
+    ])
   })
 
   it('omits meta when no infoHash', () => {
@@ -318,6 +339,24 @@ describe('historyRecordToTask', () => {
     const task = historyRecordToTask(makeRecord({ task_type: 'bt', name: 'My Torrent', meta }))
     expect(task.infoHash).toBe('deadbeef1234567890abcdef')
     expect(task.bittorrent?.info?.name).toBe('My Torrent')
+  })
+
+  it('restores announceList from meta JSON for BT restart descriptors', () => {
+    const meta = JSON.stringify({
+      infoHash: 'deadbeef1234567890abcdef',
+      announceList: [['udp://tracker1.example:80/announce'], ['https://tracker2.example/announce']],
+    })
+    const task = historyRecordToTask(makeRecord({ task_type: 'bt', name: 'My Torrent', meta }))
+
+    expect(task.bittorrent?.announceList).toEqual([
+      ['udp://tracker1.example:80/announce'],
+      ['https://tracker2.example/announce'],
+    ])
+    expect(getRestartDescriptors(task, true)).toEqual([
+      [
+        'magnet:?xt=urn:btih:deadbeef1234567890abcdef&dn=My%20Torrent&tr=udp%3A%2F%2Ftracker1.example%3A80%2Fannounce&tr=https%3A%2F%2Ftracker2.example%2Fannounce',
+      ],
+    ])
   })
 
   it('handles missing/corrupt meta gracefully', () => {
@@ -497,6 +536,19 @@ describe('buildHistoryMeta', () => {
     const meta = buildHistoryMeta(task)
     expect(meta.files![0].uris).toEqual(['http://mirror1/a.zip', 'http://mirror2/a.zip'])
     expect(meta.files![1].uris).toEqual(['http://mirror1/b.zip'])
+  })
+
+  it('stores announceList in structured BT history meta', () => {
+    const task = makeTask({
+      bittorrent: {
+        info: { name: 'Ubuntu 24.04' },
+        announceList: [['udp://tracker1.example:80/announce'], ['https://tracker2.example/announce']],
+      },
+    })
+
+    const meta = buildHistoryMeta(task)
+
+    expect(meta.announceList).toEqual([['udp://tracker1.example:80/announce'], ['https://tracker2.example/announce']])
   })
 })
 

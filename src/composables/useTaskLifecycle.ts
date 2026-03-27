@@ -29,6 +29,9 @@ export function isMetadataTask(task: Aria2Task): boolean {
 export function buildHistoryMeta(task: Aria2Task): HistoryMeta {
   const meta: HistoryMeta = {}
   if (task.infoHash) meta.infoHash = task.infoHash
+  if (task.bittorrent?.announceList && task.bittorrent.announceList.length > 0) {
+    meta.announceList = task.bittorrent.announceList.map((tier) => [...tier])
+  }
 
   // Snapshot trigger: multi-file OR any file with multiple mirror URIs.
   // Multi-file: enables correct delete (all files) and stale cleanup.
@@ -163,6 +166,9 @@ export function historyRecordToTask(record: HistoryRecord): Aria2Task {
   // BT tasks get a bittorrent.info stub so getTaskName() resolves correctly
   if (record.task_type === 'bt') {
     task.bittorrent = { info: { name: record.name } }
+    if (meta.announceList && meta.announceList.length > 0) {
+      task.bittorrent.announceList = meta.announceList.map((tier) => [...tier])
+    }
   }
 
   // Restore infoHash from meta — essential for magnet link reconstruction

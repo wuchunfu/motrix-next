@@ -290,6 +290,8 @@ export interface HistoryFileSnapshot {
 export interface HistoryMeta {
   /** BT info hash — used for magnet link reconstruction on restart. */
   infoHash?: string
+  /** BT announce tiers — used to restore tracker-aware magnet restart links. */
+  announceList?: string[][]
   /** Complete file list with all URIs — present when files.length > 1. */
   files?: HistoryFileSnapshot[]
 }

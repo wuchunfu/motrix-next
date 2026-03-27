@@ -8,6 +8,7 @@
  * - submitManualUris: multi-URI handling with rename
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { ref } from 'vue'
 
 // ── Mock external dependencies ──────────────────────────────────────
 vi.mock('@tauri-apps/api/core', () => ({
@@ -16,6 +17,11 @@ vi.mock('@tauri-apps/api/core', () => ({
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: (key: string) => key }),
+}))
+
+const mockRouterPush = vi.fn().mockResolvedValue(undefined)
+vi.mock('vue-router', () => ({
+  useRouter: () => ({ push: mockRouterPush }),
 }))
 
 vi.mock('naive-ui', () => ({
@@ -33,11 +39,51 @@ vi.mock('@/api/aria2', () => ({
   isEngineReady: () => mockIsEngineReady(),
 }))
 
+const mockAppStore = {
+  pendingBatch: [] as BatchItem[],
+}
+
+const mockTaskStoreForHook = {
+  addUri: vi.fn().mockResolvedValue(['gid1']),
+  addMagnetUri: vi.fn().mockResolvedValue('magnet-gid'),
+  addTorrent: vi.fn(),
+  addMetalink: vi.fn(),
+  registerTorrentSource: vi.fn(),
+}
+
+const mockPreferenceStore = {
+  config: { newTaskShowDownloading: true },
+}
+
+const mockMessage = {
+  success: vi.fn(),
+  error: vi.fn(),
+  warning: vi.fn(),
+  info: vi.fn(),
+}
+
+vi.mock('@/stores/app', () => ({
+  useAppStore: () => mockAppStore,
+}))
+
+vi.mock('@/stores/task', () => ({
+  useTaskStore: () => mockTaskStoreForHook,
+}))
+
+vi.mock('@/stores/preference', () => ({
+  usePreferenceStore: () => mockPreferenceStore,
+}))
+
+vi.mock('@/composables/useAppMessage', () => ({
+  useAppMessage: () => mockMessage,
+}))
+
 import {
   buildEngineOptions,
   classifySubmitError,
   submitBatchItems,
   submitManualUris,
+  useAddTaskSubmit,
   type AddTaskForm,
 } from '../useAddTaskSubmit'
 import type { BatchItem, Aria2EngineOptions } from '@shared/types'
@@ -268,6 +314,7 @@ describe('submitBatchItems', () => {
 describe('submitManualUris', () => {
   const mockTaskStore = {
     addUri: vi.fn().mockResolvedValue(['gid1']),
+    addMagnetUri: vi.fn().mockResolvedValue('magnet-gid'),
   } as unknown as ReturnType<typeof import('@/stores/task').useTaskStore>
 
   const baseForm: AddTaskForm = {
@@ -359,5 +406,61 @@ describe('submitManualUris', () => {
 
     const call = (mockTaskStore.addUri as ReturnType<typeof vi.fn>).mock.calls[0][0]
     expect(call.outs).toEqual([])
+  })
+
+  it('returns structured magnet failures without throwing away successful submissions', async () => {
+    ;(mockTaskStore.addMagnetUri as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce('magnet-gid-1')
+      .mockRejectedValueOnce(new Error('invalid magnet'))
+
+    const result = await submitManualUris(
+      {
+        ...baseForm,
+        uris: 'magnet:?xt=urn:btih:good\nmagnet:?xt=urn:btih:bad',
+      },
+      { dir: '/dl' },
+      mockTaskStore,
+    )
+
+    expect(result).toEqual({
+      magnetGids: ['magnet-gid-1'],
+      magnetFailures: [{ uri: 'magnet:?xt=urn:btih:bad', error: 'invalid magnet' }],
+    })
+  })
+})
+
+describe('useAddTaskSubmit', () => {
+  const baseForm: AddTaskForm = {
+    uris: '',
+    out: '',
+    dir: '/dl',
+    split: 16,
+    userAgent: '',
+    authorization: '',
+    referer: '',
+    cookie: '',
+    allProxy: '',
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockAppStore.pendingBatch = []
+    mockPreferenceStore.config.newTaskShowDownloading = true
+  })
+
+  it('keeps AddTask open when a magnet submission fails', async () => {
+    mockTaskStoreForHook.addMagnetUri.mockRejectedValueOnce(new Error('invalid magnet'))
+    const onClose = vi.fn()
+
+    const { handleSubmit } = useAddTaskSubmit({
+      form: ref({ ...baseForm, uris: 'magnet:?xt=urn:btih:bad' }),
+      onClose,
+    })
+
+    await handleSubmit()
+
+    expect(onClose).not.toHaveBeenCalled()
+    expect(mockMessage.warning).toHaveBeenCalledWith('1 task.failed', { duration: 5000, closable: true })
+    expect(mockRouterPush).not.toHaveBeenCalled()
   })
 })

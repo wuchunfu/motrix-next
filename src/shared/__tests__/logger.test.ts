@@ -157,6 +157,30 @@ describe('logger (tauri-plugin-log bridging)', () => {
       mockTauriDebug.mockRejectedValue(new Error('IPC unavailable'))
       expect(() => logger.debug('Ctx', 'data')).not.toThrow()
     })
+
+    it('does not throw on circular payloads and logs a fallback representation', () => {
+      const circular: { name: string; self?: unknown } = { name: 'loop' }
+      circular.self = circular
+
+      expect(() => logger.debug('Ctx', circular)).not.toThrow()
+      expect(mockTauriDebug).toHaveBeenCalledWith(expect.stringContaining('[Ctx]'))
+    })
+
+    it('does not throw on BigInt payloads and logs the numeric value', () => {
+      expect(() => logger.debug('Ctx', { bytes: 42n })).not.toThrow()
+      expect(mockTauriDebug).toHaveBeenCalledWith(expect.stringContaining('42'))
+    })
+
+    it('does not throw when payload serialization itself throws', () => {
+      const payload = {
+        toJSON(): never {
+          throw new Error('serialize failed')
+        },
+      }
+
+      expect(() => logger.debug('Ctx', payload)).not.toThrow()
+      expect(mockTauriDebug).toHaveBeenCalledWith(expect.stringContaining('[Ctx]'))
+    })
   })
 
   // ─── API contract ────────────────────────────────────────

@@ -81,9 +81,10 @@ vi.mock('naive-ui', async () => {
   })
 
   const NButton = defineComponent({
+    inheritAttrs: false,
     emits: ['click'],
-    setup(_, { slots, emit }) {
-      return () => h('button', { onClick: () => emit('click') }, slots.default ? slots.default() : [])
+    setup(_, { slots, emit, attrs }) {
+      return () => h('button', { ...attrs, onClick: () => emit('click') }, slots.default ? slots.default() : [])
     },
   })
 
@@ -479,5 +480,21 @@ describe('AddTask redesigned layout and animation structure', () => {
   it('does not use the old useAddTaskAnimations composable', async () => {
     const source = (await import('@/components/task/AddTask.vue?raw')).default
     expect(source).not.toContain('useAddTaskAnimations')
+  })
+})
+
+describe('AddTask submit flow', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    resetBatchIdCounter()
+    pushMock.mockClear()
+    warningMock.mockClear()
+  })
+
+  it('keeps the dialog open when manual magnet submission reports failures', async () => {
+    const source = (await import('@/components/task/AddTask.vue?raw')).default
+    expect(source).toContain('manualResult.magnetFailures')
+    expect(source).toContain('const failedCount =')
+    expect(source).toContain('handleClose()')
   })
 })

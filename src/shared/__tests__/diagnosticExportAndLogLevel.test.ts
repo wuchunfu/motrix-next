@@ -101,6 +101,12 @@ describe('Gap 3: Diagnostic log export', () => {
       const fnBlock = appRsSource.slice(appRsSource.indexOf('fn export_diagnostic_logs'))
       expect(fnBlock).toContain('package_info')
     })
+
+    it('sanitizes exported config instead of zipping the raw config content directly', () => {
+      const fnBlock = appRsSource.slice(appRsSource.indexOf('fn export_diagnostic_logs'))
+      expect(fnBlock).toContain('sanitize_config')
+      expect(fnBlock).not.toContain('write_all(&mut zip_writer, &config_content)')
+    })
   })
 
   describe('command registration', () => {

@@ -10,7 +10,7 @@
  * detail panel, etc.). Instead it makes its own targeted RPC calls
  * specifically for lifecycle event detection.
  *
- * The stopped slice is limited to the 20 most recent entries to avoid
+ * The stopped slice is limited to the 50 most recent entries to avoid
  * scanning the entire download history on every tick.
  */
 import { createTaskNotifier } from '@/stores/taskNotifications'
@@ -19,7 +19,7 @@ import { logger } from '@shared/logger'
 import type { Aria2Task } from '@shared/types'
 
 /** Maximum number of stopped tasks to scan per tick. */
-const STOPPED_SLICE_LIMIT = 20
+const STOPPED_SLICE_LIMIT = 50
 
 interface LifecycleCallbacks {
   onTaskError: (task: Aria2Task) => void

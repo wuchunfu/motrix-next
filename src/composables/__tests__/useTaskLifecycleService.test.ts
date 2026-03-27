@@ -88,6 +88,26 @@ describe('createTaskLifecycleService', () => {
     callbacks = createMockCallbacks()
   })
 
+  it('locks the stopped scan window to 50 items', async () => {
+    let tick = 0
+    api.fetchTaskList.mockImplementation(({ type }: { type: string }) => {
+      if (type === 'active') return Promise.resolve([])
+      tick++
+      if (tick === 1) return Promise.resolve([])
+      return Promise.resolve(Array.from({ length: 80 }, (_, i) => makeMockTask(`s${i}`, 'complete')))
+    })
+
+    const service = createTaskLifecycleService(api, callbacks)
+    service.start(() => 1000)
+
+    await vi.advanceTimersByTimeAsync(1000)
+    await vi.advanceTimersByTimeAsync(1000)
+
+    expect(callbacks.onTaskComplete).toHaveBeenCalledTimes(50)
+
+    service.stop()
+  })
+
   afterEach(() => {
     vi.useRealTimers()
   })

@@ -26,7 +26,7 @@ const getFileNameFromFile = (file?: Aria2File): string => {
   const { path } = file
   if (path) {
     // Path is set — aria2 has resolved the filename (from Content-Disposition or URL).
-    const idx = path.lastIndexOf('/')
+    const idx = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'))
     if (idx <= 0 || idx === path.length) return path
     return path.substring(idx + 1)
   }

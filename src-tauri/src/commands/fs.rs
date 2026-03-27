@@ -1,7 +1,47 @@
 use crate::error::AppError;
+use serde_json::Value;
 use std::path::Path;
 use tauri::AppHandle;
 use tauri::Manager;
+
+fn redact_url_credentials(value: &str) -> String {
+    match url::Url::parse(value) {
+        Ok(url) => {
+            let host = url.host_str().unwrap_or("invalid-host");
+            let port = url
+                .port()
+                .map(|p| format!(":{p}"))
+                .unwrap_or_default();
+            let has_auth = !url.username().is_empty() || url.password().is_some();
+            if has_auth {
+                format!("{}://[REDACTED]@{host}{port}", url.scheme())
+            } else {
+                value.to_string()
+            }
+        }
+        Err(_) => value.to_string(),
+    }
+}
+
+fn sanitize_config_snapshot(raw: &Value) -> Value {
+    let mut sanitized = raw.clone();
+    if let Some(prefs) = sanitized.get_mut("preferences").and_then(Value::as_object_mut) {
+        if let Some(secret) = prefs.get_mut("rpcSecret") {
+            *secret = Value::String("[REDACTED]".into());
+        }
+        if let Some(cookie) = prefs.get_mut("cookie") {
+            *cookie = Value::String("[REDACTED]".into());
+        }
+        if let Some(proxy) = prefs.get_mut("proxy").and_then(Value::as_object_mut) {
+            if let Some(server_value) = proxy.get_mut("server") {
+                if let Some(server) = server_value.as_str() {
+                    *server_value = Value::String(redact_url_credentials(server));
+                }
+            }
+        }
+    }
+    sanitized
+}
 
 /// Returns `true` when the current process was launched by the OS
 /// autostart mechanism (the Tauri autostart plugin appends `--autostart`).
@@ -124,10 +164,21 @@ pub async fn export_diagnostic_logs(app: AppHandle, save_path: String) -> Result
     if config_path.exists() {
         let config_content = std::fs::read(&config_path)
             .map_err(|e| AppError::Io(format!("Failed to read config: {}", e)))?;
+        let sanitized = match serde_json::from_slice::<Value>(&config_content) {
+            Ok(value) => serde_json::to_vec_pretty(&sanitize_config_snapshot(&value))
+                .map_err(|e| AppError::Io(format!("Failed to sanitize config: {}", e)))?,
+            Err(e) => {
+                log::warn!("diagnostic export: config parse failed, omitting raw config: {e}");
+                serde_json::to_vec_pretty(&serde_json::json!({
+                    "error": "Failed to sanitize config snapshot"
+                }))
+                .map_err(|serr| AppError::Io(format!("Failed to serialize config fallback: {}", serr)))?
+            }
+        };
         zip_writer
             .start_file("config.json", options)
             .map_err(|e| AppError::Io(format!("Failed to add config.json: {}", e)))?;
-        std::io::Write::write_all(&mut zip_writer, &config_content)
+        std::io::Write::write_all(&mut zip_writer, &sanitized)
             .map_err(|e| AppError::Io(format!("Failed to write config.json: {}", e)))?;
     }
 
@@ -137,6 +188,46 @@ pub async fn export_diagnostic_logs(app: AppHandle, save_path: String) -> Result
 
     log::info!("Exported diagnostic logs to {}", zip_path.display());
     Ok(crate::engine::path_to_safe_string(&zip_path))
+}
+
+#[cfg(test)]
+mod export_tests {
+    use super::*;
+
+    #[test]
+    fn redact_url_credentials_masks_auth_section() {
+        assert_eq!(
+            redact_url_credentials("http://user:pass@example.com:8080"),
+            "http://[REDACTED]@example.com:8080"
+        );
+    }
+
+    #[test]
+    fn sanitize_config_snapshot_redacts_rpc_secret_cookie_and_proxy_server() {
+        let raw = serde_json::json!({
+            "preferences": {
+                "rpcSecret": "secret",
+                "cookie": "session=abc",
+                "proxy": {
+                    "server": "http://user:pass@example.com:8080"
+                }
+            }
+        });
+        let sanitized = sanitize_config_snapshot(&raw);
+        let prefs = sanitized
+            .get("preferences")
+            .and_then(Value::as_object)
+            .expect("preferences object must exist");
+        assert_eq!(prefs.get("rpcSecret").and_then(Value::as_str), Some("[REDACTED]"));
+        assert_eq!(prefs.get("cookie").and_then(Value::as_str), Some("[REDACTED]"));
+        assert_eq!(
+            prefs.get("proxy")
+                .and_then(Value::as_object)
+                .and_then(|proxy| proxy.get("server"))
+                .and_then(Value::as_str),
+            Some("http://[REDACTED]@example.com:8080")
+        );
+    }
 }
 
 /// Checks whether a file or directory exists at the given path.

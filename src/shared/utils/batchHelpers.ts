@@ -91,7 +91,7 @@ export function mergeUriLines(existingText: string, incoming: string[]): string 
   for (const payload of incoming) {
     // Each payload may itself contain multiple lines (e.g. multiline deep-link arg)
     for (const raw of payload.split('\n')) {
-      const line = raw.trim()
+      const line = normalizeInfoHash(raw.trim())
       if (line && !seen.has(line)) {
         seen.add(line)
         existing.push(line)

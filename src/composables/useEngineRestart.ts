@@ -76,11 +76,11 @@ export function useEngineRestart() {
 
       logger.error('useEngineRestart', `all reconnect attempts failed: ${lastError}`)
       appStore.engineReady = false
-      return true
+      return false
     } catch (e) {
       logger.error('useEngineRestart', `restart failed: ${e}`)
       appStore.engineReady = false
-      return true
+      return false
     } finally {
       appStore.engineInitializing = false
       isRestarting.value = false

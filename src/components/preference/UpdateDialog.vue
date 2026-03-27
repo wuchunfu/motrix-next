@@ -26,11 +26,14 @@ import {
   getActionLabel,
   getActionType,
   getActionTarget,
+  resolvePhaseAfterDownload,
+  shouldAllowUpdateDialogClose,
   isUpdateRollback,
   calcProgressPercent,
   bytesToMB,
   getUpdateProxy as resolveProxy,
   formatUpdateError,
+  type DownloadUpdateResult,
 } from '@/composables/useUpdateFlow'
 
 interface UpdateMetadata {
@@ -77,6 +80,7 @@ const downloadReceived = ref(0)
 const downloadCancelled = ref(false)
 const activeChannel = ref('stable')
 let progressUnlisten: UnlistenFn | null = null
+const dialogClosable = computed(() => shouldAllowUpdateDialogClose(phase.value))
 
 const progressPercent = computed(() => calcProgressPercent(downloadReceived.value, downloadTotal.value))
 
@@ -157,9 +161,9 @@ async function startDownload() {
   })
 
   try {
-    await invoke('download_update', { channel: ch, proxy: getUpdateProxy() })
+    const result = await invoke<DownloadUpdateResult>('download_update', { channel: ch, proxy: getUpdateProxy() })
     if (!downloadCancelled.value) {
-      phase.value = 'ready'
+      phase.value = resolvePhaseAfterDownload(result.status)
     }
   } catch (e) {
     if (!downloadCancelled.value) {
@@ -198,8 +202,8 @@ async function handleInstallAndRelaunch() {
 }
 
 function close() {
-  if (phase.value === 'downloading') {
-    cancelDownload()
+  if (!shouldAllowUpdateDialogClose(phase.value)) {
+    return
   }
   show.value = false
 }
@@ -214,10 +218,10 @@ defineExpose({ open })
 <template>
   <NModal
     v-model:show="show"
-    :mask-closable="phase !== 'downloading' && phase !== 'installing'"
-    :close-on-esc="phase !== 'downloading' && phase !== 'installing'"
+    :mask-closable="dialogClosable"
+    :close-on-esc="dialogClosable"
     transform-origin="center"
-    :closable="phase !== 'downloading' && phase !== 'installing'"
+    :closable="dialogClosable"
     @update:show="
       (v: boolean) => {
         if (!v) close()
@@ -232,7 +236,7 @@ defineExpose({ open })
             {{ t(`preferences.update-channel-${activeChannel}`) }}
           </NTag>
         </div>
-        <button class="update-dialog-close" @click="close">×</button>
+        <button class="update-dialog-close" :disabled="!dialogClosable" @click="close">×</button>
       </div>
       <div class="update-dialog-body">
         <Transition name="phase-switch" mode="out-in">
@@ -317,7 +321,7 @@ defineExpose({ open })
       </div>
       <!-- Fixed action footer — always rendered with 2 buttons -->
       <div class="update-dialog-footer">
-        <NButton style="min-width: 120px" @click="close">
+        <NButton style="min-width: 120px" :disabled="!dialogClosable" @click="close">
           {{ t('app.close') }}
         </NButton>
         <NButton

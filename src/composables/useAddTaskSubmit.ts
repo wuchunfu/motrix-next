@@ -39,6 +39,16 @@ export interface UseAddTaskSubmitOptions {
   onClose: () => void
 }
 
+export interface MagnetSubmitFailure {
+  uri: string
+  error: string
+}
+
+export interface ManualUriSubmitResult {
+  magnetGids: string[]
+  magnetFailures: MagnetSubmitFailure[]
+}
+
 /**
  * Builds aria2 engine options from the add-task form.
  * Pure function — no side effects, fully testable.
@@ -131,8 +141,8 @@ export async function submitManualUris(
   form: AddTaskForm,
   options: Aria2EngineOptions,
   taskStore: ReturnType<typeof useTaskStore>,
-): Promise<string[]> {
-  if (!form.uris.trim()) return []
+): Promise<ManualUriSubmitResult> {
+  if (!form.uris.trim()) return { magnetGids: [], magnetFailures: [] }
   const allUris = normalizeUriLines(form.uris)
 
   // Partition into magnet and regular URIs
@@ -163,17 +173,24 @@ export async function submitManualUris(
   }
 
   // Submit magnet URIs (normal mode — global pause-metadata controls pausing)
-  const magnetGids: string[] = []
+  const result: ManualUriSubmitResult = {
+    magnetGids: [],
+    magnetFailures: [],
+  }
   for (const uri of magnetUris) {
     try {
       const gid = await taskStore.addMagnetUri({ uri, options })
-      magnetGids.push(gid)
+      result.magnetGids.push(gid)
     } catch (e) {
       logger.error('submitManualUris.magnet', e)
+      result.magnetFailures.push({
+        uri,
+        error: e instanceof Error ? e.message : String(e),
+      })
     }
   }
 
-  return magnetGids
+  return result
 }
 
 export function useAddTaskSubmit({ form, onClose }: UseAddTaskSubmitOptions) {
@@ -192,18 +209,20 @@ export function useAddTaskSubmit({ form, onClose }: UseAddTaskSubmitOptions) {
     try {
       const options = buildEngineOptions(form.value)
       const batch = appStore.pendingBatch
+      let magnetFailureCount = 0
 
       if (batch.length > 0) {
         await submitBatchItems(batch, options, taskStore)
       }
       if (form.value.uris.trim()) {
-        await submitManualUris(form.value, options, taskStore)
+        const manualResult = await submitManualUris(form.value, options, taskStore)
+        magnetFailureCount = manualResult.magnetFailures.length
         // pendingMagnetGids is set directly inside addMagnetUri (task store)
       }
 
-      const failed = batch.filter((i) => i.status === 'failed')
-      if (failed.length > 0) {
-        message.warning(`${failed.length} ${t('task.failed') || 'failed'}`, { duration: 5000, closable: true })
+      const failedCount = batch.filter((i) => i.status === 'failed').length + magnetFailureCount
+      if (failedCount > 0) {
+        message.warning(`${failedCount} ${t('task.failed') || 'failed'}`, { duration: 5000, closable: true })
       } else {
         onClose()
         if (preferenceStore.config.newTaskShowDownloading !== false) {

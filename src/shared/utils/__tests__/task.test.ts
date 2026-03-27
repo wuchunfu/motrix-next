@@ -142,6 +142,11 @@ describe('getFileNameFromFile', () => {
     expect(getFileNameFromFile(file)).toBe('test.zip')
   })
 
+  it('returns filename from Windows path with backslashes', () => {
+    const file = createMockFile({ path: 'C:\\Downloads\\nested\\test.zip' })
+    expect(getFileNameFromFile(file)).toBe('test.zip')
+  })
+
   it('returns full path when no separator found', () => {
     const file = createMockFile({ path: 'plainfile.txt' })
     expect(getFileNameFromFile(file)).toBe('plainfile.txt')

@@ -333,17 +333,18 @@ async function handleSubmit() {
 
   try {
     const options = buildEngineOptions(form.value)
+    let manualResult = { magnetGids: [] as string[], magnetFailures: [] as { uri: string; error: string }[] }
 
     if (hasBatch.value) {
       await submitBatchItems(batch.value, options, taskStore)
     }
     if (form.value.uris.trim()) {
-      await submitManualUris(form.value, options, taskStore)
+      manualResult = await submitManualUris(form.value, options, taskStore)
     }
 
-    const failed = batch.value.filter((i) => i.status === 'failed')
-    if (failed.length > 0) {
-      message.warning(`${failed.length} ${t('task.failed') || 'failed'}`, { duration: 5000, closable: true })
+    const failedCount = batch.value.filter((i) => i.status === 'failed').length + manualResult.magnetFailures.length
+    if (failedCount > 0) {
+      message.warning(`${failedCount} ${t('task.failed') || 'failed'}`, { duration: 5000, closable: true })
     } else {
       handleClose()
       if (preferenceStore.config.newTaskShowDownloading !== false) {
@@ -538,7 +539,9 @@ function kindTagType(kind: string): 'info' | 'success' | 'warning' {
       <template #footer>
         <NSpace justify="end">
           <NButton @click="handleClose">{{ t('app.cancel') }}</NButton>
-          <NButton type="primary" :loading="submitting" @click="handleSubmit">{{ submitLabel }}</NButton>
+          <NButton data-testid="submit-button" type="primary" :loading="submitting" @click="handleSubmit">
+            {{ submitLabel }}
+          </NButton>
         </NSpace>
       </template>
     </NCard>

@@ -28,6 +28,11 @@ const supportsTrayTitle = (() => {
   }
 })()
 
+function normalizeFileUriPath(url: string): string {
+  const decodedPath = decodeURIComponent(url.replace(/^file:\/\//i, ''))
+  return /^\/[A-Za-z]:[\\/]/.test(decodedPath) ? decodedPath.slice(1) : decodedPath
+}
+
 export const useAppStore = defineStore('app', () => {
   const systemTheme = ref('light')
   const trayFocused = ref(false)
@@ -228,7 +233,7 @@ export const useAppStore = defineStore('app', () => {
       // Only treat as a file-based batch item if it's a LOCAL path or file:// URI
       const hasFileExt = FILE_EXTS.some((ext) => lower.endsWith(ext))
       if ((isLocalPath || isFileUri) && hasFileExt) {
-        const filePath = isFileUri ? decodeURIComponent(url.replace(/^file:\/\//, '')) : url
+        const filePath = isFileUri ? normalizeFileUriPath(url) : url
         const kind = detectKind(filePath)
         items.push(createBatchItem(kind, filePath))
       } else if (lower.startsWith('magnet:')) {

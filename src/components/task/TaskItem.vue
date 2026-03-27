@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /** @fileoverview Individual task row in the task list with progress and controls. */
-import { computed, ref, watch, onMounted } from 'vue'
+import { computed, ref, watch, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { TASK_STATUS } from '@shared/constants'
 import {
@@ -133,37 +133,62 @@ function onDblClick() {
 
 // File missing detection for completed/stopped tasks
 const fileMissing = ref(false)
+const FILE_CHECK_THROTTLE_MS = 120
+let fileCheckTimer: ReturnType<typeof setTimeout> | null = null
 
-async function checkFileExists() {
+const fileCheckTargetPath = computed(() => {
   const status = props.task.status
   if (status === TASK_STATUS.ACTIVE || status === TASK_STATUS.WAITING || status === TASK_STATUS.PAUSED) {
-    fileMissing.value = false
-    return
+    return null
   }
-  const dir = props.task.dir
+
   const files = props.task.files
-  if (!files || files.length === 0 || !dir) {
+  if (!props.task.dir || !files || files.length === 0) {
+    return null
+  }
+
+  const selected = files.filter((file) => file.selected === 'true')
+  return (selected.length > 0 ? selected[0] : files[0])?.path ?? null
+})
+
+async function checkFileExists(targetPath: string | null) {
+  if (!targetPath) {
     fileMissing.value = false
     return
   }
+
   try {
-    // Only check files the user actually selected for download.
-    // For BT tasks with partial file selection, unselected files
-    // (selected === 'false') won't exist on disk — that is expected,
-    // not "missing". Fall back to files[0] for non-BT single-file tasks.
-    const selected = files.filter((f) => f.selected === 'true')
-    const target = (selected.length > 0 ? selected[0] : files[0])?.path
-    if (target) {
-      fileMissing.value = !(await invoke<boolean>('check_path_exists', { path: target }))
-    }
+    fileMissing.value = !(await invoke<boolean>('check_path_exists', { path: targetPath }))
   } catch (e) {
     logger.debug('TaskItem.fileCheck', e)
     fileMissing.value = false
   }
 }
 
-onMounted(checkFileExists)
-watch(() => props.task.status, checkFileExists)
+function scheduleFileExistsCheck(targetPath: string | null) {
+  if (fileCheckTimer) {
+    clearTimeout(fileCheckTimer)
+    fileCheckTimer = null
+  }
+
+  if (!targetPath) {
+    fileMissing.value = false
+    return
+  }
+
+  fileCheckTimer = setTimeout(() => {
+    fileCheckTimer = null
+    void checkFileExists(targetPath)
+  }, FILE_CHECK_THROTTLE_MS)
+}
+
+watch(fileCheckTargetPath, scheduleFileExistsCheck, { immediate: true })
+onBeforeUnmount(() => {
+  if (fileCheckTimer) {
+    clearTimeout(fileCheckTimer)
+    fileCheckTimer = null
+  }
+})
 
 // ── M3 seeding state entrance animation ───────────────────────────
 // CSS transitions fail here because the store's polling cycle replaces
@@ -202,6 +227,13 @@ function onCardRelease() {
     cardPressTimer = null
   }, remaining)
 }
+
+onBeforeUnmount(() => {
+  if (cardPressTimer) {
+    clearTimeout(cardPressTimer)
+    cardPressTimer = null
+  }
+})
 </script>
 
 <template>

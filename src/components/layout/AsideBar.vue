@@ -57,36 +57,64 @@ function showAddTask() {
         </a>
       </h1>
       <ul class="menu top-menu" data-tauri-drag-region>
-        <li class="non-draggable" @click="nav('/task/active')">
+        <li>
           <MTooltip placement="right">
             <template #trigger>
-              <NIcon :size="20"><ListOutline /></NIcon>
+              <button
+                type="button"
+                class="menu-button non-draggable"
+                :aria-label="t('app.task-list')"
+                @click="nav('/task/active')"
+              >
+                <NIcon :size="20"><ListOutline /></NIcon>
+              </button>
             </template>
             {{ t('app.task-list') }}
           </MTooltip>
         </li>
-        <li class="non-draggable" @click="showAddTask">
+        <li>
           <MTooltip placement="right">
             <template #trigger>
-              <NIcon :size="20"><AddOutline /></NIcon>
+              <button
+                type="button"
+                class="menu-button non-draggable"
+                :aria-label="t('app.add-task')"
+                @click="showAddTask"
+              >
+                <NIcon :size="20"><AddOutline /></NIcon>
+              </button>
             </template>
             {{ t('app.add-task') }}
           </MTooltip>
         </li>
       </ul>
       <ul class="menu bottom-menu">
-        <li class="non-draggable" @click="emit('show-about')">
+        <li>
           <MTooltip placement="right">
             <template #trigger>
-              <NIcon :size="20"><HelpCircleOutline /></NIcon>
+              <button
+                type="button"
+                class="menu-button non-draggable"
+                :aria-label="t('app.about')"
+                @click="emit('show-about')"
+              >
+                <NIcon :size="20"><HelpCircleOutline /></NIcon>
+              </button>
             </template>
             {{ t('app.about') }}
           </MTooltip>
         </li>
-        <li class="non-draggable" @click="nav('/preference/basic')">
+        <li>
           <MTooltip placement="right">
             <template #trigger>
-              <NIcon :size="20"><SettingsOutline /></NIcon>
+              <button
+                type="button"
+                class="menu-button non-draggable"
+                :aria-label="t('app.preferences')"
+                @click="nav('/preference/basic')"
+              >
+                <NIcon :size="20"><SettingsOutline /></NIcon>
+              </button>
             </template>
             {{ t('app.preferences') }}
           </MTooltip>
@@ -134,9 +162,11 @@ function showAddTask() {
   cursor: default;
 }
 .menu > li {
+  margin-top: 24px;
+}
+.menu-button {
   width: 32px;
   height: 32px;
-  margin-top: 24px;
   cursor: pointer;
   border-radius: 16px;
   transition: background-color 0.2s cubic-bezier(0.2, 0, 0, 1);
@@ -144,10 +174,15 @@ function showAddTask() {
   align-items: center;
   justify-content: center;
   color: var(--aside-icon-color);
+  background: transparent;
+  border: none;
+  padding: 0;
 }
-.menu > li:hover {
+.menu-button:hover,
+.menu-button:focus-visible {
   background-color: var(--aside-icon-hover-bg);
   color: var(--aside-text);
+  outline: none;
 }
 .top-menu {
   flex: 1;

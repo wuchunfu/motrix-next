@@ -94,11 +94,22 @@ describe('useEngineRestart', () => {
     mockInvoke.mockRejectedValueOnce(new Error('engine crash'))
 
     const { restartEngine, isRestarting } = useEngineRestart()
-    await restartEngine({ port: 16800, secret: 'test' })
+    const result = await restartEngine({ port: 16800, secret: 'test' })
 
     // Guard must be released even after failure
+    expect(result).toBe(false)
     expect(isRestarting.value).toBe(false)
   })
+
+  it('returns false when reconnect retries are exhausted', async () => {
+    mockReconnect.mockRejectedValue(new Error('rpc unavailable'))
+
+    const { restartEngine } = useEngineRestart()
+    const result = await restartEngine({ port: 16800, secret: 'test' })
+
+    expect(result).toBe(false)
+    expect(mockReconnect).toHaveBeenCalledTimes(5)
+  }, 7000)
 
   it('allows restart after a previous one completes', async () => {
     const { restartEngine, isRestarting } = useEngineRestart()
