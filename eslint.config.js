@@ -65,7 +65,7 @@ export default [
             'vue/first-attribute-linebreak': 'off',
             'vue/html-closing-bracket-newline': 'off',
             // SFC includes template + script + style — 350 is unrealistic.
-            'max-lines': ['warn', { max: 800, skipBlankLines: true, skipComments: true }],
+            'max-lines': ['warn', { max: 1000, skipBlankLines: true, skipComments: true }],
             'max-lines-per-function': ['warn', { max: 80, skipBlankLines: true, skipComments: true }],
         },
     },
