@@ -166,21 +166,32 @@ describe('commands/fs.rs — is_autostart_launch enhanced detection', () => {
     const fnBody = extractFunctionBody(source, 'is_autostart_launch')
     expect(fnBody).toBeTruthy()
     expect(fnBody).toContain('log::info!')
-    // Info-level log must include argc (argument count) and result
     expect(fnBody).toContain('argc')
     expect(fnBody).toContain('result')
-    // Full args MUST NOT appear in info-level log — it leaks process
-    // arguments (deep-link URLs, file paths) into diagnostic exports.
+    // Full args MUST NOT appear in info-level log.
     expect(fnBody).not.toMatch(/log::info!.*args=\{/)
   })
 
-  it('logs full argv at debug level only for developer diagnostics', () => {
+  it('debug log uses structured redacted diagnostics, not raw argv', () => {
     const fnBody = extractFunctionBody(source, 'is_autostart_launch')
     expect(fnBody).toBeTruthy()
-    // Debug-level log preserves diagnosability for autostart bugs
-    // without exposing argv in production-level diagnostic exports.
     expect(fnBody).toContain('log::debug!')
-    expect(fnBody).toMatch(/log::debug!.*args/)
+    // Must contain structured diagnostic fields for autostart troubleshooting
+    // (nicehash/auto-launch#771) without exposing raw argument strings.
+    expect(fnBody).toContain('matched_exact')
+    expect(fnBody).toContain('matched_prefixed')
+    expect(fnBody).toContain('other_arg_count')
+  })
+
+  it('never records raw argv at any log level', () => {
+    const fnBody = extractFunctionBody(source, 'is_autostart_launch')
+    expect(fnBody).toBeTruthy()
+    // Raw args={:?} would leak deep-link URLs and local paths into
+    // diagnostic exports. The default log level is Debug (per design),
+    // so debug! entries DO reach disk and get bundled by export_diagnostic_logs.
+    expect(fnBody).not.toMatch(/log::(info|debug|warn|error)!.*args=\{:\?}/)
+    // Also reject any format that dumps the full args vector
+    expect(fnBody).not.toContain('args={:?}')
   })
 })
 

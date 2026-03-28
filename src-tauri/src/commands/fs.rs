@@ -50,17 +50,27 @@ fn sanitize_config_snapshot(raw: &Value) -> Value {
 /// to tolerate edge cases from the auto-launch crate's Windows registry
 /// entry handling (nicehash/auto-launch#771).
 ///
-/// Emits an INFO log with the full argument list on every call so that
-/// autostart-related bugs can be diagnosed from user-submitted logs
-/// without requiring manual registry inspection.
+/// Logging strategy (privacy-safe):
+/// - `info!`: argument count and boolean result only
+/// - `debug!`: structured diagnostics (match type counts) — no raw argv,
+///   because the default log level is `Debug` and diagnostic exports bundle
+///   all log files into user-submitted ZIPs
 #[tauri::command]
 pub fn is_autostart_launch() -> bool {
     let args: Vec<String> = std::env::args().collect();
-    let result = args
-        .iter()
-        .any(|a| a == "--autostart" || a.starts_with("--autostart="));
+    let matched_exact = args.iter().any(|a| a == "--autostart");
+    let matched_prefixed = args.iter().any(|a| a.starts_with("--autostart="));
+    let result = matched_exact || matched_prefixed;
+    // Subtract 1 for argv[0] (binary name), then subtract matched args
+    let other_arg_count =
+        args.len().saturating_sub(1) - (matched_exact as usize) - (matched_prefixed as usize);
     log::info!("is_autostart_launch: argc={} result={}", args.len(), result);
-    log::debug!("is_autostart_launch: args={:?}", args);
+    log::debug!(
+        "is_autostart_launch: matched_exact={} matched_prefixed={} other_arg_count={}",
+        matched_exact,
+        matched_prefixed,
+        other_arg_count
+    );
     result
 }
 
