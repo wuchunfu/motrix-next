@@ -100,7 +100,9 @@ describe('TaskStore', () => {
   it('fetchList populates taskList from API', async () => {
     await store.fetchList()
     expect(store.taskList).toHaveLength(2)
-    expect(store.taskList[0].gid).toBe('gid1')
+    // Active tab sorts by added-at DESC; trackFirstSeen assigns sequential
+    // timestamps so gid2 (later) comes before gid1 (earlier).
+    expect(store.taskList[0].gid).toBe('gid2')
     expect(mockApi.fetchTaskList).toHaveBeenCalledWith({ type: 'active' })
   })
 
@@ -369,7 +371,8 @@ describe('TaskStore', () => {
   it('selectAllTask selects all gids in current list', async () => {
     await store.fetchList()
     store.selectAllTask()
-    expect(store.selectedGidList).toEqual(['gid1', 'gid2'])
+    // Order matches added-at DESC sort (gid2 first)
+    expect(store.selectedGidList).toEqual(['gid2', 'gid1'])
   })
 
   it('selectTasks sets arbitrary gid list', () => {

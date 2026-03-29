@@ -224,4 +224,11 @@ export default {
   'task-completed-at': 'زمان اتمام',
   'restart-not-available': 'لینک دانلود برای شروع مجدد موجود نیست',
   'torrent-trashed': 'دانلود "{taskName}" کامل شد، فایل تورنت به سطل زباله منتقل شد',
+  'sort-by': 'مرتب‌سازی بر اساس',
+  'sort-added-at': 'زمان افزودن',
+  'sort-completed-at': 'زمان تکمیل',
+  'sort-name': 'نام',
+  'sort-size': 'اندازه',
+  'sort-progress': 'پیشرفت',
+  'sort-speed': 'سرعت',
 }

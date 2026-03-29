@@ -224,4 +224,11 @@ export default {
   'task-completed-at': 'وقت الاكتمال',
   'restart-not-available': 'لا تتوفر روابط تحميل لإعادة التشغيل',
   'torrent-trashed': 'اكتمل تنزيل "{taskName}"، تم نقل ملف التورنت إلى سلة المهملات',
+  'sort-by': 'ترتيب حسب',
+  'sort-added-at': 'وقت الإضافة',
+  'sort-completed-at': 'وقت الاكتمال',
+  'sort-name': 'الاسم',
+  'sort-size': 'الحجم',
+  'sort-progress': 'التقدم',
+  'sort-speed': 'السرعة',
 }

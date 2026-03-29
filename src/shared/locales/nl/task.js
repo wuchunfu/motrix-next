@@ -224,4 +224,11 @@ export default {
   'task-completed-at': 'Voltooid op',
   'restart-not-available': 'Geen downloadlinks beschikbaar om opnieuw te starten',
   'torrent-trashed': 'Download van "{taskName}" voltooid, torrentbestand verplaatst naar de prullenbak',
+  'sort-by': 'Sorteren op',
+  'sort-added-at': 'Toegevoegd',
+  'sort-completed-at': 'Voltooid',
+  'sort-name': 'Naam',
+  'sort-size': 'Grootte',
+  'sort-progress': 'Voortgang',
+  'sort-speed': 'Snelheid',
 }

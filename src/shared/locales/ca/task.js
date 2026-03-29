@@ -224,4 +224,11 @@ export default {
   'task-completed-at': 'Completat el',
   'restart-not-available': 'No hi ha enllaços disponibles per reiniciar',
   'torrent-trashed': 'Descàrrega de "{taskName}" completada, el fitxer torrent s\'ha mogut a la paperera',
+  'sort-by': 'Ordena per',
+  'sort-added-at': 'Data d\'afegiment',
+  'sort-completed-at': 'Data de finalització',
+  'sort-name': 'Nom',
+  'sort-size': 'Mida',
+  'sort-progress': 'Progrés',
+  'sort-speed': 'Velocitat',
 }

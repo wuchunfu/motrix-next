@@ -224,4 +224,11 @@ export default {
   'task-completed-at': 'Ολοκληρώθηκε στις',
   'restart-not-available': 'Δεν υπάρχουν διαθέσιμοι σύνδεσμοι για επανεκκίνηση',
   'torrent-trashed': 'Η λήψη του "{taskName}" ολοκληρώθηκε, το αρχείο torrent μεταφέρθηκε στον κάδο ανακύκλωσης',
+  'sort-by': 'Ταξινόμηση κατά',
+  'sort-added-at': 'Ημερομηνία προσθήκης',
+  'sort-completed-at': 'Ημερομηνία ολοκλήρωσης',
+  'sort-name': 'Όνομα',
+  'sort-size': 'Μέγεθος',
+  'sort-progress': 'Πρόοδος',
+  'sort-speed': 'Ταχύτητα',
 }

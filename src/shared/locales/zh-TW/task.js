@@ -224,4 +224,11 @@ export default {
   'task-completed-at': '完成時間',
   'restart-not-available': '沒有可用的下載連結，無法重新下載',
   'torrent-trashed': '「{taskName}」下載完成，種子檔案已移至回收桶',
+  'sort-by': '排序方式',
+  'sort-added-at': '新增時間',
+  'sort-completed-at': '完成時間',
+  'sort-name': '名稱',
+  'sort-size': '大小',
+  'sort-progress': '進度',
+  'sort-speed': '速度',
 }

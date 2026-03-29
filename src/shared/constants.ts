@@ -1,4 +1,5 @@
 /** @fileoverview Application-wide constants: themes, intervals, suffixes, limits. */
+import { DEFAULT_TASK_SORT } from '@/composables/useTaskSort'
 export const EMPTY_STRING = ''
 export const IS_PORTABLE = false
 
@@ -163,6 +164,13 @@ export const DEFAULT_APP_CONFIG = {
   // ── Directories ───────────────────────────────────────────────
   historyDirectories: [] as string[],
   favoriteDirectories: [] as string[],
+
+  // ── Cleanup ───────────────────────────────────────────────────
+  deleteTorrentAfterComplete: false,
+  autoDeleteStaleRecords: false,
+
+  // ── Task Sorting ─────────────────────────────────────────────
+  taskSort: DEFAULT_TASK_SORT,
 }
 
 export const MAX_BT_TRACKER_LENGTH = 6144

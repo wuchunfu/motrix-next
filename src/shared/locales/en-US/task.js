@@ -224,4 +224,11 @@ export default {
   'task-completed-at': 'Completed At',
   'restart-not-available': 'No download URL available for restart',
   'torrent-trashed': '"{taskName}" download complete — torrent file moved to Trash',
+  'sort-by': 'Sort by',
+  'sort-added-at': 'Added Time',
+  'sort-completed-at': 'Completed Time',
+  'sort-name': 'Name',
+  'sort-size': 'Size',
+  'sort-progress': 'Progress',
+  'sort-speed': 'Speed',
 }

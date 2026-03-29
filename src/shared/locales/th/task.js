@@ -224,4 +224,11 @@ export default {
   'task-completed-at': 'เสร็จสิ้นเมื่อ',
   'restart-not-available': 'ไม่มี URL ดาวน์โหลดสำหรับเริ่มใหม่',
   'torrent-trashed': 'ดาวน์โหลด "{taskName}" เสร็จสิ้น ไฟล์ทอร์เรนต์ถูกย้ายไปที่ถังขยะ',
+  'sort-by': 'เรียงตาม',
+  'sort-added-at': 'เวลาที่เพิ่ม',
+  'sort-completed-at': 'เวลาที่เสร็จ',
+  'sort-name': 'ชื่อ',
+  'sort-size': 'ขนาด',
+  'sort-progress': 'ความคืบหน้า',
+  'sort-speed': 'ความเร็ว',
 }

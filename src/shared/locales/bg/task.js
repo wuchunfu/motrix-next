@@ -224,4 +224,11 @@ export default {
   'task-completed-at': 'Завършено на',
   'restart-not-available': 'Няма налични линкове за повторно изтегляне',
   'torrent-trashed': 'Изтеглянето на "{taskName}" завърши, торент файлът е преместен в кошчето',
+  'sort-by': 'Сортиране по',
+  'sort-added-at': 'Време на добавяне',
+  'sort-completed-at': 'Време на завършване',
+  'sort-name': 'Име',
+  'sort-size': 'Размер',
+  'sort-progress': 'Напредък',
+  'sort-speed': 'Скорост',
 }

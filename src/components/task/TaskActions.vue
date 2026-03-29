@@ -11,9 +11,20 @@ import { checkTaskIsSeeder } from '@shared/utils/task'
 import { deleteTaskFiles } from '@/composables/useFileDelete'
 
 import { logger } from '@shared/logger'
-import { NButton, NIcon, NCheckbox, useDialog } from 'naive-ui'
+import { NButton, NIcon, NCheckbox, NPopover, useDialog } from 'naive-ui'
 import MTooltip from '@/components/common/MTooltip.vue'
 import { useAppMessage } from '@/composables/useAppMessage'
+import { usePreferenceStore } from '@/stores/preference'
+import {
+  ACTIVE_SORT_FIELDS,
+  STOPPED_SORT_FIELDS,
+  ALL_SORT_FIELDS,
+  DEFAULT_TASK_SORT,
+  type SortDirection,
+  type ActiveSortField,
+  type StoppedSortField,
+  type AllSortField,
+} from '@/composables/useTaskSort'
 import {
   AddOutline,
   PlayOutline,
@@ -23,11 +34,67 @@ import {
   CloseOutline,
   StopCircleOutline,
   SyncOutline,
+  SwapVerticalOutline,
+  ArrowUpOutline,
+  ArrowDownOutline,
 } from '@vicons/ionicons5'
 
 const { t } = useI18n()
 const appStore = useAppStore()
 const taskStore = useTaskStore()
+const preferenceStore = usePreferenceStore()
+
+// ── Sort dropdown ─────────────────────────────────────────────────
+const currentTab = computed(() => taskStore.currentList)
+
+/** Map sort field key to its i18n label. */
+const SORT_LABELS: Record<string, string> = {
+  'added-at': 'task.sort-added-at',
+  'completed-at': 'task.sort-completed-at',
+  name: 'task.sort-name',
+  size: 'task.sort-size',
+  progress: 'task.sort-progress',
+  speed: 'task.sort-speed',
+}
+
+/** Active sort config for the current tab. */
+const currentSort = computed(() => {
+  const cfg = preferenceStore.config?.taskSort ?? DEFAULT_TASK_SORT
+  switch (currentTab.value) {
+    case 'stopped':
+      return cfg.stopped
+    case 'all':
+      return cfg.all
+    default:
+      return cfg.active
+  }
+})
+
+/** Sort field list for the current tab. */
+const currentSortFields = computed(() => {
+  switch (currentTab.value) {
+    case 'stopped':
+      return STOPPED_SORT_FIELDS
+    case 'all':
+      return ALL_SORT_FIELDS
+    default:
+      return ACTIVE_SORT_FIELDS
+  }
+})
+
+const sortPopoverVisible = ref(false)
+
+function onSortSelect(key: string) {
+  const cfg = preferenceStore.config?.taskSort ?? { ...DEFAULT_TASK_SORT }
+  const tab = currentTab.value === 'stopped' ? 'stopped' : currentTab.value === 'all' ? 'all' : 'active'
+  const current = cfg[tab]
+  // Toggle direction if same field, otherwise switch to DESC
+  const direction: SortDirection = current.field === key ? (current.direction === 'desc' ? 'asc' : 'desc') : 'desc'
+  const updated = { ...cfg, [tab]: { field: key as ActiveSortField | StoppedSortField | AllSortField, direction } }
+  preferenceStore.updateAndSave({ taskSort: updated })
+  sortPopoverVisible.value = false
+  taskStore.fetchList()
+}
 const message = useAppMessage()
 const dialog = useDialog()
 
@@ -352,6 +419,47 @@ function onBtnRelease(ev: PointerEvent) {
       </template>
       {{ t('task.new-task') || 'New Task' }}
     </MTooltip>
+    <NPopover
+      v-model:show="sortPopoverVisible"
+      trigger="click"
+      placement="bottom-start"
+      :show-arrow="false"
+      raw
+      style="padding: 0"
+    >
+      <template #trigger>
+        <NButton
+          quaternary
+          circle
+          size="small"
+          @pointerdown="onBtnPress"
+          @pointerup="onBtnRelease"
+          @pointerleave="onBtnRelease"
+        >
+          <template #icon>
+            <NIcon><SwapVerticalOutline /></NIcon>
+          </template>
+        </NButton>
+      </template>
+      <div class="sort-panel">
+        <div class="sort-panel-header">{{ t('task.sort-by') }}</div>
+        <button
+          v-for="field in currentSortFields"
+          :key="field"
+          class="sort-item"
+          :class="{ active: field === currentSort.field }"
+          @click="onSortSelect(field)"
+        >
+          <span class="sort-item-label">{{ t(SORT_LABELS[field]) }}</span>
+          <span v-if="field === currentSort.field" class="sort-item-dir">
+            <NIcon :size="14">
+              <ArrowUpOutline v-if="currentSort.direction === 'asc'" />
+              <ArrowDownOutline v-else />
+            </NIcon>
+          </span>
+        </button>
+      </div>
+    </NPopover>
     <MTooltip>
       <template #trigger>
         <NButton
@@ -505,5 +613,73 @@ function onBtnRelease(ev: PointerEvent) {
   transform-origin: center;
   will-change: transform;
   contain: layout style paint;
+}
+</style>
+
+<!-- Sort panel renders in teleported popover — must be unscoped -->
+<style>
+.sort-panel {
+  min-width: 160px;
+  padding: 6px;
+  background: var(--m3-surface-container-high);
+  border: 1px solid var(--m3-outline-variant);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px var(--m3-shadow);
+}
+
+.sort-panel-header {
+  padding: 6px 10px 4px;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--m3-outline);
+  letter-spacing: 0.02em;
+}
+
+.sort-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--m3-on-surface);
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.15s cubic-bezier(0.2, 0, 0, 1),
+    color 0.15s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.sort-item:hover {
+  background: var(--m3-surface-container-highest);
+}
+
+.sort-item:active {
+  background: var(--m3-outline-variant);
+  transition: background-color 0.05s ease;
+}
+
+.sort-item.active {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.sort-item.active:hover {
+  background: var(--m3-primary-container-bg);
+}
+
+.sort-item-label {
+  flex: 1;
+}
+
+.sort-item-dir {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  color: var(--color-primary);
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
 }
 </style>

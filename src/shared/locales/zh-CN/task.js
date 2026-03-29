@@ -224,4 +224,11 @@ export default {
   'task-completed-at': '完成时间',
   'restart-not-available': '没有可用的下载链接，无法重新下载',
   'torrent-trashed': '"{taskName}" 下载完成，种子文件已移至废纸篓',
+  'sort-by': '排序方式',
+  'sort-added-at': '添加时间',
+  'sort-completed-at': '完成时间',
+  'sort-name': '名称',
+  'sort-size': '大小',
+  'sort-progress': '进度',
+  'sort-speed': '速度',
 }

@@ -224,4 +224,11 @@ export default {
   'task-completed-at': '완료 시간',
   'restart-not-available': '다시 시작할 수 있는 다운로드 URL이 없습니다',
   'torrent-trashed': '"{taskName}" 다운로드 완료 — 토렌트 파일이 휴지통으로 이동됨',
+  'sort-by': '정렬',
+  'sort-added-at': '추가 시간',
+  'sort-completed-at': '완료 시간',
+  'sort-name': '이름',
+  'sort-size': '크기',
+  'sort-progress': '진행률',
+  'sort-speed': '속도',
 }

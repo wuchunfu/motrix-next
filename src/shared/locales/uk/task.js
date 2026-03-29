@@ -224,4 +224,11 @@ export default {
   'task-completed-at': 'Завершено',
   'restart-not-available': 'Немає доступних посилань для повторного завантаження',
   'torrent-trashed': 'Завантаження "{taskName}" завершено — торент-файл переміщено до кошика',
+  'sort-by': 'Сортувати за',
+  'sort-added-at': 'Час додавання',
+  'sort-completed-at': 'Час завершення',
+  'sort-name': 'Назва',
+  'sort-size': 'Розмір',
+  'sort-progress': 'Прогрес',
+  'sort-speed': 'Швидкість',
 }

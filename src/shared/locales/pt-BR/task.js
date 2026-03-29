@@ -224,4 +224,11 @@ export default {
   'task-completed-at': 'Concluído em',
   'restart-not-available': 'Nenhum link de download disponível para reiniciar',
   'torrent-trashed': 'Download de "{taskName}" concluído — arquivo torrent movido para a lixeira',
+  'sort-by': 'Ordenar por',
+  'sort-added-at': 'Data de adição',
+  'sort-completed-at': 'Data de conclusão',
+  'sort-name': 'Nome',
+  'sort-size': 'Tamanho',
+  'sort-progress': 'Progresso',
+  'sort-speed': 'Velocidade',
 }

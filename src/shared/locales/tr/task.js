@@ -224,4 +224,11 @@ export default {
   'task-completed-at': 'Tamamlanma Tarihi',
   'restart-not-available': 'Yeniden başlatmak için indirme bağlantısı yok',
   'torrent-trashed': '"{taskName}" indirmesi tamamlandı, torrent dosyası çöp kutusuna taşındı',
+  'sort-by': 'Sırala',
+  'sort-added-at': 'Eklenme Zamanı',
+  'sort-completed-at': 'Tamamlanma Zamanı',
+  'sort-name': 'Ad',
+  'sort-size': 'Boyut',
+  'sort-progress': 'İlerleme',
+  'sort-speed': 'Hız',
 }

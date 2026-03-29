@@ -15,7 +15,10 @@ import {
   loadAddedAtFromRecords,
   buildSortableAddedAtMap,
 } from '@/composables/useTaskOrder'
+import { sortTasks, sortRecords } from '@/composables/useTaskSort'
+import { DEFAULT_TASK_SORT } from '@/composables/useTaskSort'
 import { useHistoryStore } from '@/stores/history'
+import { usePreferenceStore } from '@/stores/preference'
 
 import { restartTask as restartTaskImpl } from './taskRestart'
 import { createTaskOperations } from './taskOperations'
@@ -70,10 +73,13 @@ export const useTaskStore = defineStore('task', () => {
       // Stopped tab is DB-primary: history.db is the single source of truth.
       // Active tab reads from aria2 (tellActive + tellWaiting).
       // All tab merges: aria2 active + aria2 stopped (bridge) + history DB.
+      const sortConfig = usePreferenceStore().config?.taskSort ?? DEFAULT_TASK_SORT
       let data: Aria2Task[]
       if (currentList.value === 'stopped') {
         const historyStore = useHistoryStore()
         const records = await historyStore.getRecords()
+        const { field, direction } = sortConfig.stopped
+        sortRecords(records, field, direction)
         data = records.map(historyRecordToTask)
       } else if (currentList.value === 'all') {
         const ALL_STOPPED_LIMIT = 128
@@ -89,10 +95,6 @@ export const useTaskStore = defineStore('task', () => {
         const LIVE_TASK_STATUSES = new Set(['active', 'waiting', 'paused'])
         data = data.filter((t) => LIVE_TASK_STATUSES.has(t.status) || !isMetadataTask(t))
 
-        // Position-stable ordering: all tasks sorted by added_at DESC.
-        // No partitioning — tasks stay at their original position regardless
-        // of status transitions (seeding → stopped, active → complete).
-        //
         // Load DB-persisted added_at FIRST so that trackFirstSeen does not
         // overwrite completed tasks' timestamps with Date.now().
         loadAddedAtFromRecords(historyRecords)
@@ -111,14 +113,15 @@ export const useTaskStore = defineStore('task', () => {
         trackFirstSeen(data)
 
         const addedAtIndex = buildSortableAddedAtMap(data, historyRecords)
-
-        data.sort((a, b) => {
-          const ta = addedAtIndex.get(a.gid) ?? ''
-          const tb = addedAtIndex.get(b.gid) ?? ''
-          return tb.localeCompare(ta) // DESC: most recently added first
-        })
+        const { field, direction } = sortConfig.all
+        sortTasks(data, field, direction, addedAtIndex)
       } else {
+        // Active tab: aria2 returns insertion-order; apply user sort.
         data = await api.fetchTaskList({ type: currentList.value })
+        trackFirstSeen(data)
+        const addedAtIndex = buildSortableAddedAtMap(data, [])
+        const { field, direction } = sortConfig.active
+        sortTasks(data, field, direction, addedAtIndex)
       }
 
       taskList.value = data

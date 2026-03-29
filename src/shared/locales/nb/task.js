@@ -224,4 +224,11 @@ export default {
   'task-completed-at': 'Fullført',
   'restart-not-available': 'Ingen nedlastingslenker tilgjengelig for omstart',
   'torrent-trashed': 'Nedlasting av "{taskName}" fullført, torrentfilen er flyttet til papirkurven',
+  'sort-by': 'Sorter etter',
+  'sort-added-at': 'Lagt til',
+  'sort-completed-at': 'Fullført',
+  'sort-name': 'Navn',
+  'sort-size': 'Størrelse',
+  'sort-progress': 'Fremgang',
+  'sort-speed': 'Hastighet',
 }
