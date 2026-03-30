@@ -187,7 +187,12 @@ export function useTaskActions(deps: TaskActionsDeps) {
 
   async function handleShowInFolder(task: Aria2Task) {
     const files = task.files || []
-    const filePath = files[0]?.path
+    if (files.length === 0) return
+
+    // Prefer user-selected files (same logic as resolveOpenTarget / TaskItem)
+    const selected = files.filter((f) => f.selected === 'true')
+    const filePath = (selected.length > 0 ? selected[0] : files[0])?.path
+
     if (!filePath) return
     try {
       const fileExists = await invoke<boolean>('check_path_exists', { path: filePath })

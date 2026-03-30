@@ -330,8 +330,8 @@ mod tests {
             failures: vec![],
         };
         let json = serde_json::to_value(&result).expect("should serialize");
-        assert!(json["data"].as_array().unwrap().is_empty());
-        assert!(json["failures"].as_array().unwrap().is_empty());
+        assert!(json["data"].as_array().expect("data should be array").is_empty());
+        assert!(json["failures"].as_array().expect("failures should be array").is_empty());
     }
 
     #[test]

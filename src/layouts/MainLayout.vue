@@ -114,7 +114,13 @@ async function openFileFromNotification(task: Aria2Task) {
  */
 async function showInFolderFromNotification(task: Aria2Task) {
   const { invoke } = await import('@tauri-apps/api/core')
-  const filePath = task.files?.[0]?.path
+  const files = task.files || []
+  if (files.length === 0) return
+
+  // Prefer user-selected files (same logic as resolveOpenTarget / TaskItem)
+  const selected = files.filter((f) => f.selected === 'true')
+  const filePath = (selected.length > 0 ? selected[0] : files[0])?.path
+
   if (!filePath) return
   try {
     const fileExists = await invoke<boolean>('check_path_exists', { path: filePath })

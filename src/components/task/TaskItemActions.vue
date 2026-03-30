@@ -62,16 +62,19 @@ const actionsMap = computed<Record<string, ActionDef[]>>(() => ({
   ],
   [TASK_STATUS.ERROR]: [
     { key: 'open', icon: OpenOutline, label: t('task.open-file'), event: 'open-file' },
+    { key: 'folder', icon: FolderOpenOutline, label: t('task.show-in-folder'), event: 'folder' },
     { key: 'restart', icon: RefreshOutline, label: t('task.resume-task'), event: 'resume' },
     { key: 'trash', icon: TrashOutline, label: t('task.remove-record'), event: 'delete-record' },
   ],
   [TASK_STATUS.COMPLETE]: [
     { key: 'open', icon: OpenOutline, label: t('task.open-file'), event: 'open-file' },
+    { key: 'folder', icon: FolderOpenOutline, label: t('task.show-in-folder'), event: 'folder' },
     { key: 'restart', icon: RefreshOutline, label: t('task.restart-task'), event: 'resume' },
     { key: 'trash', icon: TrashOutline, label: t('task.remove-record'), event: 'delete-record' },
   ],
   [TASK_STATUS.REMOVED]: [
     { key: 'open', icon: OpenOutline, label: t('task.open-file'), event: 'open-file' },
+    { key: 'folder', icon: FolderOpenOutline, label: t('task.show-in-folder'), event: 'folder' },
     { key: 'restart', icon: RefreshOutline, label: t('task.restart-task'), event: 'resume' },
     { key: 'trash', icon: TrashOutline, label: t('task.remove-record'), event: 'delete-record' },
   ],
@@ -92,12 +95,20 @@ const actionsMap = computed<Record<string, ActionDef[]>>(() => ({
 
 const actions = computed(() => {
   const primary = actionsMap.value[props.status] || []
+  const primaryKeys = new Set(primary.map((a) => a.key))
+
+  // Destructive actions (trash, delete) always go to the far right
+  const destructiveKeys = new Set(['trash', 'delete'])
+  const leading = primary.filter((a) => !destructiveKeys.has(a.key))
+  const trailing = primary.filter((a) => destructiveKeys.has(a.key))
+
   const common: ActionDef[] = [
     { key: 'folder', icon: FolderOpenOutline, label: t('task.show-in-folder'), event: 'folder' },
     { key: 'link', icon: LinkOutline, label: t('task.copy-link'), event: 'copy-link' },
     { key: 'info', icon: InformationCircleOutline, label: t('task.task-detail-title'), event: 'show-info' },
-  ]
-  return [...primary, ...common].reverse()
+  ].filter((a) => !primaryKeys.has(a.key))
+
+  return [...leading, ...common, ...trailing].reverse()
 })
 
 function onAction(event: string) {

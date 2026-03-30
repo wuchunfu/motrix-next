@@ -34,7 +34,7 @@ import {
   CloseOutline,
   StopCircleOutline,
   SyncOutline,
-  SwapVerticalOutline,
+  FunnelOutline,
   ArrowUpOutline,
   ArrowDownOutline,
 } from '@vicons/ionicons5'
@@ -437,7 +437,7 @@ function onBtnRelease(ev: PointerEvent) {
           @pointerleave="onBtnRelease"
         >
           <template #icon>
-            <NIcon><SwapVerticalOutline /></NIcon>
+            <NIcon><FunnelOutline /></NIcon>
           </template>
         </NButton>
       </template>
