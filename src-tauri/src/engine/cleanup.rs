@@ -1,11 +1,15 @@
 /// Determines whether a process command name is an aria2c process.
 ///
-/// Used by `cleanup_port` to verify that only aria2c processes are killed
-/// when reclaiming the RPC port — never arbitrary processes that happen to
-/// occupy the same port.
+/// Used by `cleanup_port` (Unix) to verify that only aria2c processes are
+/// killed when reclaiming the RPC port — never arbitrary processes that
+/// happen to occupy the same port.
 ///
 /// Matches both `aria2c` and `motrixnext-aria2c` (the namespaced sidecar name).
-pub(crate) fn is_aria2c_process(comm: &str) -> bool {
+///
+/// On Windows, the equivalent check is inlined via `tasklist` CSV output
+/// (see the `#[cfg(windows)]` block in `cleanup_port`).
+#[cfg(any(unix, test))]
+fn is_aria2c_process(comm: &str) -> bool {
     comm.contains("aria2c")
 }
 
@@ -218,7 +222,7 @@ mod tests {
         let fn_start = production_code
             .find("fn cleanup_port")
             .expect("cleanup_port function must exist in cleanup.rs");
-        let fn_body = &production_code[fn_start..];
+        let _fn_body = &production_code[fn_start..];
 
         // On Unix, the old pattern was:
         //   Command::new("sh").args(["-c", &format!("lsof -ti:{}", port)])
@@ -226,7 +230,7 @@ mod tests {
         #[cfg(unix)]
         {
             assert!(
-                !fn_body.contains(r#"Command::new("sh")"#),
+                !_fn_body.contains(r#"Command::new("sh")"#),
                 "Unix cleanup_port must not use sh -c — use direct Command::new instead"
             );
         }
