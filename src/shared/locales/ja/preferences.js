@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'Magnet リンク',
   'clipboard-thunder': 'Thunder（迅雷）リンク',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': 'プロトコルハンドラー',
+  'protocol-magnet': 'magnet リンクの既定のハンドラー',
+  'protocol-thunder': 'thunder リンクの既定のハンドラー',
+  'protocol-registered': '{protocol} リンクをこのアプリに関連付けました',
+  'protocol-unregistered': '{protocol} リンクの関連付けを解除しました',
+  'protocol-failed': '{protocol} リンクの関連付けに失敗しました: {reason}',
   'copied-to-clipboard': '{label} をコピーしました',
 }

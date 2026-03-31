@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'Tautan Magnet',
   'clipboard-thunder': 'Tautan Thunder (迅雷)',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': 'Penangan Protokol',
+  'protocol-magnet': 'Penangan tautan magnet bawaan',
+  'protocol-thunder': 'Penangan tautan thunder bawaan',
+  'protocol-registered': 'Tautan {protocol} telah dikaitkan dengan aplikasi',
+  'protocol-unregistered': 'Kaitan tautan {protocol} dihapus',
+  'protocol-failed': 'Gagal mengaitkan tautan {protocol}: {reason}',
   'copied-to-clipboard': '{label} disalin',
 }

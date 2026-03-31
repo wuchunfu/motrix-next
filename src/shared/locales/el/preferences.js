@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'Σύνδεσμοι Magnet',
   'clipboard-thunder': 'Σύνδεσμοι Thunder (迅雷)',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': 'Χειριστές πρωτοκόλλων',
+  'protocol-magnet': 'Προεπιλεγμένος χειριστής συνδέσμων magnet',
+  'protocol-thunder': 'Προεπιλεγμένος χειριστής συνδέσμων thunder',
+  'protocol-registered': 'Οι σύνδεσμοι {protocol} συσχετίστηκαν με την εφαρμογή',
+  'protocol-unregistered': 'Η συσχέτιση {protocol} αφαιρέθηκε',
+  'protocol-failed': 'Η συσχέτιση {protocol} απέτυχε: {reason}',
   'copied-to-clipboard': '{label} αντιγράφηκε',
 }

@@ -264,6 +264,45 @@ window.addEventListener('unhandledrejection', (e) => {
     }
   }
 
+  /**
+   * Sync protocol handler registration with user preferences.
+   *
+   * macOS: no-op — protocol associations are declared statically in Info.plist
+   * at build time and managed by Launch Services.  The plugin's register()
+   * returns UnsupportedPlatform on macOS.
+   *
+   * Windows: writes HKCU\Software\Classes\{protocol} registry keys.
+   * Linux: creates .desktop handler file + xdg-mime default association.
+   *
+   * Enabled protocols are unconditionally re-registered on every launch
+   * (idempotent) to self-heal Linux AppImage path drift and Windows
+   * registry corruption from other installers.
+   */
+  async function syncProtocolHandlers(config: typeof preferenceStore.config): Promise<void> {
+    try {
+      const { platform } = await import('@tauri-apps/plugin-os')
+      if (platform() === 'macos') return
+
+      const { register, unregister, isRegistered } = await import('@tauri-apps/plugin-deep-link')
+
+      for (const [protocol, enabled] of Object.entries(config.protocols)) {
+        try {
+          if (enabled) {
+            // Unconditional register — idempotent, self-heals path drift
+            await register(protocol)
+          } else if (await isRegistered(protocol)) {
+            await unregister(protocol)
+          }
+        } catch (e) {
+          // Per-protocol errors must not block other protocols
+          logger.debug('ProtocolSync', `${protocol}: ${(e as Error).message}`)
+        }
+      }
+    } catch (e) {
+      logger.debug('ProtocolSync', e)
+    }
+  }
+
   preferenceStore.loadPreference().then(async () => {
     // ── Phase 1: critical path → window visible ASAP ──────────────────────
     let locale = preferenceStore.locale
@@ -319,7 +358,7 @@ window.addEventListener('unhandledrejection', (e) => {
     const enginePromise = initEngine(port, secret, config)
 
     // ── Phase 3: non-critical IPC (parallel) ──────────────────────────────
-    Promise.allSettled([setupDeepLinks(), syncAutostart(config)])
+    Promise.allSettled([setupDeepLinks(), syncAutostart(config), syncProtocolHandlers(config)])
 
     // Start UPnP port mapping if enabled (fire-and-forget)
     if (config.enableUpnp) {

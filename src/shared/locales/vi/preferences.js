@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'Liên kết Magnet',
   'clipboard-thunder': 'Liên kết Thunder (迅雷)',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': 'Trình xử lý giao thức',
+  'protocol-magnet': 'Trình xử lý liên kết magnet mặc định',
+  'protocol-thunder': 'Trình xử lý liên kết thunder mặc định',
+  'protocol-registered': 'Liên kết {protocol} đã được liên kết với ứng dụng',
+  'protocol-unregistered': 'Đã gỡ liên kết {protocol}',
+  'protocol-failed': 'Liên kết {protocol} thất bại: {reason}',
   'copied-to-clipboard': 'Đã sao chép {label}',
 }

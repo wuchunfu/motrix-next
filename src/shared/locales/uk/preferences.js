@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'Посилання Magnet',
   'clipboard-thunder': 'Посилання Thunder (迅雷)',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': 'Обробники протоколів',
+  'protocol-magnet': 'Обробник magnet-посилань за замовчуванням',
+  'protocol-thunder': 'Обробник thunder-посилань за замовчуванням',
+  'protocol-registered': 'Посилання {protocol} прив\'язано до застосунку',
+  'protocol-unregistered': 'Прив\'язку посилань {protocol} видалено',
+  'protocol-failed': 'Прив\'язка посилань {protocol} не вдалася: {reason}',
   'copied-to-clipboard': '{label} скопійовано',
 }

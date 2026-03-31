@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'Magnet линкове',
   'clipboard-thunder': 'Thunder (迅雷) линкове',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': 'Обработчици на протоколи',
+  'protocol-magnet': 'Обработчик по подразбиране за magnet връзки',
+  'protocol-thunder': 'Обработчик по подразбиране за thunder връзки',
+  'protocol-registered': '{protocol} връзките са свързани с приложението',
+  'protocol-unregistered': '{protocol} връзките са премахнати',
+  'protocol-failed': '{protocol} свързването е неуспешно: {reason}',
   'copied-to-clipboard': '{label} копирано',
 }

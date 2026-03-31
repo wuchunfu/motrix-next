@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'لینک‌های Magnet',
   'clipboard-thunder': 'لینک‌های Thunder (迅雷)',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': 'مدیریت پروتکل‌ها',
+  'protocol-magnet': 'مدیریت پیش‌فرض لینک‌های magnet',
+  'protocol-thunder': 'مدیریت پیش‌فرض لینک‌های thunder',
+  'protocol-registered': 'لینک‌های {protocol} به برنامه مرتبط شدند',
+  'protocol-unregistered': 'ارتباط لینک‌های {protocol} حذف شد',
+  'protocol-failed': 'ارتباط لینک‌های {protocol} ناموفق بود: {reason}',
   'copied-to-clipboard': '{label} کپی شد',
 }

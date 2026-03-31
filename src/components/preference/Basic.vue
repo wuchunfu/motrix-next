@@ -379,6 +379,31 @@ function handleManualRestart() {
   })
 }
 
+/**
+ * Register/unregister a protocol handler immediately when the user toggles.
+ * Operates independently of the form save flow — protocol registration
+ * is an OS-level side-effect, not an aria2 config change.
+ * On failure the switch reverts to its previous state.
+ */
+async function onProtocolToggle(protocol: string, enabled: boolean) {
+  try {
+    const { register, unregister } = await import('@tauri-apps/plugin-deep-link')
+    if (enabled) {
+      await register(protocol)
+    } else {
+      await unregister(protocol)
+    }
+    message.success(t(enabled ? 'preferences.protocol-registered' : 'preferences.protocol-unregistered', { protocol }))
+  } catch (e) {
+    const reason = e instanceof Error ? e.message : String(e)
+    logger.warn('Basic.protocol', `Failed to ${enabled ? 'register' : 'unregister'} ${protocol}: ${reason}`)
+    message.error(t('preferences.protocol-failed', { protocol, reason }))
+    // Revert switch on failure
+    if (protocol === 'magnet') form.value.protocolMagnet = !enabled
+    else form.value.protocolThunder = !enabled
+  }
+}
+
 onMounted(async () => {
   try {
     defaultDownloadDir.value = await downloadDir()
@@ -413,6 +438,19 @@ onMounted(async () => {
   }
   loadForm()
   resetSnapshot()
+
+  // Read actual OS registration state for protocol toggles (Windows/Linux).
+  // This ensures the switches reflect reality even if another app has taken
+  // over the protocol association since Motrix last ran.
+  if (currentPlatform.value && currentPlatform.value !== 'macos') {
+    try {
+      const { isRegistered } = await import('@tauri-apps/plugin-deep-link')
+      form.value.protocolMagnet = await isRegistered('magnet')
+      form.value.protocolThunder = await isRegistered('thunder')
+    } catch (e) {
+      logger.debug('Basic.protocolCheck', e)
+    }
+  }
 })
 </script>
 
@@ -552,6 +590,17 @@ onMounted(async () => {
       <NFormItem :label="t('preferences.auto-resume-all')">
         <NSwitch v-model:value="form.resumeAllWhenAppLaunched" />
       </NFormItem>
+
+      <!-- ── Protocol Handlers (Windows/Linux only) ────────────────── -->
+      <template v-if="!isMac">
+        <NDivider title-placement="left">{{ t('preferences.protocol-handler') }}</NDivider>
+        <NFormItem :label="t('preferences.protocol-magnet')">
+          <NSwitch v-model:value="form.protocolMagnet" @update:value="onProtocolToggle('magnet', $event)" />
+        </NFormItem>
+        <NFormItem :label="t('preferences.protocol-thunder')">
+          <NSwitch v-model:value="form.protocolThunder" @update:value="onProtocolToggle('thunder', $event)" />
+        </NFormItem>
+      </template>
 
       <NDivider title-placement="left">{{ t('preferences.download-path-and-speed') }}</NDivider>
       <NFormItem :label="t('preferences.default-dir')">

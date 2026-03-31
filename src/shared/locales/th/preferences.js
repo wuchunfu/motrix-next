@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'ลิงก์ Magnet',
   'clipboard-thunder': 'ลิงก์ Thunder (迅雷)',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': 'ตัวจัดการโปรโตคอล',
+  'protocol-magnet': 'ตัวจัดการลิงก์ magnet เริ่มต้น',
+  'protocol-thunder': 'ตัวจัดการลิงก์ thunder เริ่มต้น',
+  'protocol-registered': 'ลิงก์ {protocol} เชื่อมโยงกับแอปแล้ว',
+  'protocol-unregistered': 'ยกเลิกการเชื่อมโยงลิงก์ {protocol} แล้ว',
+  'protocol-failed': 'การเชื่อมโยงลิงก์ {protocol} ล้มเหลว: {reason}',
   'copied-to-clipboard': 'คัดลอก {label} แล้ว',
 }

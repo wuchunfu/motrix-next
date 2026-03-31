@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': '磁力链接 (Magnet)',
   'clipboard-thunder': '迅雷链接 (Thunder)',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': '协议关联',
+  'protocol-magnet': '设为 magnet 链接默认处理器',
+  'protocol-thunder': '设为 thunder 链接默认处理器',
+  'protocol-registered': '{protocol} 链接已关联到本应用',
+  'protocol-unregistered': '{protocol} 链接关联已取消',
+  'protocol-failed': '{protocol} 链接关联失败：{reason}',
   'copied-to-clipboard': '{label} 已复制',
 }

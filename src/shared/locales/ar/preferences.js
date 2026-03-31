@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'روابط Magnet',
   'clipboard-thunder': 'روابط Thunder (迅雷)',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': 'معالجات البروتوكول',
+  'protocol-magnet': 'معالج روابط magnet الافتراضي',
+  'protocol-thunder': 'معالج روابط thunder الافتراضي',
+  'protocol-registered': '{protocol} تم تسجيل روابط بنجاح',
+  'protocol-unregistered': '{protocol} تم إلغاء ربط روابط',
+  'protocol-failed': '{protocol} فشل ربط الروابط: {reason}',
   'copied-to-clipboard': '{label} تم النسخ',
 }

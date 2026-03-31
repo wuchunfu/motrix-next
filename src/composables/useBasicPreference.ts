@@ -51,6 +51,8 @@ export interface BasicForm {
   clipboardMagnet: boolean
   clipboardThunder: boolean
   clipboardBtHash: boolean
+  protocolMagnet: boolean
+  protocolThunder: boolean
 }
 
 // ── Pure Functions ──────────────────────────────────────────────────
@@ -106,6 +108,8 @@ export function buildBasicForm(config: AppConfig, defaultDir: string = ''): Basi
     clipboardMagnet: config.clipboard?.magnet ?? D.clipboard.magnet,
     clipboardThunder: config.clipboard?.thunder ?? D.clipboard.thunder,
     clipboardBtHash: config.clipboard?.btHash ?? D.clipboard.btHash,
+    protocolMagnet: config.protocols?.magnet ?? D.protocols.magnet,
+    protocolThunder: config.protocols?.thunder ?? D.protocols.thunder,
   }
 }
 
@@ -170,5 +174,12 @@ export function transformBasicForStore(f: BasicForm): Partial<AppConfig> {
   delete data.clipboardMagnet
   delete data.clipboardThunder
   delete data.clipboardBtHash
+  // Collapse flattened protocol fields back into nested ProtocolsConfig object
+  data.protocols = {
+    magnet: f.protocolMagnet,
+    thunder: f.protocolThunder,
+  }
+  delete data.protocolMagnet
+  delete data.protocolThunder
   return data
 }

@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'Magnet bağlantıları',
   'clipboard-thunder': 'Thunder (迅雷) bağlantıları',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': 'Protokol İşleyicileri',
+  'protocol-magnet': 'Varsayılan magnet bağlantı işleyicisi',
+  'protocol-thunder': 'Varsayılan thunder bağlantı işleyicisi',
+  'protocol-registered': '{protocol} bağlantıları uygulamayla ilişkilendirildi',
+  'protocol-unregistered': '{protocol} bağlantı ilişkisi kaldırıldı',
+  'protocol-failed': '{protocol} bağlantı ilişkilendirme başarısız: {reason}',
   'copied-to-clipboard': '{label} kopyalandı',
 }

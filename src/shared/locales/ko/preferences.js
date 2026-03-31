@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'Magnet 링크',
   'clipboard-thunder': 'Thunder (迅雷) 링크',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': '프로토콜 핸들러',
+  'protocol-magnet': 'magnet 링크 기본 핸들러',
+  'protocol-thunder': 'thunder 링크 기본 핸들러',
+  'protocol-registered': '{protocol} 링크가 이 앱에 연결되었습니다',
+  'protocol-unregistered': '{protocol} 링크 연결이 해제되었습니다',
+  'protocol-failed': '{protocol} 링크 연결 실패: {reason}',
   'copied-to-clipboard': '{label} 복사됨',
 }

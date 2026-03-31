@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'Linkuri Magnet',
   'clipboard-thunder': 'Linkuri Thunder (迅雷)',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': 'Gestionare protocoale',
+  'protocol-magnet': 'Handler implicit pentru linkuri magnet',
+  'protocol-thunder': 'Handler implicit pentru linkuri thunder',
+  'protocol-registered': 'Linkurile {protocol} au fost asociate cu aplicația',
+  'protocol-unregistered': 'Asocierea linkurilor {protocol} a fost eliminată',
+  'protocol-failed': 'Asocierea linkurilor {protocol} a eșuat: {reason}',
   'copied-to-clipboard': '{label} copiat',
 }

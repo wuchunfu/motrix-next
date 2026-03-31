@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'Magnet-lenker',
   'clipboard-thunder': 'Thunder (迅雷)-lenker',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': 'Protokollbehandlere',
+  'protocol-magnet': 'Standard magnet-lenkbehandler',
+  'protocol-thunder': 'Standard thunder-lenkbehandler',
+  'protocol-registered': '{protocol}-lenker ble knyttet til appen',
+  'protocol-unregistered': '{protocol}-lenketilknytning fjernet',
+  'protocol-failed': '{protocol}-lenketilknytning mislyktes: {reason}',
   'copied-to-clipboard': '{label} kopiert',
 }

@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'Liens Magnet',
   'clipboard-thunder': 'Liens Thunder (迅雷)',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': 'Gestionnaires de protocoles',
+  'protocol-magnet': 'Gestionnaire par défaut des liens magnet',
+  'protocol-thunder': 'Gestionnaire par défaut des liens thunder',
+  'protocol-registered': 'Les liens {protocol} ont été associés à l\'application',
+  'protocol-unregistered': 'L\'association des liens {protocol} a été supprimée',
+  'protocol-failed': 'Échec de l\'association des liens {protocol} : {reason}',
   'copied-to-clipboard': '{label} copié',
 }

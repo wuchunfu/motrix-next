@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'Ссылки Magnet',
   'clipboard-thunder': 'Ссылки Thunder (迅雷)',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': 'Обработчики протоколов',
+  'protocol-magnet': 'Обработчик magnet-ссылок по умолчанию',
+  'protocol-thunder': 'Обработчик thunder-ссылок по умолчанию',
+  'protocol-registered': 'Ссылки {protocol} привязаны к приложению',
+  'protocol-unregistered': 'Привязка ссылок {protocol} удалена',
+  'protocol-failed': 'Не удалось привязать ссылки {protocol}: {reason}',
   'copied-to-clipboard': '{label} скопировано',
 }

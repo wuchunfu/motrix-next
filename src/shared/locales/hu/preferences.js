@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'Magnet hivatkozások',
   'clipboard-thunder': 'Thunder (迅雷) hivatkozások',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': 'Protokollkezelők',
+  'protocol-magnet': 'Alapértelmezett magnet link kezelő',
+  'protocol-thunder': 'Alapértelmezett thunder link kezelő',
+  'protocol-registered': 'A(z) {protocol} linkek társítva az alkalmazáshoz',
+  'protocol-unregistered': 'A(z) {protocol} linktársítás eltávolítva',
+  'protocol-failed': 'A(z) {protocol} linktársítás sikertelen: {reason}',
   'copied-to-clipboard': '{label} másolva',
 }

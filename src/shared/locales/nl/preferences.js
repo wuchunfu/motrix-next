@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'Magnet-links',
   'clipboard-thunder': 'Thunder (迅雷)-links',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': 'Protocolverwerkers',
+  'protocol-magnet': 'Standaard magnet-linkverwerker',
+  'protocol-thunder': 'Standaard thunder-linkverwerker',
+  'protocol-registered': '{protocol}-links zijn gekoppeld aan de app',
+  'protocol-unregistered': '{protocol}-linkkoppeling verwijderd',
+  'protocol-failed': '{protocol}-linkkoppeling mislukt: {reason}',
   'copied-to-clipboard': '{label} gekopieerd',
 }

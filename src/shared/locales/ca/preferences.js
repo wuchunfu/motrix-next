@@ -219,5 +219,11 @@ export default {
   'clipboard-magnet': 'Enllaços Magnet',
   'clipboard-thunder': 'Enllaços Thunder (迅雷)',
   'clipboard-bt-hash': 'BT Info Hash',
+  'protocol-handler': 'Gestors de protocols',
+  'protocol-magnet': 'Gestor predeterminat d\'enllaços magnet',
+  'protocol-thunder': 'Gestor predeterminat d\'enllaços thunder',
+  'protocol-registered': 'Els enllaços {protocol} s\'han associat a l\'aplicació',
+  'protocol-unregistered': 'S\'ha desassociat els enllaços {protocol}',
+  'protocol-failed': 'No s\'ha pogut associar els enllaços {protocol}: {reason}',
   'copied-to-clipboard': '{label} copiat',
 }
