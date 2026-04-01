@@ -772,6 +772,9 @@ onMounted(async () => {
       <NFormItem :label="t('preferences.auto-delete-stale-records')">
         <NSwitch v-model:value="form.autoDeleteStaleRecords" />
       </NFormItem>
+      <NFormItem :label="t('preferences.clear-completed-on-exit')">
+        <NSwitch v-model:value="form.clearCompletedOnExit" />
+      </NFormItem>
 
       <NDivider title-placement="left">{{ t('preferences.clipboard-detection') }}</NDivider>
       <NFormItem :label="t('preferences.clipboard-auto-detect')">

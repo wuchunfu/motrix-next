@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': 'Niet bevestigen bij verwijderen',
   'delete-torrent-after-complete': 'Torrentbestand verwijderen na voltooiing van download',
   'auto-delete-stale-records': 'Records automatisch verwijderen wanneer lokale bestanden ontbreken',
+  'clear-completed-on-exit': 'Voltooide items wissen bij afsluiten',
   'continue': 'Downloads hervatten',
   'task-completed-notify': 'Melden bij voltooiing',
   'auto-purge-record': 'Records wissen bij afsluiten',

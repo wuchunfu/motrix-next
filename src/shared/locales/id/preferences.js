@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': 'Jangan konfirmasi sebelum menghapus',
   'delete-torrent-after-complete': 'Hapus file torrent setelah unduhan selesai',
   'auto-delete-stale-records': 'Hapus catatan secara otomatis saat file lokal hilang',
+  'clear-completed-on-exit': 'Hapus catatan selesai saat keluar',
   'continue': 'Lanjutkan unduhan',
   'task-completed-notify': 'Beri tahu saat selesai',
   'auto-purge-record': 'Hapus catatan saat keluar',

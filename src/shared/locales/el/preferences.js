@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': 'Χωρίς επιβεβαίωση πριν τη διαγραφή',
   'delete-torrent-after-complete': 'Διαγραφή αρχείου torrent μετά την ολοκλήρωση λήψης',
   'auto-delete-stale-records': 'Αυτόματη διαγραφή εγγραφών όταν λείπουν τοπικά αρχεία',
+  'clear-completed-on-exit': 'Εκκαθάριση ολοκληρωμένων εγγραφών κατά την έξοδο',
   'continue': 'Συνέχιση λήψεων',
   'task-completed-notify': 'Ειδοποίηση κατά την ολοκλήρωση',
   'auto-purge-record': 'Εκκαθάριση εγγραφών κατά την έξοδο',

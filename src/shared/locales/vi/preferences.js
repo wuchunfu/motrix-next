@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': 'Không xác nhận trước khi xóa',
   'delete-torrent-after-complete': 'Xóa tệp torrent sau khi tải xuống hoàn tất',
   'auto-delete-stale-records': 'Tự động xóa bản ghi khi tệp cục bộ bị thiếu',
+  'clear-completed-on-exit': 'Xóa bản ghi đã hoàn thành khi thoát',
   'continue': 'Tiếp tục tải xuống',
   'task-completed-notify': 'Thông báo khi hoàn thành',
   'auto-purge-record': 'Xóa bản ghi khi thoát',

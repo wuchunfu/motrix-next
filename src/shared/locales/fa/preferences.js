@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': 'بدون تأیید قبل از حذف',
   'delete-torrent-after-complete': 'حذف فایل تورنت پس از اتمام دانلود',
   'auto-delete-stale-records': 'حذف خودکار رکوردها هنگام گم شدن فایل‌های محلی',
+  'clear-completed-on-exit': 'پاک کردن رکوردهای تکمیل شده هنگام خروج',
   'continue': 'ادامه دانلودها',
   'task-completed-notify': 'اطلاع‌رسانی هنگام تکمیل',
   'auto-purge-record': 'پاک کردن رکوردها هنگام خروج',

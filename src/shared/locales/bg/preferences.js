@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': 'Без потвърждение при изтриване',
   'delete-torrent-after-complete': 'Изтриване на торент файла след приключване на изтеглянето',
   'auto-delete-stale-records': 'Автоматично изтриване на записите при липсващи локални файлове',
+  'clear-completed-on-exit': 'Изчистване на завършените записи при изход',
   'continue': 'Продължи изтеглянията',
   'task-completed-notify': 'Уведоми при завършване',
   'auto-purge-record': 'Изчисти записите при затваряне',

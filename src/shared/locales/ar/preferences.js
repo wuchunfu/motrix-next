@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': 'عدم التأكيد قبل الحذف',
   'delete-torrent-after-complete': 'حذف ملف التورنت بعد اكتمال التنزيل',
   'auto-delete-stale-records': 'حذف السجلات تلقائيًا عند فقدان الملفات المحلية',
+  'clear-completed-on-exit': 'مسح السجلات المكتملة عند الخروج',
   'continue': 'استئناف التنزيلات',
   'task-completed-notify': 'الإشعار عند الاكتمال',
   'auto-purge-record': 'مسح السجلات عند الخروج',

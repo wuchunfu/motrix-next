@@ -7,6 +7,7 @@ const userKeys = [
   'cookie',
   'custom-tracker-urls',
   'clipboard',
+  'clear-completed-on-exit',
   'color-scheme',
   'delete-torrent-after-complete',
   'enable-upnp',

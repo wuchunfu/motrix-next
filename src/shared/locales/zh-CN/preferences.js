@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': '删除任务时不再确认',
   'delete-torrent-after-complete': '下载完成后删除种子文件',
   'auto-delete-stale-records': '本地文件丢失时自动删除记录',
+  'clear-completed-on-exit': '退出时清空已完成的下载记录',
   'continue': '断点续传',
   'task-completed-notify': '下载完成后通知',
   'auto-purge-record': '退出时自动清除下载记录',

@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': 'Nu confirma la ștergere',
   'delete-torrent-after-complete': 'Șterge fișierul torrent după finalizarea descărcării',
   'auto-delete-stale-records': 'Șterge automat înregistrările când fișierele locale lipsesc',
+  'clear-completed-on-exit': 'Șterge înregistrările finalizate la ieșire',
   'continue': 'Reia descărcările',
   'task-completed-notify': 'Notifică la finalizare',
   'auto-purge-record': 'Curăță înregistrările la ieșire',

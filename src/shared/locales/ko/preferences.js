@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': '작업 삭제 시 확인 생략',
   'delete-torrent-after-complete': '다운로드 완료 후 토렌트 파일 삭제',
   'auto-delete-stale-records': '로컬 파일이 없을 때 기록 자동 삭제',
+  'clear-completed-on-exit': '종료 시 완료된 기록 삭제',
   'continue': '이어받기',
   'task-completed-notify': '다운로드 완료 시 알림',
   'auto-purge-record': '종료 시 다운로드 기록 자동 삭제',

@@ -15,6 +15,7 @@ import { shouldDeleteTorrent, trashTorrentFile, cleanupTorrentMetadataFiles } fr
 import { getTaskDisplayName, resolveOpenTarget } from '@shared/utils'
 import type { Aria2Task } from '@shared/types'
 import { ARIA2_ERROR_CODES } from '@shared/aria2ErrorCodes'
+import { TASK_STATUS } from '@shared/constants'
 import { useHistoryStore } from '@/stores/history'
 import {
   parseFilesForSelection,
@@ -381,6 +382,21 @@ async function handleExitConfirm() {
   showExitDialog.value = false
   rememberChoice.value = false
   appReady.value = false
+
+  // ── Clear completed download records on exit (#134) ──────────
+  // Runs before the fade animation while the webview JS context is
+  // still fully functional.  Only removes 'complete' status tasks;
+  // error and removed records are preserved for diagnostics.
+  if (preferenceStore.config.clearCompletedOnExit) {
+    try {
+      const completedTasks = taskStore.taskList.filter((t) => t.status === TASK_STATUS.COMPLETE)
+      for (const task of completedTasks) {
+        await taskStore.removeTaskRecord(task)
+      }
+    } catch (e: unknown) {
+      logger.warn('MainLayout.exitCleanup', e instanceof Error ? e.message : String(e))
+    }
+  }
 
   // Fade the entire native window (including macOS traffic lights) in sync
   // with the CSS container animation.  CSS only affects the webview content,

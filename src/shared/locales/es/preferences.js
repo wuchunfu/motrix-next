@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': 'No confirmar al eliminar tareas',
   'delete-torrent-after-complete': 'Eliminar archivo torrent después de completar la descarga',
   'auto-delete-stale-records': 'Eliminar registros automáticamente cuando faltan archivos locales',
+  'clear-completed-on-exit': 'Borrar registros completados al salir',
   'continue': 'Reanudar descargas',
   'task-completed-notify': 'Notificar al completar descarga',
   'auto-purge-record': 'Borrar registros al salir',

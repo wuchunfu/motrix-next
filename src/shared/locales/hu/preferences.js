@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': 'Ne kérjen megerősítést törléskor',
   'delete-torrent-after-complete': 'Torrent fájl törlése a letöltés befejezése után',
   'auto-delete-stale-records': 'Bejegyzések automatikus törlése, ha a helyi fájlok hiányoznak',
+  'clear-completed-on-exit': 'Befejezett bejegyzések törlése kilépéskor',
   'continue': 'Letöltések folytatása',
   'task-completed-notify': 'Értesítés befejezéskor',
   'auto-purge-record': 'Bejegyzések törlése kilépéskor',

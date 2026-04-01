@@ -46,6 +46,7 @@ export interface BasicForm {
   continue: boolean
   deleteTorrentAfterComplete: boolean
   autoDeleteStaleRecords: boolean
+  clearCompletedOnExit: boolean
   clipboardEnable: boolean
   clipboardHttp: boolean
   clipboardFtp: boolean
@@ -104,6 +105,7 @@ export function buildBasicForm(config: AppConfig, defaultDir: string = ''): Basi
     continue: config.continue ?? D.continue,
     deleteTorrentAfterComplete: config.deleteTorrentAfterComplete ?? false,
     autoDeleteStaleRecords: config.autoDeleteStaleRecords ?? false,
+    clearCompletedOnExit: config.clearCompletedOnExit ?? false,
     clipboardEnable: config.clipboard?.enable ?? D.clipboard.enable,
     clipboardHttp: config.clipboard?.http ?? D.clipboard.http,
     clipboardFtp: config.clipboard?.ftp ?? D.clipboard.ftp,

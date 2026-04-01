@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': 'Ikke bekreft ved sletting',
   'delete-torrent-after-complete': 'Slett torrentfilen etter at nedlastingen er ferdig',
   'auto-delete-stale-records': 'Slett poster automatisk når lokale filer mangler',
+  'clear-completed-on-exit': 'Fjern fullførte oppføringer ved avslutning',
   'continue': 'Gjenoppta nedlastinger',
   'task-completed-notify': 'Varsle ved fullført nedlasting',
   'auto-purge-record': 'Fjern oppføringer ved avslutning',

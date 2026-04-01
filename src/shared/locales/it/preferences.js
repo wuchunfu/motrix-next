@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': 'Non confermare prima dell\'eliminazione',
   'delete-torrent-after-complete': 'Elimina il file torrent dopo il completamento del download',
   'auto-delete-stale-records': 'Elimina automaticamente i record quando i file locali sono mancanti',
+  'clear-completed-on-exit': 'Cancella i record completati all\'uscita',
   'continue': 'Riprendi download',
   'task-completed-notify': 'Notifica al completamento',
   'auto-purge-record': 'Cancella record all\'uscita',

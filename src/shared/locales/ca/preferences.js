@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': 'No confirmar en eliminar tasques',
   'delete-torrent-after-complete': 'Eliminar el fitxer torrent després de completar la descàrrega',
   'auto-delete-stale-records': 'Eliminar automàticament els registres quan els fitxers locals falten',
+  'clear-completed-on-exit': 'Esborra els registres completats en sortir',
   'continue': 'Reprendre descàrregues',
   'task-completed-notify': 'Notificar en completar la descàrrega',
   'auto-purge-record': 'Esborrar registres en sortir',

@@ -201,6 +201,7 @@ export interface AppConfig {
   enableUpnp: boolean
   deleteTorrentAfterComplete: boolean
   autoDeleteStaleRecords: boolean
+  clearCompletedOnExit: boolean
   /** Per-tab sort configuration (field + direction), persisted independently per tab. */
   taskSort: import('@/composables/useTaskSort').TaskSortConfig
   [key: string]: unknown

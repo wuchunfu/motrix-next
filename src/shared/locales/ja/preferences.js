@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': 'タスク削除時に確認しない',
   'delete-torrent-after-complete': 'ダウンロード完了後にトレントファイルを削除',
   'auto-delete-stale-records': 'ローカルファイルが見つからない場合、レコードを自動的に削除',
+  'clear-completed-on-exit': '終了時に完了した記録をクリア',
   'continue': 'レジューム',
   'task-completed-notify': 'ダウンロード完了時に通知',
   'auto-purge-record': '終了時にダウンロード記録を自動消去',

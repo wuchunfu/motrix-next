@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': 'Skip confirmation when deleting tasks',
   'delete-torrent-after-complete': 'Delete .torrent file after download completes',
   'auto-delete-stale-records': 'Auto-delete records when local files are missing',
+  'clear-completed-on-exit': 'Clear completed records on exit',
   'continue': 'Resume downloads',
   'task-completed-notify': 'Notify on download completion',
   'auto-purge-record': 'Clear download records on exit',

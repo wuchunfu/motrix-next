@@ -204,6 +204,7 @@ export const DEFAULT_APP_CONFIG = {
   // ── Cleanup ───────────────────────────────────────────────────
   deleteTorrentAfterComplete: false,
   autoDeleteStaleRecords: false,
+  clearCompletedOnExit: false,
 
   // ── Task Sorting ─────────────────────────────────────────────
   taskSort: DEFAULT_TASK_SORT,

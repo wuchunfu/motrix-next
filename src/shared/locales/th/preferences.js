@@ -33,6 +33,7 @@ export default {
   'no-confirm-before-delete-task': 'ไม่ต้องยืนยันก่อนลบ',
   'delete-torrent-after-complete': 'ลบไฟล์ทอร์เรนต์หลังดาวน์โหลดเสร็จ',
   'auto-delete-stale-records': 'ลบบันทึกอัตโนมัติเมื่อไฟล์ในเครื่องหายไป',
+  'clear-completed-on-exit': 'ล้างรายการที่เสร็จสิ้นเมื่อออก',
   'continue': 'ดำเนินการดาวน์โหลดต่อ',
   'task-completed-notify': 'แจ้งเตือนเมื่อเสร็จ',
   'auto-purge-record': 'ล้างรายการเมื่อปิดโปรแกรม',
