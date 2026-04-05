@@ -137,8 +137,6 @@ mod elevation {
     /// Writes `HKCU\Software\Classes\<scheme>` with the standard URL
     /// protocol handler structure pointing to the current executable.
     fn register_protocol_via_registry(scheme: &str) -> Result<(), AppError> {
-        use std::ffi::OsStr;
-        use std::os::windows::ffi::OsStrExt;
         use windows_sys::Win32::System::Registry::*;
 
         let exe =
@@ -166,6 +164,7 @@ mod elevation {
 
     /// Unregister a protocol handler by deleting its registry tree from HKCU.
     fn unregister_protocol_via_registry(scheme: &str) -> Result<(), AppError> {
+        use std::os::windows::ffi::OsStrExt;
         use windows_sys::Win32::System::Registry::*;
 
         let key_path = format!("Software\\Classes\\{scheme}");
@@ -200,23 +199,17 @@ mod elevation {
 
         let mut hkey: HKEY = std::ptr::null_mut();
         let status = unsafe {
-            RegCreateKeyExW(
+            RegCreateKeyW(
                 HKEY_CURRENT_USER,
                 path_wide.as_ptr(),
-                0,
-                std::ptr::null(),
-                0, // REG_OPTION_NON_VOLATILE
-                KEY_WRITE,
-                std::ptr::null(),
                 &mut hkey,
-                std::ptr::null_mut(),
             )
         };
         if status == 0 {
             Ok(hkey)
         } else {
             Err(AppError::Protocol(format!(
-                "RegCreateKeyExW failed for {path}: error {status}"
+                "RegCreateKeyW failed for {path}: error {status}"
             )))
         }
     }
