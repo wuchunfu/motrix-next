@@ -62,6 +62,10 @@ src-tauri/
 │   ├── menu.rs                 # Native menu builder (macOS only, cfg-gated)
 │   ├── tray.rs                 # System tray setup
 │   └── upnp.rs                 # UPnP/IGD port mapping with renewal loop
+├── nsis/
+│   ├── hooks.nsh              # Windows installer hooks (compat shim + icon refresh)
+│   ├── header.bmp             # Installer header image (150×57, 24-bit BMP)
+│   └── sidebar.bmp            # Installer sidebar image (164×314, 24-bit BMP)
 ├── Cargo.toml                  # VERSION SOURCE OF TRUTH
 └── tauri.conf.json             # Tauri config (no version field — reads from Cargo.toml)
 
@@ -181,6 +185,21 @@ Both migration systems show upgrade toasts on the UI, but with distinct messages
 | ------ | -------- | --------------- | ---------- |
 | Config (C′) | `app.migration-success` | "User settings schema upgraded to v2" | `success` (green) |
 | DB (C″) | `app.db-upgraded` | "Database schema upgraded to v2" | `info` (blue) |
+
+### Windows Installer Hooks (not a migration system)
+
+`src-tauri/nsis/hooks.nsh` contains one-off compatibility shims for the `currentUser` → `both` install mode transition (v3.6.1 → v3.6.2). These are NSIS-level registry fixups that run during installation, not at app launch. They are **not** a versioned migration system — once all users have upgraded past v3.6.2, the shims become safe no-ops.
+
+The hooks file defines three injection points:
+
+| Hook | Timing | Purpose |
+| ---- | ------ | ------- |
+| `MUI_CUSTOMFUNCTION_GUIINIT` | Before any installer pages | Bridges old `MANUPRODUCTKEY` registry path (`Software\motrix\…`) to new (`Software\AnInsomniacy\…`) so `PageLeaveReinstall` can locate the old uninstaller |
+| `!macro NSIS_HOOK_PREINSTALL` | Inside `Section Install`, before file copy | Redirects `$INSTDIR`/`$OUTDIR` to old install location, deletes stale HKCU uninstall entry, cleans orphaned registry keys and Program Files residuals |
+| `!macro NSIS_HOOK_POSTINSTALL` | After file copy | Refreshes Windows icon cache via `ie4uinit.exe` |
+
+> [!CAUTION]
+> **Do NOT change `bundle.publisher`, `bundle.identifier`, or `productName` after the first public release.** These values derive the NSIS `MANUFACTURER` variable and `MANUPRODUCTKEY` registry path (`Software\{MANUFACTURER}\{PRODUCTNAME}`). Changing them breaks the Windows upgrade path for all existing users and requires a new NSIS compatibility shim in `hooks.nsh`. The v3.6.2 transition required four separate fixups (issue #159) — avoid repeating this.
 
 ---
 

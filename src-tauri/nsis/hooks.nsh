@@ -4,7 +4,7 @@
 
 
 ; ────────────────────────────────────────────────────────────────
-; .onGUIInit — MANUPRODUCTKEY registry bridge
+; MUI_CUSTOMFUNCTION_GUIINIT — MANUPRODUCTKEY registry bridge
 ; ────────────────────────────────────────────────────────────────
 ;
 ; Changing bundle.publisher from unset to "AnInsomniacy" shifted
@@ -20,13 +20,19 @@
 ; → "NSIS Error: Error launching installer" (issue #159).
 ;
 ; Fix: copy the install-directory value from the old key to the
-; new key BEFORE any pages are displayed.  .onGUIInit is the
-; earliest available hook point that the template does not define.
+; new key BEFORE any pages are displayed.
+;
+; MUI2 owns .onGUIInit (via MUI_FUNCTION_GUIINIT), so we cannot
+; define it directly.  Instead, use MUI_CUSTOMFUNCTION_GUIINIT to
+; register a named function that MUI2 calls from within its own
+; .onGUIInit.  This !define must appear BEFORE !insertmacro
+; MUI_LANGUAGE — which it does, since hooks are included at
+; template line 33, well before the language macros.
 ;
 ; Execution order:
 ;   .onInit  (template)  → RestorePreviousInstallLocation (reads
 ;                           new MANUPRODUCTKEY — empty, no-op)
-;   .onGUIInit (this)    → bridges old → new MANUPRODUCTKEY
+;   .onGUIInit (MUI2)    → calls MotrixBridgeMANUPRODUCTKEY (this)
 ;   Welcome page
 ;   MULTIUSER page       → RestorePreviousInstallLocation called
 ;                           again (now succeeds via bridged data)
@@ -42,11 +48,14 @@
 ; and for already-migrated users (old key already cleaned up by
 ; PREINSTALL → no-op).
 
-Function .onGUIInit
+!define MUI_CUSTOMFUNCTION_GUIINIT MotrixBridgeMANUPRODUCTKEY
+
+Function MotrixBridgeMANUPRODUCTKEY
   ; Try HKCU first (old currentUser installs write here)
   ReadRegStr $R0 HKCU "Software\motrix\MotrixNext" ""
   StrCmp $R0 "" _motrix_bridge_hklm 0
     WriteRegStr HKCU "Software\AnInsomniacy\MotrixNext" "" $R0
+    DetailPrint "Bridged MANUPRODUCTKEY (HKCU): $R0"
     Goto _motrix_bridge_done
 
   _motrix_bridge_hklm:
@@ -54,6 +63,7 @@ Function .onGUIInit
   ReadRegStr $R0 HKLM "Software\motrix\MotrixNext" ""
   StrCmp $R0 "" _motrix_bridge_done 0
     WriteRegStr HKLM "Software\AnInsomniacy\MotrixNext" "" $R0
+    DetailPrint "Bridged MANUPRODUCTKEY (HKLM): $R0"
 
   _motrix_bridge_done:
 FunctionEnd
@@ -105,14 +115,17 @@ FunctionEnd
 
     ; ── 1. Strip surrounding quotes ──────────────────────────────
     ; "C:\path" → C:\path
+    ; Uses named labels instead of fragile +N relative offsets.
     StrCpy $R1 $R0 1        ; first character
-    StrCmp $R1 '"' 0 +2     ; starts with quote?
+    StrCmp $R1 '"' 0 _motrix_no_lead_quote
       StrCpy $R0 $R0 "" 1   ; remove first char
+    _motrix_no_lead_quote:
     StrLen $R1 $R0
     IntOp $R1 $R1 - 1
     StrCpy $R2 $R0 1 $R1    ; last character
-    StrCmp $R2 '"' 0 +2     ; ends with quote?
+    StrCmp $R2 '"' 0 _motrix_no_trail_quote
       StrCpy $R0 $R0 $R1    ; remove last char
+    _motrix_no_trail_quote:
 
     ; ── 2. Redirect install directory ────────────────────────────
     StrCpy $INSTDIR $R0
@@ -120,6 +133,7 @@ FunctionEnd
     ; so $OUTDIR still points to the template's default.  Re-issue
     ; SetOutPath to sync $OUTDIR with the corrected $INSTDIR.
     SetOutPath $INSTDIR
+    DetailPrint "Migrated install directory: $INSTDIR"
 
     ; ── 3. Delete stale HKCU uninstall entry ─────────────────────
     ; This is the root cause of duplicate "Apps & Features" entries.
@@ -127,6 +141,7 @@ FunctionEnd
     ; for "all users", HKCU for "current user") at the end.
     DeleteRegKey HKCU \
       "Software\Microsoft\Windows\CurrentVersion\Uninstall\MotrixNext"
+    DetailPrint "Deleted stale HKCU uninstall entry"
 
     ; ── 4. Delete orphaned MANUPRODUCTKEY ────────────────────────
     ; Versions that shipped with publisher unset derived MANUFACTURER
@@ -137,17 +152,25 @@ FunctionEnd
     ; so RestorePreviousInstallLocation does not read stale data.
     DeleteRegKey HKCU "Software\motrix\MotrixNext"
     DeleteRegKey /ifempty HKCU "Software\motrix"
+    DetailPrint "Deleted orphaned registry key: Software\motrix"
 
     ; ── 5. Remove Program Files residual ─────────────────────────
     ; A prior beta with a SetOutPath bug left partial files in the
     ; per-machine default directory while the real install lived in
-    ; AppData\Local.  Clean up only if $INSTDIR is NOT Program Files
-    ; (i.e., the migration target differs from the default location).
-    StrCpy $R3 $INSTDIR 16   ; first 16 chars of $INSTDIR
-    StrCmp $R3 "C:\Program Fi" _motrix_skip_pf_cleanup 0
+    ; AppData\Local.  Clean up only if $INSTDIR is NOT under the
+    ; system Program Files directory (i.e., the migration target
+    ; differs from the per-machine default location).
+    ;
+    ; Dynamic comparison: extract the first N characters of $INSTDIR
+    ; where N = length of $PROGRAMFILES64, then compare.  This works
+    ; regardless of which drive Windows is installed on.
+    StrLen $R3 "$PROGRAMFILES64"
+    StrCpy $R4 $INSTDIR $R3
+    StrCmp $R4 "$PROGRAMFILES64" _motrix_skip_pf_cleanup 0
       ; $INSTDIR is NOT under Program Files — safe to remove residual
       IfFileExists "$PROGRAMFILES64\MotrixNext\*.*" 0 _motrix_skip_pf_cleanup
         RMDir /r "$PROGRAMFILES64\MotrixNext"
+        DetailPrint "Removed Program Files residual: $PROGRAMFILES64\MotrixNext"
     _motrix_skip_pf_cleanup:
 
   _motrix_skip_migration:
