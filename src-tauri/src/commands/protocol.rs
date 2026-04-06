@@ -330,9 +330,7 @@ pub mod win_registry {
 
     /// Creates (or opens) a registry key under HKCU.
     #[cfg(windows)]
-    fn reg_create_key(
-        path: &str,
-    ) -> Result<windows_sys::Win32::System::Registry::HKEY, AppError> {
+    fn reg_create_key(path: &str) -> Result<windows_sys::Win32::System::Registry::HKEY, AppError> {
         use std::ffi::OsStr;
         use std::os::windows::ffi::OsStrExt;
         use windows_sys::Win32::System::Registry::*;
@@ -414,7 +412,15 @@ pub mod win_registry {
             .collect();
 
         let mut hkey: HKEY = std::ptr::null_mut();
-        let status = unsafe { RegOpenKeyExW(HKEY_CURRENT_USER, path_wide.as_ptr(), 0, KEY_READ, &mut hkey) };
+        let status = unsafe {
+            RegOpenKeyExW(
+                HKEY_CURRENT_USER,
+                path_wide.as_ptr(),
+                0,
+                KEY_READ,
+                &mut hkey,
+            )
+        };
         if status != 0 {
             return Err(AppError::Protocol(format!(
                 "RegOpenKeyExW failed for {path}: error {status}"
@@ -462,8 +468,9 @@ pub mod win_registry {
         }
 
         // Convert UTF-16 buffer to String
-        let wide: &[u16] =
-            unsafe { std::slice::from_raw_parts(buffer.as_ptr() as *const u16, data_size as usize / 2) };
+        let wide: &[u16] = unsafe {
+            std::slice::from_raw_parts(buffer.as_ptr() as *const u16, data_size as usize / 2)
+        };
         // Strip trailing null
         let len = wide.iter().position(|&c| c == 0).unwrap_or(wide.len());
         Ok(String::from_utf16_lossy(&wide[..len]))
@@ -506,8 +513,15 @@ pub mod win_registry {
             .collect();
 
         let mut hkey: HKEY = std::ptr::null_mut();
-        let status =
-            unsafe { RegOpenKeyExW(HKEY_CURRENT_USER, path_wide.as_ptr(), 0, KEY_WRITE, &mut hkey) };
+        let status = unsafe {
+            RegOpenKeyExW(
+                HKEY_CURRENT_USER,
+                path_wide.as_ptr(),
+                0,
+                KEY_WRITE,
+                &mut hkey,
+            )
+        };
         if status == 2 {
             // Key doesn't exist — nothing to delete
             return Ok(());

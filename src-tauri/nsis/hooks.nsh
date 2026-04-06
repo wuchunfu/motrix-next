@@ -3,6 +3,35 @@
 ; fresh installs AND silent OTA (updater) installs.
 
 !macro NSIS_HOOK_PREINSTALL
+  ; ── Migration: currentUser → both ──────────────────────────────
+  ;
+  ; Versions ≤ 3.6.2-beta.1 shipped with installMode "currentUser",
+  ; which writes the uninstall registry entry under HKCU.
+  ;
+  ; Starting from 3.6.2, installMode is "both".  In silent/update
+  ; mode (/S), the "both" NSIS template defaults to per-machine
+  ; scope and reads HKLM — it will NOT find the old HKCU entry,
+  ; causing a duplicate installation.
+  ;
+  ; Fix: unconditionally check HKCU for a previous per-user install.
+  ; If found, copy its InstallLocation into $INSTDIR so the new
+  ; installer overwrites the existing files in-place.
+  ;
+  ; Registry key: HKCU\Software\Microsoft\Windows\CurrentVersion
+  ;                 \Uninstall\com.motrix.next
+  ; The key name matches the `identifier` field in tauri.conf.json.
+  ;
+  ; This block is safe for fresh installs (key absent → no-op) and
+  ; for users who already migrated (HKLM entry found by the "both"
+  ; template before this hook even runs for file-copy decisions).
+
+  ReadRegStr $R0 HKCU \
+    "Software\Microsoft\Windows\CurrentVersion\Uninstall\com.motrix.next" \
+    "InstallLocation"
+  StrCmp $R0 "" _motrix_skip_migration 0
+    StrCpy $INSTDIR $R0
+  _motrix_skip_migration:
+
   ; Defense-in-depth: kill any lingering sidecar before file copy.
   ; Tauri bundles externalBin as motrixnext-aria2c.exe (renamed from aria2c).
   ; aria2 is single-process — no child processes to worry about.

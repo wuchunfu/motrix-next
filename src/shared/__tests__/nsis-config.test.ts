@@ -102,9 +102,9 @@ describe('NSIS installer brand configuration', () => {
       expect(nsis.sidebarImage).toBe('nsis/sidebar.bmp')
     })
 
-    it('sets installMode to "currentUser" (per-user install, no admin required)', () => {
+    it('sets installMode to "both" (user chooses scope, auto-elevates for OTA)', () => {
       const nsis = getNsisConfig()
-      expect(nsis.installMode).toBe('currentUser')
+      expect(nsis.installMode).toBe('both')
     })
 
     it('enables the language selector dialog', () => {
