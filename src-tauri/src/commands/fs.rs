@@ -1010,13 +1010,19 @@ mod tests {
     #[test]
     fn remove_file_returns_ok_for_nonexistent() {
         let result = remove_file("/definitely/does/not/exist/file.aria2".to_string());
-        assert!(result.is_ok(), "remove_file must be a silent no-op for missing files");
+        assert!(
+            result.is_ok(),
+            "remove_file must be a silent no-op for missing files"
+        );
     }
 
     #[test]
     fn remove_file_returns_ok_for_empty_string() {
         let result = remove_file(String::new());
-        assert!(result.is_ok(), "remove_file must handle empty path gracefully");
+        assert!(
+            result.is_ok(),
+            "remove_file must handle empty path gracefully"
+        );
     }
 
     #[test]
@@ -1042,7 +1048,10 @@ mod tests {
         // std::fs::remove_file on a directory fails — verify it returns Err
         let result = remove_file(dir.to_string_lossy().to_string());
         assert!(result.is_err(), "remove_file must not delete directories");
-        assert!(dir.exists(), "directory must still exist after failed removal");
+        assert!(
+            dir.exists(),
+            "directory must still exist after failed removal"
+        );
 
         let _ = std::fs::remove_dir(&dir);
     }
