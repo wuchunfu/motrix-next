@@ -29,6 +29,13 @@ vi.mock('@/stores/history', () => ({
   }),
 }))
 
+// ── Mock cleanupAria2ControlFile ───────────────────────────────────
+const mockCleanupAria2ControlFile = vi.fn().mockResolvedValue(undefined)
+
+vi.mock('@/composables/useFileDelete', () => ({
+  cleanupAria2ControlFile: (...args: unknown[]) => mockCleanupAria2ControlFile(...args),
+}))
+
 // ── Mock buildBtCompletionRecord ───────────────────────────────────
 vi.mock('@/composables/useTaskLifecycle', () => ({
   buildBtCompletionRecord: (task: Aria2Task) => ({
@@ -405,6 +412,39 @@ describe('stopSeeding', () => {
     // Critical: UI refresh and session persistence must happen even on failure
     expect(deps.fetchList).toHaveBeenCalledOnce()
     expect(api.saveSession).toHaveBeenCalledOnce()
+  })
+
+  it('calls cleanupAria2ControlFile with the task after stopping seeding', async () => {
+    const task = makeTask({
+      gid: 'seed-cleanup',
+      bittorrent: { info: { name: 'movie.mkv' } },
+      infoHash: 'deadbeef'.repeat(5),
+      files: [
+        {
+          index: '1',
+          path: '/downloads/movie.mkv',
+          length: '1000',
+          completedLength: '1000',
+          selected: 'true',
+          uris: [],
+        },
+      ],
+    } as Partial<Aria2Task>)
+
+    await ops.stopSeeding(task)
+
+    expect(mockCleanupAria2ControlFile).toHaveBeenCalledWith(task)
+  })
+
+  it('does not throw if cleanupAria2ControlFile fails (best-effort cleanup)', async () => {
+    mockCleanupAria2ControlFile.mockRejectedValueOnce(new Error('cleanup failed'))
+    const task = makeTask({
+      gid: 'seed-cleanup-fail',
+      bittorrent: { info: { name: 'movie.mkv' } },
+    } as Partial<Aria2Task>)
+
+    await expect(ops.stopSeeding(task)).resolves.not.toThrow()
+    expect(mockCleanupAria2ControlFile).toHaveBeenCalledWith(task)
   })
 })
 

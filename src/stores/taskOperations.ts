@@ -12,6 +12,7 @@ import { TASK_STATUS } from '@shared/constants'
 import { checkTaskIsBT, checkTaskIsSeeder } from '@shared/utils'
 import { logger } from '@shared/logger'
 import { buildBtCompletionRecord } from '@/composables/useTaskLifecycle'
+import { cleanupAria2ControlFile } from '@/composables/useFileDelete'
 import { useHistoryStore } from '@/stores/history'
 import type { Aria2Task, TaskApi } from '@shared/types'
 import type { Ref } from 'vue'
@@ -120,6 +121,13 @@ export function createTaskOperations(deps: TaskOperationsDeps) {
         await historyStore.removeByInfoHash(task.infoHash, task.gid)
       }
       await historyStore.addRecord(record)
+      // Clean up .aria2 control file left behind by force-save=true.
+      // Best-effort: must never prevent fetchList/saveSession from running.
+      try {
+        await cleanupAria2ControlFile(task)
+      } catch {
+        /* silent — cleanup failure must not block seeding teardown */
+      }
     } finally {
       await fetchList()
       await api.saveSession()

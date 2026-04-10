@@ -12,6 +12,7 @@ import { createTaskLifecycleService } from '@/composables/useTaskLifecycleServic
 import { buildHistoryRecord, buildBtCompletionRecord, isMetadataTask } from '@/composables/useTaskLifecycle'
 import { handleTaskComplete, handleBtComplete, handleTaskError } from '@/composables/useTaskNotifyHandlers'
 import { shouldDeleteTorrent, trashTorrentFile, cleanupTorrentMetadataFiles } from '@/composables/useDownloadCleanup'
+import { cleanupAria2ControlFile } from '@/composables/useFileDelete'
 import { getTaskDisplayName, resolveOpenTarget } from '@shared/utils'
 import type { Aria2Task } from '@shared/types'
 import { ARIA2_ERROR_CODES } from '@shared/aria2ErrorCodes'
@@ -597,6 +598,11 @@ onMounted(async () => {
         onOpenFile: openFileFromNotification,
         onShowInFolder: showInFolderFromNotification,
       })
+      // Clean up .aria2 control file for BT tasks that auto-completed seeding
+      // (seed-ratio or seed-time threshold reached). Best-effort, never throws.
+      if (task.bittorrent) {
+        cleanupAria2ControlFile(task).catch((e) => logger.debug('Lifecycle.aria2ControlCleanup', e))
+      }
     },
     onBtComplete: async (task) => {
       // Persist immediately — download is complete, seeding is just uploading.

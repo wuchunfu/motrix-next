@@ -493,6 +493,26 @@ pub fn trash_file(path: String) -> Result<(), AppError> {
     trash::delete(&path).map_err(|e| AppError::Io(e.to_string()))
 }
 
+/// Permanently deletes a file from disk (NOT move to trash).
+///
+/// Used for internal aria2 metadata files that have no user value:
+/// - `.aria2` control files (piece bitmap + checksums)
+/// - hex40-named `.torrent` metadata (`bt-save-metadata` / `rpc-save-upload-metadata`)
+/// - hex40-named `.meta4` metadata (`rpc-save-upload-metadata` for metalink)
+///
+/// This replicates what aria2's native `removeControlFile()` does (`std::remove`).
+/// The frontend MUST only call this for files it has verified are internal
+/// aria2 metadata — never for user-downloaded content (use `trash_file` instead).
+#[tauri::command]
+pub fn remove_file(path: String) -> Result<(), AppError> {
+    let p = std::path::Path::new(&path);
+    if !p.exists() {
+        return Ok(());
+    }
+    log::debug!("file:remove path={path:?}");
+    std::fs::remove_file(p).map_err(|e| AppError::Io(e.to_string()))
+}
+
 /// Returns `true` when the WebKitGTK DMABuf renderer has been disabled via
 /// the `WEBKIT_DISABLE_DMABUF_RENDERER` environment variable.
 ///
@@ -967,5 +987,63 @@ mod tests {
             fn_body.contains("log::debug!"),
             "normalize_path must include debug logging"
         );
+    }
+
+    // ── remove_file ─────────────────────────────────────────────────
+
+    #[test]
+    fn remove_file_deletes_existing_file() {
+        let dir = std::env::temp_dir().join("motrix_test_remove");
+        let _ = std::fs::create_dir_all(&dir);
+        let file = dir.join("test.aria2");
+        std::fs::write(&file, "control data").expect("write test file");
+        assert!(file.exists(), "precondition: file must exist");
+
+        let result = remove_file(file.to_string_lossy().to_string());
+        assert!(result.is_ok());
+        assert!(!file.exists(), "file must be permanently deleted");
+
+        // Cleanup
+        let _ = std::fs::remove_dir(&dir);
+    }
+
+    #[test]
+    fn remove_file_returns_ok_for_nonexistent() {
+        let result = remove_file("/definitely/does/not/exist/file.aria2".to_string());
+        assert!(result.is_ok(), "remove_file must be a silent no-op for missing files");
+    }
+
+    #[test]
+    fn remove_file_returns_ok_for_empty_string() {
+        let result = remove_file(String::new());
+        assert!(result.is_ok(), "remove_file must handle empty path gracefully");
+    }
+
+    #[test]
+    fn remove_file_handles_path_with_spaces() {
+        let dir = std::env::temp_dir().join("motrix test remove spaces");
+        let _ = std::fs::create_dir_all(&dir);
+        let file = dir.join("my download.aria2");
+        std::fs::write(&file, "data").expect("write");
+
+        let result = remove_file(file.to_string_lossy().to_string());
+        assert!(result.is_ok());
+        assert!(!file.exists());
+
+        let _ = std::fs::remove_dir(&dir);
+    }
+
+    #[test]
+    fn remove_file_does_not_delete_directories() {
+        let dir = std::env::temp_dir().join("motrix_test_remove_dir_guard");
+        let _ = std::fs::create_dir_all(&dir);
+        assert!(dir.exists(), "precondition: dir must exist");
+
+        // std::fs::remove_file on a directory fails — verify it returns Err
+        let result = remove_file(dir.to_string_lossy().to_string());
+        assert!(result.is_err(), "remove_file must not delete directories");
+        assert!(dir.exists(), "directory must still exist after failed removal");
+
+        let _ = std::fs::remove_dir(&dir);
     }
 }

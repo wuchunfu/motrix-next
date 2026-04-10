@@ -5,7 +5,7 @@
 import { readDir } from '@tauri-apps/plugin-fs'
 import { join } from '@tauri-apps/api/path'
 import { invoke } from '@tauri-apps/api/core'
-import { trashPath } from '@/composables/useFileDelete'
+import { removePath } from '@/composables/useFileDelete'
 import { logger } from '@shared/logger'
 
 /** Record shape needed for stale detection (not the full HistoryRecord). */
@@ -83,8 +83,8 @@ export function shouldDeleteTorrent(config: Partial<{ deleteTorrentAfterComplete
   return config.deleteTorrentAfterComplete === true
 }
 
-/** Regex matching aria2's auto-saved metadata filenames: 40-char lowercase hex + .torrent */
-const HEX40_TORRENT_RE = /^[0-9a-f]{40}\.torrent$/
+/** Regex matching aria2's auto-saved metadata filenames: 40-char lowercase hex + .torrent or .meta4 */
+const HEX40_METADATA_RE = /^[0-9a-f]{40}\.(torrent|meta4)$/
 
 /**
  * Default hash extractor: reads a .torrent file, parses it with bencode,
@@ -109,24 +109,30 @@ async function defaultHashExtractor(filePath: string): Promise<string | null> {
 export type HashExtractor = (filePath: string) => Promise<string | null>
 
 /**
- * Scan the download directory for aria2-saved .torrent metadata files and
- * delete the one whose infoHash matches the given target.
+ * Scan the download directory for aria2-saved metadata files and
+ * clean up those associated with the given torrent.
  *
- * aria2 names metadata files as `{SHA1(uploaded_content)}.torrent` (40-char hex),
- * which is different from the torrent's infoHash.  We must read and parse each
- * candidate to find the match.
+ * Handles two file types:
+ * - **hex40 `.torrent`**: aria2 names these as `{SHA1(content)}.torrent` (rpc-save-upload-metadata)
+ *   or `{infoHash}.torrent` (bt-save-metadata).  We parse each candidate and match by infoHash.
+ * - **hex40 `.meta4`**: aria2 names these as `{SHA1(content)}.meta4` (rpc-save-upload-metadata
+ *   for metalink).  These can't be parsed for infoHash, so they are removed unconditionally
+ *   since only aria2-generated files match the hex40 pattern.
+ *
+ * Uses `removePath()` (permanent delete) instead of `trashPath()` because these are
+ * internal aria2 engine artifacts — not user content.
  *
  * Safety guarantees:
- * - Only files matching `[0-9a-f]{40}.torrent` are considered (user files safe)
- * - Parsed infoHash must exactly match the target (no accidental deletion)
+ * - Only files matching `/^[0-9a-f]{40}\.(torrent|meta4)$/` are considered (user files safe)
+ * - `.torrent` candidates: parsed infoHash must exactly match the target (no accidental deletion)
  * - All errors are caught and logged (never throws)
  *
  * @param dir       Download directory to scan
  * @param infoHash  Target infoHash to match (from aria2 task status)
  * @param extractHash  Injectable hash extractor for testability
- * @returns true if a matching file was found and deleted, false otherwise
+ * @returns true if a matching .torrent file was found and deleted, false otherwise
  */
-export async function cleanupTorrentMetadataFiles(
+export async function cleanupAria2MetadataFiles(
   dir: string,
   infoHash: string,
   extractHash: HashExtractor = defaultHashExtractor,
@@ -135,26 +141,42 @@ export async function cleanupTorrentMetadataFiles(
 
   try {
     const entries = await readDir(dir)
-    const candidates = entries.filter((e) => e.isFile && HEX40_TORRENT_RE.test(e.name))
+    const candidates = entries.filter((e) => e.isFile && HEX40_METADATA_RE.test(e.name))
+
+    let torrentMatched = false
 
     for (const entry of candidates) {
       const filePath = await join(dir, entry.name)
       try {
+        if (entry.name.endsWith('.meta4')) {
+          // .meta4 files can't be parsed for infoHash — they use SHA1(content) naming.
+          // Since the only .meta4 files matching hex40 pattern are aria2-generated,
+          // we clean all of them for the given dir.
+          const removed = await removePath(filePath)
+          if (removed) logger.debug('cleanupAria2Metadata', `removed ${entry.name}`)
+          continue
+        }
+
+        // .torrent: parse and match infoHash
         const hash = await extractHash(filePath)
         if (hash === infoHash) {
-          const trashed = await trashPath(filePath)
-          if (trashed) logger.debug('cleanupTorrentMetadata', `trashed ${entry.name}`)
-          return trashed
+          const removed = await removePath(filePath)
+          if (removed) logger.debug('cleanupAria2Metadata', `removed ${entry.name}`)
+          torrentMatched = removed
+          return torrentMatched
         }
       } catch (e) {
-        logger.debug('cleanupTorrentMetadata', `skipping ${entry.name}: ${e}`)
+        logger.debug('cleanupAria2Metadata', `skipping ${entry.name}: ${e}`)
         continue
       }
     }
 
-    return false
+    return torrentMatched
   } catch (e) {
-    logger.debug('cleanupTorrentMetadata', `readDir failed for ${dir}: ${e}`)
+    logger.debug('cleanupAria2Metadata', `readDir failed for ${dir}: ${e}`)
     return false
   }
 }
+
+/** Backward-compatible alias for cleanupAria2MetadataFiles. */
+export const cleanupTorrentMetadataFiles = cleanupAria2MetadataFiles

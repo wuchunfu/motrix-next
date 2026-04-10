@@ -9,6 +9,10 @@
  * - Fallback: trashes files individually when resolveOpenTarget returns dir
  * - Download directory is NEVER trashed (issue #167)
  * - Silently handles missing files without throwing
+ *
+ * Also covers:
+ * - removePath: permanently deletes internal aria2 metadata via remove_file command
+ * - cleanupAria2ControlFile: removes .aria2 control files after BT seeding ends
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { Aria2Task } from '@shared/types'
@@ -17,12 +21,14 @@ import type { Aria2Task } from '@shared/types'
 const mockCheckPathExists = vi.fn()
 const mockCheckPathIsDir = vi.fn()
 const mockTrashFile = vi.fn()
+const mockRemoveFile = vi.fn()
 
 vi.mock('@tauri-apps/api/core', () => ({
   invoke: (cmd: string, args?: Record<string, unknown>) => {
     if (cmd === 'check_path_exists') return mockCheckPathExists(args)
     if (cmd === 'check_path_is_dir') return mockCheckPathIsDir(args)
     if (cmd === 'trash_file') return mockTrashFile(args)
+    if (cmd === 'remove_file') return mockRemoveFile(args)
     return Promise.reject(new Error(`Unexpected invoke: ${cmd}`))
   },
 }))
@@ -46,7 +52,7 @@ vi.mock('@tauri-apps/api/path', () => ({
   join: (...parts: string[]) => Promise.resolve(parts.join('/')),
 }))
 
-import { deleteTaskFiles } from '../useFileDelete'
+import { deleteTaskFiles, removePath, cleanupAria2ControlFile } from '../useFileDelete'
 
 function makeTask(overrides: Partial<Aria2Task> = {}): Aria2Task {
   return {
@@ -69,6 +75,7 @@ describe('deleteTaskFiles', () => {
     vi.clearAllMocks()
     mockCheckPathExists.mockResolvedValue(true)
     mockTrashFile.mockResolvedValue(undefined)
+    mockRemoveFile.mockResolvedValue(undefined)
     mockCleanupTorrentMetadata.mockResolvedValue(true)
   })
 
@@ -262,5 +269,218 @@ describe('deleteTaskFiles', () => {
     const trashedPaths = mockTrashFile.mock.calls.map((c) => (c[0] as Record<string, unknown>)?.path)
     expect(trashedPaths).not.toContain('')
     expect(trashedPaths).toContain('/downloads/valid.zip')
+  })
+})
+
+// ═══════════════════════════════════════════════════════════════════════
+// removePath — permanent deletion of internal aria2 metadata
+// ═══════════════════════════════════════════════════════════════════════
+
+describe('removePath', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockCheckPathExists.mockResolvedValue(true)
+    mockRemoveFile.mockResolvedValue(undefined)
+  })
+
+  it('permanently deletes an existing file via remove_file command', async () => {
+    const result = await removePath('/downloads/movie.mkv.aria2')
+
+    expect(result).toBe(true)
+    expect(mockCheckPathExists).toHaveBeenCalledWith({ path: '/downloads/movie.mkv.aria2' })
+    expect(mockRemoveFile).toHaveBeenCalledWith({ path: '/downloads/movie.mkv.aria2' })
+  })
+
+  it('does NOT use trash_file (must permanently delete)', async () => {
+    await removePath('/downloads/test.aria2')
+
+    expect(mockRemoveFile).toHaveBeenCalled()
+    expect(mockTrashFile).not.toHaveBeenCalled()
+  })
+
+  it('returns false for empty path', async () => {
+    const result = await removePath('')
+
+    expect(result).toBe(false)
+    expect(mockCheckPathExists).not.toHaveBeenCalled()
+    expect(mockRemoveFile).not.toHaveBeenCalled()
+  })
+
+  it('returns false when file does not exist', async () => {
+    mockCheckPathExists.mockResolvedValue(false)
+
+    const result = await removePath('/downloads/gone.aria2')
+
+    expect(result).toBe(false)
+    expect(mockRemoveFile).not.toHaveBeenCalled()
+  })
+
+  it('returns false and does not throw on remove_file error', async () => {
+    mockRemoveFile.mockRejectedValue(new Error('permission denied'))
+
+    const result = await removePath('/downloads/locked.aria2')
+
+    expect(result).toBe(false)
+  })
+})
+
+// ═══════════════════════════════════════════════════════════════════════
+// cleanupAria2ControlFile — .aria2 cleanup after BT seeding ends
+// ═══════════════════════════════════════════════════════════════════════
+
+describe('cleanupAria2ControlFile', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockCheckPathExists.mockResolvedValue(true)
+    mockRemoveFile.mockResolvedValue(undefined)
+  })
+
+  it('removes .aria2 for single-file BT task via resolveOpenTarget', async () => {
+    const task = makeTask({
+      bittorrent: { info: { name: 'movie.mkv' } },
+      infoHash: 'deadbeef'.repeat(5),
+      files: [
+        {
+          index: '1',
+          path: '/downloads/movie.mkv',
+          length: '1000',
+          completedLength: '1000',
+          selected: 'true',
+          uris: [],
+        },
+      ],
+    })
+    mockResolveOpenTarget.mockResolvedValue('/downloads/movie.mkv')
+
+    await cleanupAria2ControlFile(task)
+
+    expect(mockRemoveFile).toHaveBeenCalledWith({ path: '/downloads/movie.mkv.aria2' })
+    // Must use remove_file, not trash_file
+    expect(mockTrashFile).not.toHaveBeenCalled()
+  })
+
+  it('removes .aria2 for folder BT task', async () => {
+    const task = makeTask({
+      bittorrent: { info: { name: 'My Torrent' } },
+      infoHash: 'abcdef12'.repeat(5),
+      files: [
+        {
+          index: '1',
+          path: '/downloads/My Torrent/file1.mp4',
+          length: '500',
+          completedLength: '500',
+          selected: 'true',
+          uris: [],
+        },
+        {
+          index: '2',
+          path: '/downloads/My Torrent/file2.srt',
+          length: '100',
+          completedLength: '100',
+          selected: 'true',
+          uris: [],
+        },
+      ],
+    })
+    mockResolveOpenTarget.mockResolvedValue('/downloads/My Torrent')
+
+    await cleanupAria2ControlFile(task)
+
+    expect(mockRemoveFile).toHaveBeenCalledWith({ path: '/downloads/My Torrent.aria2' })
+  })
+
+  it('skips non-BT tasks entirely', async () => {
+    const task = makeTask({
+      files: [
+        {
+          index: '1',
+          path: '/downloads/file.zip',
+          length: '1000',
+          completedLength: '1000',
+          selected: 'true',
+          uris: [],
+        },
+      ],
+    })
+
+    await cleanupAria2ControlFile(task)
+
+    expect(mockRemoveFile).not.toHaveBeenCalled()
+    expect(mockResolveOpenTarget).not.toHaveBeenCalled()
+  })
+
+  it('falls back to per-file .aria2 cleanup when resolveOpenTarget returns dir', async () => {
+    const task = makeTask({
+      bittorrent: { info: { name: 'Task' } },
+      dir: '/downloads',
+      files: [
+        { index: '1', path: '/downloads/file1.mp4', length: '500', completedLength: '500', selected: 'true', uris: [] },
+        { index: '2', path: '/downloads/file2.mp4', length: '500', completedLength: '500', selected: 'true', uris: [] },
+      ],
+    })
+    mockResolveOpenTarget.mockResolvedValue('/downloads')
+
+    await cleanupAria2ControlFile(task)
+
+    expect(mockRemoveFile).toHaveBeenCalledWith({ path: '/downloads/file1.mp4.aria2' })
+    expect(mockRemoveFile).toHaveBeenCalledWith({ path: '/downloads/file2.mp4.aria2' })
+  })
+
+  it('falls back to per-file cleanup when resolveOpenTarget returns empty', async () => {
+    const task = makeTask({
+      bittorrent: { info: { name: 'Task' } },
+      files: [
+        {
+          index: '1',
+          path: '/downloads/only.mp4',
+          length: '1000',
+          completedLength: '1000',
+          selected: 'true',
+          uris: [],
+        },
+      ],
+    })
+    mockResolveOpenTarget.mockResolvedValue('')
+
+    await cleanupAria2ControlFile(task)
+
+    expect(mockRemoveFile).toHaveBeenCalledWith({ path: '/downloads/only.mp4.aria2' })
+  })
+
+  it('silently handles errors without throwing', async () => {
+    const task = makeTask({
+      bittorrent: { info: { name: 'movie.mkv' } },
+      files: [
+        {
+          index: '1',
+          path: '/downloads/movie.mkv',
+          length: '1000',
+          completedLength: '1000',
+          selected: 'true',
+          uris: [],
+        },
+      ],
+    })
+    mockResolveOpenTarget.mockRejectedValue(new Error('resolve failed'))
+
+    await expect(cleanupAria2ControlFile(task)).resolves.toBeUndefined()
+  })
+
+  it('skips files with empty path in fallback', async () => {
+    const task = makeTask({
+      bittorrent: { info: { name: 'Task' } },
+      dir: '/downloads',
+      files: [
+        { index: '1', path: '', length: '0', completedLength: '0', selected: 'true', uris: [] },
+        { index: '2', path: '/downloads/valid.mp4', length: '500', completedLength: '500', selected: 'true', uris: [] },
+      ],
+    })
+    mockResolveOpenTarget.mockResolvedValue('/downloads')
+
+    await cleanupAria2ControlFile(task)
+
+    const removedPaths = mockRemoveFile.mock.calls.map((c) => (c[0] as Record<string, unknown>)?.path)
+    expect(removedPaths).not.toContain('.aria2')
+    expect(removedPaths).toContain('/downloads/valid.mp4.aria2')
   })
 })

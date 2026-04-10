@@ -621,6 +621,7 @@ pub fn run() {
             commands::check_path_is_dir,
             commands::show_item_in_dir,
             commands::open_path_normalized,
+            commands::remove_file,
             commands::trash_file,
             commands::get_engine_conf_path,
             commands::is_dmabuf_renderer_disabled,
