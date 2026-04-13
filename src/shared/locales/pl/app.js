@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': 'Limit prędkości usunięty',
   'speedometer-enable-limit': 'Włącz limit prędkości',
   'speedometer-enter-values': 'Proszę wprowadzić wartości limitu',
+  'schedule-enabled': 'Harmonogram prędkości włączony',
+  'schedule-disabled': 'Harmonogram prędkości wyłączony',
 }

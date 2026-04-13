@@ -101,4 +101,6 @@ export default {
   'speedometer-limit-cleared': 'Límit de velocitat eliminat',
   'speedometer-enable-limit': 'Activa el límit de velocitat',
   'speedometer-enter-values': 'Introduïu els valors del límit',
+  'schedule-enabled': 'Programació de velocitat activada',
+  'schedule-disabled': 'Programació de velocitat desactivada',
 }

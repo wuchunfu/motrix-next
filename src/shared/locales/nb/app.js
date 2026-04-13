@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': 'Hastighetsgrense fjernet',
   'speedometer-enable-limit': 'Aktiver hastighetsgrense',
   'speedometer-enter-values': 'Vennligst oppgi grenseverdier',
+  'schedule-enabled': 'Hastighetsplan aktivert',
+  'schedule-disabled': 'Hastighetsplan deaktivert',
 }

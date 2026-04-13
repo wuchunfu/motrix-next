@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': 'Το όριο ταχύτητας αφαιρέθηκε',
   'speedometer-enable-limit': 'Ενεργοποίηση ορίου ταχύτητας',
   'speedometer-enter-values': 'Παρακαλώ εισάγετε τιμές ορίου',
+  'schedule-enabled': 'Το χρονοδιάγραμμα ταχύτητας ενεργοποιήθηκε',
+  'schedule-disabled': 'Το χρονοδιάγραμμα ταχύτητας απενεργοποιήθηκε',
 }

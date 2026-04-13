@@ -166,6 +166,16 @@ export interface AppConfig {
    *  When true, configured limits are applied to aria2 at runtime.
    *  When false, aria2 runs with 0 (unlimited) regardless of configured values. */
   speedLimitEnabled: boolean
+  /** Whether the speed schedule is enabled. When true, the scheduler automatically
+   *  toggles speedLimitEnabled on/off based on time of day and day of week. */
+  speedScheduleEnabled: boolean
+  /** Schedule start time in "HH:mm" format (24-hour). */
+  speedScheduleFrom: string
+  /** Schedule end time in "HH:mm" format (24-hour). Supports overnight spans (e.g. "22:00"→"08:00"). */
+  speedScheduleTo: string
+  /** Day-of-week bitmask: Mon=1, Tue=2, Wed=4, Thu=8, Fri=16, Sat=32, Sun=64.
+   *  0 = every day. Weekdays = 31. Weekends = 96. */
+  speedScheduleDays: number
   seedTime: number
   seedRatio: number
   btMaxPeers: number

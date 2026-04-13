@@ -25,6 +25,7 @@ import {
   SAFE_LIMIT_CONNECTION_PER_SERVER,
   SAFE_LIMIT_BT_MAX_PEERS,
   COLOR_SCHEMES,
+  SCHEDULE_DAY,
 } from '@shared/constants'
 import { useAppMessage } from '@/composables/useAppMessage'
 import { buildBasicForm, buildBasicSystemConfig, transformBasicForStore } from '@/composables/useBasicPreference'
@@ -406,6 +407,25 @@ const speedUnitOptions = [
   { label: 'MB/s', value: 'M' },
 ]
 
+// ── Schedule time options (HH:mm in 30-min steps) ───────────────────
+const timeOptions = (() => {
+  const opts: Array<{ label: string; value: string }> = []
+  for (let h = 0; h < 24; h++) {
+    for (const m of [0, 30]) {
+      const hh = String(h).padStart(2, '0')
+      const mm = String(m).padStart(2, '0')
+      opts.push({ label: `${hh}:${mm}`, value: `${hh}:${mm}` })
+    }
+  }
+  return opts
+})()
+
+const scheduleDayOptions = computed(() => [
+  { label: t('preferences.schedule-days-everyday'), value: SCHEDULE_DAY.EVERY_DAY },
+  { label: t('preferences.schedule-days-weekdays'), value: SCHEDULE_DAY.WEEKDAYS },
+  { label: t('preferences.schedule-days-weekends'), value: SCHEDULE_DAY.WEEKENDS },
+])
+
 const localeOptions = [
   { label: 'English', value: 'en-US' },
   { label: '简体中文 · Chinese Simplified', value: 'zh-CN' },
@@ -543,6 +563,15 @@ async function handleSpeedLimitToggle() {
     }
   } catch (e) {
     logger.error('Basic.speedLimitToggle', e)
+  }
+}
+
+async function handleScheduleToggle(enabled: boolean) {
+  try {
+    await preferenceStore.updateAndSave({ speedScheduleEnabled: enabled })
+    message.success(t(enabled ? 'app.schedule-enabled' : 'app.schedule-disabled'))
+  } catch (e) {
+    logger.error('Basic.scheduleToggle', e)
   }
 }
 
@@ -815,6 +844,32 @@ onMounted(async () => {
           </NInputGroup>
         </NFormItem>
       </div>
+
+      <NFormItem :label="t('preferences.speed-schedule-enabled')">
+        <NSwitch :value="preferenceStore.config.speedScheduleEnabled" @update:value="handleScheduleToggle" />
+      </NFormItem>
+      <NCollapseTransition :show="preferenceStore.config.speedScheduleEnabled" class="collapse-indent">
+        <NText
+          v-if="!preferenceStore.config.speedLimitEnabled"
+          depth="3"
+          type="warning"
+          style="font-size: 12px; display: block; margin-bottom: 8px"
+        >
+          {{ t('preferences.schedule-needs-limit') }}
+        </NText>
+        <NFormItem :label="t('preferences.schedule-from')">
+          <NSelect v-model:value="form.speedScheduleFrom" :options="timeOptions" style="width: 120px" />
+        </NFormItem>
+        <NFormItem :label="t('preferences.schedule-to')">
+          <NSelect v-model:value="form.speedScheduleTo" :options="timeOptions" style="width: 120px" />
+        </NFormItem>
+        <NFormItem :label="t('preferences.schedule-days')">
+          <NSelect v-model:value="form.speedScheduleDays" :options="scheduleDayOptions" style="width: 160px" />
+        </NFormItem>
+        <NText depth="3" style="font-size: 12px; display: block; margin-top: -8px; margin-bottom: 8px">
+          {{ t('preferences.schedule-hint') }}
+        </NText>
+      </NCollapseTransition>
 
       <NDivider title-placement="left">{{ t('preferences.bt-settings') }}</NDivider>
       <NFormItem :label="t('preferences.bt-auto-download-content')">

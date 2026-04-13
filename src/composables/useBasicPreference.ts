@@ -39,6 +39,10 @@ export interface BasicForm {
   btMaxPeers: number
   maxOverallDownloadLimit: string
   maxOverallUploadLimit: string
+  speedScheduleEnabled: boolean
+  speedScheduleFrom: string
+  speedScheduleTo: string
+  speedScheduleDays: number
   btAutoDownloadContent: boolean
   btForceEncryption: boolean
   keepSeeding: boolean
@@ -101,6 +105,10 @@ export function buildBasicForm(config: AppConfig, defaultDir: string = ''): Basi
     btMaxPeers: config.btMaxPeers ?? D.btMaxPeers,
     maxOverallDownloadLimit: String(config.maxOverallDownloadLimit ?? D.maxOverallDownloadLimit),
     maxOverallUploadLimit: String(config.maxOverallUploadLimit ?? D.maxOverallUploadLimit),
+    speedScheduleEnabled: config.speedScheduleEnabled ?? D.speedScheduleEnabled,
+    speedScheduleFrom: config.speedScheduleFrom ?? D.speedScheduleFrom,
+    speedScheduleTo: config.speedScheduleTo ?? D.speedScheduleTo,
+    speedScheduleDays: config.speedScheduleDays ?? D.speedScheduleDays,
     btAutoDownloadContent,
     btForceEncryption: config.btForceEncryption ?? D.btForceEncryption,
     keepSeeding: config.keepSeeding ?? D.keepSeeding,

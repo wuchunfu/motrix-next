@@ -63,3 +63,4 @@ src-tauri/gen/
 *.pid
 *.seed
 *.pid.lock
+.omx/

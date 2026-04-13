@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': '速度制限を解除しました',
   'speedometer-enable-limit': '速度制限を有効化',
   'speedometer-enter-values': '制限値を入力してください',
+  'schedule-enabled': '速度スケジュールを有効にしました',
+  'schedule-disabled': '速度スケジュールを無効にしました',
 }

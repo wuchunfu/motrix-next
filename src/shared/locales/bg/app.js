@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': 'Ограничението на скоростта е премахнато',
   'speedometer-enable-limit': 'Активиране на ограничението',
   'speedometer-enter-values': 'Моля, въведете стойности за ограничението',
+  'schedule-enabled': 'Графикът за скоростта е включен',
+  'schedule-disabled': 'Графикът за скоростта е изключен',
 }

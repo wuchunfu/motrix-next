@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': 'Đã xóa giới hạn tốc độ',
   'speedometer-enable-limit': 'Bật giới hạn tốc độ',
   'speedometer-enter-values': 'Vui lòng nhập giá trị giới hạn',
+  'schedule-enabled': 'Đã bật lịch giới hạn tốc độ',
+  'schedule-disabled': 'Đã tắt lịch giới hạn tốc độ',
 }

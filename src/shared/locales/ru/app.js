@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': 'Ограничение скорости снято',
   'speedometer-enable-limit': 'Включить ограничение скорости',
   'speedometer-enter-values': 'Пожалуйста, введите значения ограничения',
+  'schedule-enabled': 'Расписание ограничения скорости включено',
+  'schedule-disabled': 'Расписание ограничения скорости отключено',
 }

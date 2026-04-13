@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': 'Limite di velocità rimosso',
   'speedometer-enable-limit': 'Attiva limite di velocità',
   'speedometer-enter-values': 'Inserisci i valori limite',
+  'schedule-enabled': 'Pianificazione velocità attivata',
+  'schedule-disabled': 'Pianificazione velocità disattivata',
 }

@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': '已解除速度限制',
   'speedometer-enable-limit': '启用限速',
   'speedometer-enter-values': '请输入限速值',
+  'schedule-enabled': '定时限速已启用',
+  'schedule-disabled': '定时限速已关闭',
 }

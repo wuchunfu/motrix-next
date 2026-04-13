@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': 'محدودیت سرعت حذف شد',
   'speedometer-enable-limit': 'فعال‌سازی محدودیت سرعت',
   'speedometer-enter-values': 'لطفاً مقادیر محدودیت را وارد کنید',
+  'schedule-enabled': 'زمان‌بندی سرعت فعال شد',
+  'schedule-disabled': 'زمان‌بندی سرعت غیرفعال شد',
 }

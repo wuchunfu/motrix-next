@@ -18,8 +18,14 @@ import { useAppStore } from '@/stores/app'
 import { usePreferenceStore } from '@/stores/preference'
 import { changeGlobalOption, isEngineReady } from '@/api/aria2'
 import { bytesToSize } from '@shared/utils'
-import { NIcon, NPopover, NInputNumber, NSelect, NButton } from 'naive-ui'
-import { SpeedometerOutline, ArrowUpOutline, ArrowDownOutline, LockClosedOutline } from '@vicons/ionicons5'
+import { NIcon, NPopover, NInputNumber, NSelect, NButton, NSwitch, NDivider, NText } from 'naive-ui'
+import {
+  SpeedometerOutline,
+  ArrowUpOutline,
+  ArrowDownOutline,
+  LockClosedOutline,
+  TimerOutline,
+} from '@vicons/ionicons5'
 import {
   formatLimitBadge,
   parseSpeedLimitValue,
@@ -38,6 +44,9 @@ const message = useAppMessage()
 const stat = computed(() => appStore.stat)
 const isIdle = computed(() => stat.value.numActive === 0)
 const isLimited = computed(() => !!preferenceStore.config.speedLimitEnabled)
+const isScheduleActive = computed(() => !!preferenceStore.config.speedScheduleEnabled)
+/** Clock badge only when schedule is actually effective (both switches ON). */
+const isScheduleEffective = computed(() => isLimited.value && isScheduleActive.value)
 const downloadSpeed = computed(() => bytesToSize(String(stat.value.downloadSpeed)))
 const uploadSpeed = computed(() => bytesToSize(String(stat.value.uploadSpeed)))
 
@@ -192,6 +201,12 @@ async function handleApply() {
     logger.error('Speedometer.applyLimit', e)
   }
 }
+
+// ── Schedule toggle from popover ───────────────────────────────────────
+async function handleScheduleToggle(enabled: boolean) {
+  await preferenceStore.updateAndSave({ speedScheduleEnabled: enabled })
+  message.success(t(enabled ? 'app.schedule-enabled' : 'app.schedule-disabled'))
+}
 </script>
 
 <template>
@@ -211,8 +226,11 @@ async function handleApply() {
         @click="handleClick"
         @contextmenu="handleContextMenu"
       >
-        <Transition name="lock-pop">
-          <div v-if="isLimited" class="lock-pill">
+        <Transition name="lock-pop" mode="out-in">
+          <div v-if="isScheduleEffective" key="clock" class="clock-pill">
+            <NIcon :size="12"><TimerOutline /></NIcon>
+          </div>
+          <div v-else-if="isLimited" key="lock" class="lock-pill">
             <NIcon :size="12"><LockClosedOutline /></NIcon>
           </div>
         </Transition>
@@ -293,6 +311,23 @@ async function handleApply() {
           <NSelect v-model:value="popoverDlUnit" :options="speedUnitOptions" size="small" style="width: 88px" />
         </div>
       </div>
+
+      <NDivider style="margin: 12px 0 8px" />
+      <div class="limit-panel-row">
+        <div class="limit-panel-label">
+          <NIcon :size="12"><TimerOutline /></NIcon>
+          <span>{{ t('preferences.speed-schedule-enabled') }}</span>
+        </div>
+        <NSwitch :value="isScheduleActive" size="small" @update:value="handleScheduleToggle" />
+      </div>
+      <NText
+        v-if="isScheduleActive && !isLimited"
+        depth="3"
+        type="warning"
+        style="font-size: 11px; margin-top: 4px; display: block"
+      >
+        {{ t('preferences.schedule-needs-limit') }}
+      </NText>
 
       <NButton type="primary" size="small" block style="margin-top: 12px" @click="handleApply">
         {{ t('app.speedometer-apply') }}
@@ -474,6 +509,23 @@ async function handleApply() {
   color: var(--m3-tertiary, var(--color-primary));
   font-size: 10px;
   border: 1px solid color-mix(in srgb, var(--m3-tertiary) 30%, transparent);
+}
+
+/* ── Clock pill (top-right badge, visible when schedule is active) ── */
+.clock-pill {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--m3-primary) 22%, var(--m3-surface-container));
+  color: var(--m3-primary, var(--color-primary));
+  font-size: 10px;
+  border: 1px solid color-mix(in srgb, var(--m3-primary) 30%, transparent);
 }
 
 /* Lock pill pop animation */

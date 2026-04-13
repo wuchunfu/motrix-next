@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': 'Sebességkorlát eltávolítva',
   'speedometer-enable-limit': 'Sebességkorlát engedélyezése',
   'speedometer-enter-values': 'Kérem, adja meg a korlát értékeket',
+  'schedule-enabled': 'Sebességütemezés engedélyezve',
+  'schedule-disabled': 'Sebességütemezés letiltva',
 }

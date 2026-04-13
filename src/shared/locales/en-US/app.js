@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': 'Speed limit removed',
   'speedometer-enable-limit': 'Enable Speed Limit',
   'speedometer-enter-values': 'Please enter limit values',
+  'schedule-enabled': 'Speed schedule enabled',
+  'schedule-disabled': 'Speed schedule disabled',
 }

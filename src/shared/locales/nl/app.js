@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': 'Snelheidslimiet verwijderd',
   'speedometer-enable-limit': 'Snelheidslimiet inschakelen',
   'speedometer-enter-values': 'Voer limietwaarden in',
+  'schedule-enabled': 'Snelheidsschema ingeschakeld',
+  'schedule-disabled': 'Snelheidsschema uitgeschakeld',
 }

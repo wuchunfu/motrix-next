@@ -287,7 +287,7 @@ describe('v2 migration — decouple split / maxConnectionPerServer', () => {
       engineMaxConnectionPerServer: 64,
     } as Partial<AppConfig>
     runMigrations(config)
-    expect(config.configVersion).toBe(2)
+    expect(config.configVersion).toBe(CONFIG_VERSION)
   })
 
   it('is idempotent — running on already-migrated v2 config is a no-op', () => {
@@ -306,7 +306,7 @@ describe('v2 migration — decouple split / maxConnectionPerServer', () => {
 // ── Full v0 → v2 integration ──────────────────────────────────────
 
 describe('v0 → v2 full migration path', () => {
-  it('runs both v1 and v2 migrations in sequence on fresh config', () => {
+  it('runs both migrations in sequence on fresh config', () => {
     const config = {
       proxy: { enable: true, server: 'http://proxy:1080', bypass: '', scope: [] },
       engineMaxConnectionPerServer: 64,

@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': 'ลบขีดจำกัดความเร็วแล้ว',
   'speedometer-enable-limit': 'เปิดใช้งานจำกัดความเร็ว',
   'speedometer-enter-values': 'กรุณาใส่ค่าจำกัด',
+  'schedule-enabled': 'เปิดใช้งานกำหนดการความเร็วแล้ว',
+  'schedule-disabled': 'ปิดใช้งานกำหนดการความเร็วแล้ว',
 }

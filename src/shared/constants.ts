@@ -118,6 +118,24 @@ export const UPDATE_CHANNELS = ['stable', 'beta'] as const
  * - `dir: ''`       → system Downloads directory via Tauri API
  * - `rpcSecret`     → ABSENT from defaults; auto-generated on first launch in main.ts
  */
+
+/** Day-of-week bitmask constants for speed schedule. Mon=1 … Sun=64. */
+export const SCHEDULE_DAY = {
+  MON: 1,
+  TUE: 2,
+  WED: 4,
+  THU: 8,
+  FRI: 16,
+  SAT: 32,
+  SUN: 64,
+  /** Every day (special sentinel — checked first, bypasses bitmask). */
+  EVERY_DAY: 0,
+  /** Monday–Friday. */
+  WEEKDAYS: 1 + 2 + 4 + 8 + 16, // 31
+  /** Saturday–Sunday. */
+  WEEKENDS: 32 + 64, // 96
+} as const
+
 export const DEFAULT_APP_CONFIG = {
   configVersion: 2,
   dbSchemaVersion: 2,
@@ -134,6 +152,10 @@ export const DEFAULT_APP_CONFIG = {
   maxOverallDownloadLimit: '0',
   maxOverallUploadLimit: '0',
   speedLimitEnabled: false,
+  speedScheduleEnabled: false,
+  speedScheduleFrom: '08:00',
+  speedScheduleTo: '18:00',
+  speedScheduleDays: 0, // 0 = every day
   maxDownloadLimit: '',
   maxUploadLimit: '',
 

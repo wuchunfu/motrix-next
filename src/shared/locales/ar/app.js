@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': 'تمت إزالة حد السرعة',
   'speedometer-enable-limit': 'تفعيل تحديد السرعة',
   'speedometer-enter-values': 'يرجى إدخال قيم الحد',
+  'schedule-enabled': 'تم تفعيل التحكم بالجدول الزمني للسرعة',
+  'schedule-disabled': 'تم إلغاء التحكم بالجدول الزمني للسرعة',
 }

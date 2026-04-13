@@ -410,6 +410,17 @@ window.addEventListener('unhandledrejection', (e) => {
       if (ok) {
         const { syncGlobalOptions } = await import('@/composables/syncGlobalOptions')
         await syncGlobalOptions(config).catch((e) => logger.warn('Engine', 'global option sync failed: ' + e))
+
+        // Start the speed schedule timer — checks every 60s whether to
+        // switch between normal and alternative speed limits.
+        const { startScheduler } = await import('@/composables/useSpeedScheduler')
+        const { changeGlobalOption } = await import('@/api/aria2')
+        const stopScheduler = startScheduler(() => preferenceStore.config, {
+          changeGlobalOption,
+          updateAndSave: (partial) => preferenceStore.updateAndSave(partial),
+        })
+        // Store cleanup for engine restart scenarios
+        ;(window as unknown as Record<string, unknown>).__stopSpeedScheduler = stopScheduler
       }
     } catch (e) {
       logger.error('Engine', 'unexpected startup error: ' + e)

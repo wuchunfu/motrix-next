@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': 'Hız sınırı kaldırıldı',
   'speedometer-enable-limit': 'Hız sınırını etkinleştir',
   'speedometer-enter-values': 'Lütfen sınır değerlerini girin',
+  'schedule-enabled': 'Hız planı etkinleştirildi',
+  'schedule-disabled': 'Hız planı devre dışı bırakıldı',
 }

@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': 'Batas kecepatan dihapus',
   'speedometer-enable-limit': 'Aktifkan batas kecepatan',
   'speedometer-enter-values': 'Silakan masukkan nilai batas',
+  'schedule-enabled': 'Jadwal kecepatan diaktifkan',
+  'schedule-disabled': 'Jadwal kecepatan dinonaktifkan',
 }

@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': '속도 제한이 해제되었습니다',
   'speedometer-enable-limit': '속도 제한 활성화',
   'speedometer-enter-values': '제한 값을 입력하세요',
+  'schedule-enabled': '속도 스케줄이 활성화되었습니다',
+  'schedule-disabled': '속도 스케줄이 비활성화되었습니다',
 }

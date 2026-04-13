@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': 'Limita de viteză a fost eliminată',
   'speedometer-enable-limit': 'Activează limita de viteză',
   'speedometer-enter-values': 'Introduceți valorile limitei',
+  'schedule-enabled': 'Program de viteză activat',
+  'schedule-disabled': 'Program de viteză dezactivat',
 }

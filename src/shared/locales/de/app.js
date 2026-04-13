@@ -102,4 +102,6 @@ export default {
   'speedometer-limit-cleared': 'Geschwindigkeitslimit entfernt',
   'speedometer-enable-limit': 'Geschwindigkeitslimit aktivieren',
   'speedometer-enter-values': 'Bitte Grenzwerte eingeben',
+  'schedule-enabled': 'Geschwindigkeitszeitplan aktiviert',
+  'schedule-disabled': 'Geschwindigkeitszeitplan deaktiviert',
 }

@@ -42,13 +42,26 @@ export async function syncGlobalOptions(config: AppConfig): Promise<void> {
   // basic wins (it's closer to the user-facing value).
   const merged = { ...advancedSystem, ...basicSystem }
 
-  // Speed limit toggle override: when the user has disabled the speed
-  // limit via the Speedometer toggle, we must send '0' (unlimited) to
-  // aria2 even though config.json retains the configured values (so the
-  // user can re-enable them with a single click).
+  // Speed limit override: determine which limits to push to aria2.
+  //
+  // Priority (highest → lowest):
+  //   1. speedLimitEnabled = false → unlimited ('0')
+  //   2. speedLimitEnabled = true + schedule ON + outside period → unlimited ('0')
+  //   3. speedLimitEnabled = true + schedule ON + in period → limits (already in merged)
+  //   4. speedLimitEnabled = true + schedule OFF → limits (already in merged)
+  //
+  // This runs once at startup/restart; the scheduler timer handles
+  // ongoing transitions afterwards.
   if (!config.speedLimitEnabled) {
     merged['max-overall-download-limit'] = '0'
     merged['max-overall-upload-limit'] = '0'
+  } else if (config.speedScheduleEnabled) {
+    const { isInScheduledPeriod } = await import('@/composables/useSpeedScheduler')
+    if (!isInScheduledPeriod(config)) {
+      merged['max-overall-download-limit'] = '0'
+      merged['max-overall-upload-limit'] = '0'
+    }
+    // in-period: limits from buildBasicSystemConfig are already correct
   }
 
   // Strip keys that aria2 rejects via changeGlobalOption (ports, secret,
