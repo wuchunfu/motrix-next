@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useTaskStore } from '@/stores/task'
 import { useAppStore } from '@/stores/app'
 import { usePreferenceStore } from '@/stores/preference'
+import { useTheme } from '@/composables/useTheme'
 
 import { isEngineReady } from '@/api/aria2'
 import { useTaskActions } from '@/composables/useTaskActions'
@@ -15,6 +16,8 @@ import { useAppMessage } from '@/composables/useAppMessage'
 import TaskList from '@/components/task/TaskList.vue'
 import TaskActions from '@/components/task/TaskActions.vue'
 import TaskDetail from '@/components/task/TaskDetail.vue'
+import watermarkDark from '@/assets/logo-bolt-dark.png'
+import watermarkLight from '@/assets/logo-bolt-light.png'
 
 const props = withDefaults(defineProps<{ status?: string }>(), { status: 'active' })
 
@@ -24,6 +27,8 @@ const appStore = useAppStore()
 const preferenceStore = usePreferenceStore()
 const dialog = useDialog()
 const message = useAppMessage()
+const { isDark } = useTheme()
+const watermarkSrc = computed(() => (isDark.value ? watermarkLight : watermarkDark))
 
 const stoppingGids = ref<string[]>([])
 provide('stoppingGids', stoppingGids)
@@ -119,19 +124,26 @@ onBeforeUnmount(() => {
       <h4 :key="status" class="task-title">{{ title }}</h4>
       <TaskActions />
     </header>
-    <div class="panel-content">
-      <TaskList
-        :key="props.status"
-        @pause="handlePauseTask"
-        @resume="handleResumeTask"
-        @delete="handleDeleteTask"
-        @delete-record="handleDeleteRecord"
-        @copy-link="handleCopyLink"
-        @show-info="handleShowInfo"
-        @folder="handleShowInFolder"
-        @open-file="handleOpenFile"
-        @stop-seeding="handleStopSeeding"
-      />
+    <div class="panel-body">
+      <!-- Permanent brand watermark — positioned outside the scroll container
+           so it stays fixed while task cards scroll underneath -->
+      <div class="watermark" @dragstart.prevent @selectstart.prevent>
+        <img :src="watermarkSrc" alt="Motrix Next" class="watermark-brand" draggable="false" />
+      </div>
+      <div class="panel-content">
+        <TaskList
+          :key="props.status"
+          @pause="handlePauseTask"
+          @resume="handleResumeTask"
+          @delete="handleDeleteTask"
+          @delete-record="handleDeleteRecord"
+          @copy-link="handleCopyLink"
+          @show-info="handleShowInfo"
+          @folder="handleShowInFolder"
+          @open-file="handleOpenFile"
+          @stop-seeding="handleStopSeeding"
+        />
+      </div>
     </div>
     <TaskDetail
       :show="taskStore.taskDetailVisible"
@@ -165,13 +177,55 @@ onBeforeUnmount(() => {
   font-weight: normal;
   line-height: 24px;
 }
-.panel-content {
+/*
+ * .panel-body creates the positioning context for the watermark.
+ * The watermark is absolutely positioned here (outside the scroll flow),
+ * while .panel-content scrolls independently on top.
+ */
+.panel-body {
   position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.panel-content {
   padding: 0;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  /* z-index lifts scrollable content above the watermark layer */
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Permanent watermark — pinned to scroll container viewport ────── */
+.watermark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  animation: watermark-in 0.5s cubic-bezier(0.2, 0, 0, 1) both;
+}
+.watermark-brand {
+  max-width: 480px;
+  width: 80%;
+  opacity: 0.35;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+@keyframes watermark-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 </style>
