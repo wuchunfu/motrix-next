@@ -51,7 +51,7 @@ export default {
   'minimize-to-tray-on-close': 'Beim Schließen in den Infobereich minimieren',
   'hide-dock-on-minimize': 'Dock-Symbol beim Minimieren ausblenden (macOS)',
   'lightweight-mode': 'Leichtmodus',
-  'lightweight-mode-hint': 'WebView beim Minimieren in den Tray zerstören, um den Speicherverbrauch zu senken',
+  'lightweight-mode-hint': 'Wenn aktiviert, wird der Renderer beim Minimieren in den Tray zerstört, um den Speicherverbrauch zu senken',
   'run-mode': 'Ausführungsmodus',
   'run-mode-standard': 'Standard',
   'run-mode-tray': 'Taskleiste',

@@ -402,6 +402,26 @@ watch(
   },
 )
 
+// ── Lightweight mode ↔ Minimize-to-tray linkage ─────────────────────
+// Lightweight mode requires minimize-to-tray: auto-enable it as a dependency.
+watch(
+  () => form.value.lightweightMode,
+  (enabled) => {
+    if (enabled && !form.value.minimizeToTrayOnClose) {
+      form.value.minimizeToTrayOnClose = true
+    }
+  },
+)
+// When tray mode is disabled, lightweight mode loses its meaning — auto-disable.
+watch(
+  () => form.value.minimizeToTrayOnClose,
+  (enabled) => {
+    if (!enabled && form.value.lightweightMode) {
+      form.value.lightweightMode = false
+    }
+  },
+)
+
 const uploadSpeedValue = ref(0)
 const uploadUnit = ref('K')
 const downloadSpeedValue = ref(0)
@@ -836,13 +856,13 @@ onMounted(async () => {
         <NSwitch v-model:value="form.traySpeedometer" />
       </NFormItem>
       <NFormItem :label="t('preferences.lightweight-mode')">
-        <NSwitch v-model:value="form.lightweightMode" :disabled="!form.minimizeToTrayOnClose" />
+        <NSwitch v-model:value="form.lightweightMode" />
       </NFormItem>
       <NText
-        v-if="form.minimizeToTrayOnClose"
         depth="3"
         style="font-size: 12px; display: block; margin-top: -8px; margin-bottom: 8px; padding-left: 50px"
       >
+        ⓘ {{ t('preferences.lightweight-mode') }}:
         {{ t('preferences.lightweight-mode-hint') }}
       </NText>
 

@@ -51,7 +51,7 @@ export default {
   'minimize-to-tray-on-close': 'Minimizare în bara de sistem la închidere',
   'hide-dock-on-minimize': 'Ascunde pictograma Dock la minimizare (macOS)',
   'lightweight-mode': 'Mod ușor',
-  'lightweight-mode-hint': 'Distruge WebView la minimizarea în tava de sistem pentru a reduce consumul de memorie',
+  'lightweight-mode-hint': 'Când este activat, procesul de randare este distrus la minimizarea în tava de sistem pentru a reduce memoria',
   'run-mode': 'Mod de execuție',
   'run-mode-standard': 'Standard',
   'run-mode-tray': 'Bara de sistem',

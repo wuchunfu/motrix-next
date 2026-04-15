@@ -51,7 +51,7 @@ export default {
   'minimize-to-tray-on-close': 'Сворачивать в трей при закрытии',
   'hide-dock-on-minimize': 'Скрыть значок Dock при сворачивании (macOS)',
   'lightweight-mode': 'Облегчённый режим',
-  'lightweight-mode-hint': 'Уничтожить WebView при сворачивании в трей для снижения потребления памяти',
+  'lightweight-mode-hint': 'При включении процесс рендеринга уничтожается при сворачивании в трей для снижения потребления памяти',
   'run-mode': 'Режим работы',
   'run-mode-standard': 'Стандартный',
   'run-mode-tray': 'Системный лоток',

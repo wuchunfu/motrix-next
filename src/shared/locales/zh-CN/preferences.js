@@ -51,7 +51,7 @@ export default {
   'minimize-to-tray-on-close': '关闭时最小化到托盘',
   'hide-dock-on-minimize': '最小化到托盘时隐藏 Dock 图标（macOS）',
   'lightweight-mode': '轻量模式',
-  'lightweight-mode-hint': '最小化到托盘时销毁 WebView 以降低内存占用',
+  'lightweight-mode-hint': '开启后，最小化到托盘时将销毁渲染进程以降低内存占用',
   'run-mode': '运行模式',
   'run-mode-standard': '标准应用',
   'run-mode-tray': '托盘应用',

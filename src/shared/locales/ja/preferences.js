@@ -51,7 +51,7 @@ export default {
   'minimize-to-tray-on-close': '閉じたときにトレイに最小化',
   'hide-dock-on-minimize': 'トレイに最小化時にDockアイコンを隠す (macOS)',
   'lightweight-mode': '軽量モード',
-  'lightweight-mode-hint': 'トレイに最小化する際に WebView を破棄してメモリ使用量を削減します',
+  'lightweight-mode-hint': '有効にすると、トレイに最小化する際にレンダリングプロセスを破棄してメモリ使用量を削減します',
   'run-mode': '実行モード',
   'run-mode-standard': '標準',
   'run-mode-tray': 'トレイ',

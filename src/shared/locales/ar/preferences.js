@@ -51,7 +51,7 @@ export default {
   'minimize-to-tray-on-close': 'تصغير إلى شريط المهام عند الإغلاق',
   'hide-dock-on-minimize': 'إخفاء أيقونة Dock عند التصغير (macOS)',
   'lightweight-mode': 'الوضع الخفيف',
-  'lightweight-mode-hint': 'تدمير WebView عند التصغير إلى شريط النظام لتقليل استهلاك الذاكرة',
+  'lightweight-mode-hint': 'عند التفعيل، يتم تدمير عملية العرض عند التصغير إلى شريط النظام لتقليل استهلاك الذاكرة',
   'run-mode': 'وضع التشغيل',
   'run-mode-standard': 'قياسي',
   'run-mode-tray': 'شريط النظام',

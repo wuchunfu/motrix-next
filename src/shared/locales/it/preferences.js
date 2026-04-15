@@ -51,7 +51,7 @@ export default {
   'minimize-to-tray-on-close': 'Riduci a icona nella barra delle applicazioni alla chiusura',
   'hide-dock-on-minimize': 'Nascondi icona Dock quando minimizzato (macOS)',
   'lightweight-mode': 'Modalità leggera',
-  'lightweight-mode-hint': 'Distruggi la WebView quando minimizzato nel vassoio per ridurre l\'uso della memoria',
+  'lightweight-mode-hint': 'Quando attivato, il processo di rendering viene distrutto alla riduzione nel vassoio per ridurre la memoria',
   'run-mode': 'Modalità di esecuzione',
   'run-mode-standard': 'Standard',
   'run-mode-tray': 'Barra di sistema',

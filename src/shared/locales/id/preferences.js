@@ -51,7 +51,7 @@ export default {
   'minimize-to-tray-on-close': 'Minimalkan ke tray saat ditutup',
   'hide-dock-on-minimize': 'Sembunyikan ikon Dock saat diminimalkan (macOS)',
   'lightweight-mode': 'Mode Ringan',
-  'lightweight-mode-hint': 'Hancurkan WebView saat diperkecil ke baki sistem untuk mengurangi penggunaan memori',
+  'lightweight-mode-hint': 'Saat diaktifkan, proses render dihancurkan saat diperkecil ke baki sistem untuk mengurangi penggunaan memori',
   'run-mode': 'Mode operasi',
   'run-mode-standard': 'Standar',
   'run-mode-tray': 'Baki sistem',

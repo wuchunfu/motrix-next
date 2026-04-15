@@ -51,7 +51,7 @@ export default {
   'minimize-to-tray-on-close': 'کوچک‌سازی به سینی سیستم هنگام بستن',
   'hide-dock-on-minimize': 'مخفی کردن آیکون Dock هنگام کمینه‌سازی (macOS)',
   'lightweight-mode': 'حالت سبک',
-  'lightweight-mode-hint': 'از بین بردن WebView هنگام کوچک‌سازی به سینی سیستم برای کاهش مصرف حافظه',
+  'lightweight-mode-hint': 'هنگام فعال‌سازی، فرآیند رندر هنگام کوچک‌سازی به سینی سیستم از بین می‌رود تا مصرف حافظه کاهش یابد',
   'run-mode': 'حالت اجرا',
   'run-mode-standard': 'استاندارد',
   'run-mode-tray': 'نوار سیستم',

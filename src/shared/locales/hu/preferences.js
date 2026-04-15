@@ -51,7 +51,7 @@ export default {
   'minimize-to-tray-on-close': 'Bezáráskor tálcára kicsinyítés',
   'hide-dock-on-minimize': 'Dock ikon elrejtése tálcára kicsinyítéskor (macOS)',
   'lightweight-mode': 'Könnyű mód',
-  'lightweight-mode-hint': 'WebView megsemmisítése a tálcára kicsinyítéskor a memóriahasználat csökkentéséhez',
+  'lightweight-mode-hint': 'Bekapcsolva a renderelési folyamat megsemmisül a tálcára kicsinyítéskor a memóriahasználat csökkentéséhez',
   'run-mode': 'Futási mód',
   'run-mode-standard': 'Szabványos',
   'run-mode-tray': 'Tálca',

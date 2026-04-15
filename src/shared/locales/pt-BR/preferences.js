@@ -51,7 +51,7 @@ export default {
   'minimize-to-tray-on-close': 'Minimizar para a bandeja ao fechar',
   'hide-dock-on-minimize': 'Ocultar ícone do Dock ao minimizar (macOS)',
   'lightweight-mode': 'Modo leve',
-  'lightweight-mode-hint': 'Destruir WebView ao minimizar para a bandeja para reduzir o uso de memória',
+  'lightweight-mode-hint': 'Quando ativado, o processo de renderização é destruído ao minimizar para a bandeja para reduzir o uso de memória',
   'run-mode': 'Modo de execução',
   'run-mode-standard': 'Padrão',
   'run-mode-tray': 'Bandeja',

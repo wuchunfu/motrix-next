@@ -51,7 +51,7 @@ export default {
   'minimize-to-tray-on-close': 'Minimer til systemstatusfeltet ved lukking',
   'hide-dock-on-minimize': 'Skjul Dock-ikon ved minimering (macOS)',
   'lightweight-mode': 'Lettvektsmodus',
-  'lightweight-mode-hint': 'Ødelegg WebView ved minimering til systemstatusfeltet for å redusere minnebruk',
+  'lightweight-mode-hint': 'Når aktivert, ødelegges gjengivelseprosessen ved minimering til systemfeltet for å redusere minnebruk',
   'run-mode': 'Kjøremodus',
   'run-mode-standard': 'Standard',
   'run-mode-tray': 'Systemkurv',

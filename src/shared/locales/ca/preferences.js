@@ -51,7 +51,7 @@ export default {
   'minimize-to-tray-on-close': 'Minimitzar a la safata en tancar',
   'hide-dock-on-minimize': 'Amaga la icona del Dock en minimitzar (macOS)',
   'lightweight-mode': 'Mode lleuger',
-  'lightweight-mode-hint': 'Destruir el WebView en minimitzar a la safata per reduir l\'ús de memòria',
+  'lightweight-mode-hint': 'En activar-se, el procés de renderització es destrueix en minimitzar a la safata per reduir la memòria',
   'run-mode': 'Mode d\'execució',
   'run-mode-standard': 'Estàndard',
   'run-mode-tray': 'Safata',

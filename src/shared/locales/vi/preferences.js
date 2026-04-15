@@ -51,7 +51,7 @@ export default {
   'minimize-to-tray-on-close': 'Thu nhỏ vào khay hệ thống khi đóng',
   'hide-dock-on-minimize': 'Ẩn biểu tượng Dock khi thu nhỏ (macOS)',
   'lightweight-mode': 'Chế độ nhẹ',
-  'lightweight-mode-hint': 'Hủy WebView khi thu nhỏ xuống khay hệ thống để giảm sử dụng bộ nhớ',
+  'lightweight-mode-hint': 'Khi bật, tiến trình hiển thị sẽ bị hủy khi thu nhỏ xuống khay hệ thống để giảm sử dụng bộ nhớ',
   'run-mode': 'Chế độ chạy',
   'run-mode-standard': 'Tiêu chuẩn',
   'run-mode-tray': 'Khay hệ thống',

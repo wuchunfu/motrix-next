@@ -51,7 +51,7 @@ export default {
   'minimize-to-tray-on-close': 'Kapatıldığında sistem tepsisine küçült',
   'hide-dock-on-minimize': 'Küçültüldüğünde Dock simgesini gizle (macOS)',
   'lightweight-mode': 'Hafif Mod',
-  'lightweight-mode-hint': 'Sistem tepsisine küçültürken WebView\'ı yok ederek bellek kullanımını azaltın',
+  'lightweight-mode-hint': 'Etkinleştirildiğinde, sistem tepsisine küçültürken işleme süreci yok edilerek bellek kullanımı azaltılır',
   'run-mode': 'Çalışma modu',
   'run-mode-standard': 'Standart',
   'run-mode-tray': 'Sistem tepsisi',
