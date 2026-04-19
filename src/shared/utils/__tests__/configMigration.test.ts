@@ -297,22 +297,72 @@ describe('v2 migration — decouple split / maxConnectionPerServer', () => {
       maxConnectionPerServer: 16,
     } as Partial<AppConfig>
     const result = runMigrations(config)
-    expect(result.migrated).toBe(false)
+    // v3 migration runs (configVersion 2 < 3), but autoSubmitFromExtension
+    // is absent so the migration is effectively a no-op for that field
+    expect(result.migrated).toBe(true)
     expect(config.split).toBe(64)
     expect(config.maxConnectionPerServer).toBe(16)
   })
 })
 
-// ── Full v0 → v2 integration ──────────────────────────────────────
+// ── v3 Migration: flatten autoSubmitFromExtension ──────────────────
 
-describe('v0 → v2 full migration path', () => {
-  it('runs both migrations in sequence on fresh config', () => {
+describe('v3 migration — flatten autoSubmitFromExtension', () => {
+  it('flattens object with enable=true to boolean true', () => {
+    const config = {
+      configVersion: 2,
+      autoSubmitFromExtension: { enable: true, http: true, magnet: true, torrent: false, metalink: false },
+    } as unknown as Partial<AppConfig>
+    runMigrations(config)
+    expect(config.autoSubmitFromExtension).toBe(true)
+  })
+
+  it('flattens object with enable=false to boolean false', () => {
+    const config = {
+      configVersion: 2,
+      autoSubmitFromExtension: { enable: false, http: true, magnet: true, torrent: true, metalink: true },
+    } as unknown as Partial<AppConfig>
+    runMigrations(config)
+    expect(config.autoSubmitFromExtension).toBe(false)
+  })
+
+  it('leaves boolean value untouched (already migrated)', () => {
+    const config = {
+      configVersion: 2,
+      autoSubmitFromExtension: true,
+    } as Partial<AppConfig>
+    runMigrations(config)
+    expect(config.autoSubmitFromExtension).toBe(true)
+  })
+
+  it('handles absent autoSubmitFromExtension gracefully', () => {
+    const config = { configVersion: 2 } as Partial<AppConfig>
+    const result = runMigrations(config)
+    expect(result.migrated).toBe(true)
+    expect(config.autoSubmitFromExtension).toBeUndefined()
+  })
+
+  it('stamps configVersion to 3 after migration', () => {
+    const config = {
+      configVersion: 2,
+      autoSubmitFromExtension: { enable: false, http: true, magnet: true, torrent: false, metalink: false },
+    } as unknown as Partial<AppConfig>
+    runMigrations(config)
+    expect(config.configVersion).toBe(CONFIG_VERSION)
+  })
+})
+
+// ── Full v0 → v3 integration ──────────────────────────────────────
+
+describe('v0 → v3 full migration path', () => {
+  it('runs all migrations in sequence on fresh config', () => {
     const config = {
       proxy: { enable: true, server: 'http://proxy:1080', bypass: '', scope: [] },
       engineMaxConnectionPerServer: 64,
       split: 64,
       maxConnectionPerServer: 64,
-    } as Partial<AppConfig>
+      autoSubmitFromExtension: { enable: true, http: true, magnet: true, torrent: false, metalink: false },
+    } as unknown as Partial<AppConfig>
 
     const result = runMigrations(config)
     expect(result.migrated).toBe(true)
@@ -321,6 +371,8 @@ describe('v0 → v2 full migration path', () => {
     expect(config.proxy!.scope).toEqual([...PROXY_SCOPE_OPTIONS])
     // v2: engineMaxConnectionPerServer removed
     expect((config as Record<string, unknown>).engineMaxConnectionPerServer).toBeUndefined()
+    // v3: autoSubmitFromExtension flattened
+    expect(config.autoSubmitFromExtension).toBe(true)
     // Both split and maxConnectionPerServer preserved
     expect(config.split).toBe(64)
     expect(config.maxConnectionPerServer).toBe(64)

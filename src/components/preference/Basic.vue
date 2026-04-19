@@ -1093,31 +1093,9 @@ onMounted(async () => {
           <NSwitch v-model:value="form.deleteFilesWhenSkipConfirm" />
         </NFormItem>
       </NCollapseTransition>
-
-      <NDivider title-placement="left">{{ t('preferences.extension-downloads') }}</NDivider>
       <NFormItem :label="t('preferences.auto-submit-from-extension')">
-        <NSwitch v-model:value="form.autoSubmitEnable" />
+        <NSwitch v-model:value="form.autoSubmitFromExtension" />
       </NFormItem>
-      <NCollapseTransition :show="form.autoSubmitEnable" class="collapse-indent">
-        <NFormItem :label="t('preferences.auto-submit-http')">
-          <NSwitch v-model:value="form.autoSubmitHttp" />
-        </NFormItem>
-        <NFormItem :label="t('preferences.auto-submit-magnet')">
-          <NSwitch v-model:value="form.autoSubmitMagnet" />
-        </NFormItem>
-        <NFormItem :label="t('preferences.auto-submit-torrent')">
-          <NSwitch v-model:value="form.autoSubmitTorrent" />
-        </NFormItem>
-        <NFormItem :label="t('preferences.auto-submit-metalink')">
-          <NSwitch v-model:value="form.autoSubmitMetalink" />
-        </NFormItem>
-        <NText
-          depth="3"
-          style="font-size: 12px; display: block; margin-top: -8px; margin-bottom: 8px; padding-left: 50px"
-        >
-          ⓘ {{ t('preferences.auto-submit-hint') }}
-        </NText>
-      </NCollapseTransition>
 
       <NDivider title-placement="left">{{ t('preferences.auto-cleanup') }}</NDivider>
       <NFormItem :label="t('preferences.delete-torrent-after-complete')">

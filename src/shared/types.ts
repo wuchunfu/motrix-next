@@ -143,21 +143,6 @@ export interface ClipboardConfig {
   btHash: boolean
 }
 
-/** Controls which extension-intercepted download types bypass the AddTask
- *  dialog and submit immediately using the user's default settings. */
-export interface AutoSubmitConfig {
-  /** Master switch — when false, all extension downloads show AddTask dialog. */
-  enable: boolean
-  /** Auto-submit HTTP/HTTPS/FTP links. */
-  http: boolean
-  /** Auto-submit magnet: URIs. */
-  magnet: boolean
-  /** Auto-submit .torrent file URLs. */
-  torrent: boolean
-  /** Auto-submit .metalink/.meta4 file URLs. */
-  metalink: boolean
-}
-
 /** A file category rule mapping extensions to a download directory. */
 export interface FileCategory {
   /** Display label — i18n key suffix for built-in categories, user-provided name for custom ones. */
@@ -235,7 +220,11 @@ export interface AppConfig {
   proxy: ProxyConfig
   protocols: ProtocolsConfig
   clipboard: ClipboardConfig
-  autoSubmitFromExtension: AutoSubmitConfig
+  /** When true, extension-intercepted URI downloads (HTTP/FTP/magnet) bypass
+   *  the AddTask dialog and submit immediately using user defaults.
+   *  Torrent/metalink URLs always show the dialog regardless — they require
+   *  a fetch→parse→file-select pipeline that cannot be skipped. */
+  autoSubmitFromExtension: boolean
   trackerSource: string[]
   customTrackerUrls: string[]
   historyDirectories: string[]

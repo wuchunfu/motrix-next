@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': 'Nom de la categoria',
   'file-category-auto-archive': 'arxiu automàtic',
   'file-category-auto-archive-hint': 'Els tipus no reconeguts es desen a la ruta per defecte i s\'arxiven automàticament després de la descàrrega',
-  'extension-downloads': 'Extensió del navegador',
   'auto-submit-from-extension': 'Ometre la confirmació per a descàrregues de l\'extensió',
-  'auto-submit-http': 'Enllaços normals (HTTP / FTP)',
-  'auto-submit-magnet': 'Enllaços Magnet',
-  'auto-submit-torrent': 'Fitxers Torrent (.torrent)',
-  'auto-submit-metalink': 'Fitxers Metalink (.meta4)',
-  'auto-submit-hint': 'Els tipus no marcats mostraran el diàleg d\'afegir tasca',
   'shutdown-when-complete': 'Apagar després de completar totes les descàrregues',
 }

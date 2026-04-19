@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': 'Numele categoriei',
   'file-category-auto-archive': 'arhivare automată',
   'file-category-auto-archive-hint': 'Tipurile nerecunoscute sunt salvate în calea implicită și arhivate automat după descărcare',
-  'extension-downloads': 'Extensia browserului',
   'auto-submit-from-extension': 'Omite confirmarea pentru descărcările din extensie',
-  'auto-submit-http': 'Linkuri obișnuite (HTTP / FTP)',
-  'auto-submit-magnet': 'Linkuri Magnet',
-  'auto-submit-torrent': 'Fișiere Torrent (.torrent)',
-  'auto-submit-metalink': 'Fișiere Metalink (.meta4)',
-  'auto-submit-hint': 'Tipurile nebifate vor afișa dialogul de adăugare a sarcinii',
   'shutdown-when-complete': 'Oprire după finalizarea tuturor descărcărilor',
 }

@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': 'Categorienaam',
   'file-category-auto-archive': 'automatisch archiveren',
   'file-category-auto-archive-hint': 'Niet-herkende typen worden opgeslagen in het standaardpad en automatisch gearchiveerd na het downloaden',
-  'extension-downloads': 'Browserextensie',
   'auto-submit-from-extension': 'Bevestiging overslaan voor extensie-downloads',
-  'auto-submit-http': 'Gewone links (HTTP / FTP)',
-  'auto-submit-magnet': 'Magnet-links',
-  'auto-submit-torrent': 'Torrent-bestanden (.torrent)',
-  'auto-submit-metalink': 'Metalink-bestanden (.meta4)',
-  'auto-submit-hint': 'Niet-aangevinkte typen tonen nog steeds het taak-dialoogvenster',
   'shutdown-when-complete': 'Afsluiten na voltooiing van alle downloads',
 }

@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': 'Nama Kategori',
   'file-category-auto-archive': 'arsip otomatis',
   'file-category-auto-archive-hint': 'Jenis yang tidak dikenali disimpan ke jalur default dan diarsipkan secara otomatis setelah unduhan',
-  'extension-downloads': 'Ekstensi Browser',
   'auto-submit-from-extension': 'Lewati konfirmasi untuk unduhan ekstensi',
-  'auto-submit-http': 'Tautan biasa (HTTP / FTP)',
-  'auto-submit-magnet': 'Tautan Magnet',
-  'auto-submit-torrent': 'File Torrent (.torrent)',
-  'auto-submit-metalink': 'File Metalink (.meta4)',
-  'auto-submit-hint': 'Jenis yang tidak dicentang tetap menampilkan dialog tambah tugas',
   'shutdown-when-complete': 'Matikan setelah semua unduhan selesai',
 }

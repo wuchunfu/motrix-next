@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': 'Category Name',
   'file-category-auto-archive': 'auto-archive',
   'file-category-auto-archive-hint': 'Unrecognized types are saved to the default path and auto-archived after download',
-  'extension-downloads': 'Browser Extension',
   'auto-submit-from-extension': 'Skip confirmation for extension downloads',
-  'auto-submit-http': 'Regular links (HTTP / FTP)',
-  'auto-submit-magnet': 'Magnet links',
-  'auto-submit-torrent': 'Torrent files (.torrent)',
-  'auto-submit-metalink': 'Metalink files (.meta4)',
-  'auto-submit-hint': 'Unchecked types will still show the Add Task dialog',
   'shutdown-when-complete': 'Shut down after all downloads complete',
 }

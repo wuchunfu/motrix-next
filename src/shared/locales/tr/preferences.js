@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': 'Kategori adı',
   'file-category-auto-archive': 'otomatik arşivle',
   'file-category-auto-archive-hint': 'Tanınmayan türler varsayılan yola kaydedilir ve indirdikten sonra otomatik olarak arşivlenir',
-  'extension-downloads': 'Tarayıcı Eklentisi',
   'auto-submit-from-extension': 'Eklenti indirmeleri için onayı atla',
-  'auto-submit-http': 'Normal bağlantılar (HTTP / FTP)',
-  'auto-submit-magnet': 'Magnet bağlantıları',
-  'auto-submit-torrent': 'Torrent dosyaları (.torrent)',
-  'auto-submit-metalink': 'Metalink dosyaları (.meta4)',
-  'auto-submit-hint': 'İşaretlenmemiş türler görev ekleme iletişim kutusunu gösterir',
   'shutdown-when-complete': 'Tüm indirmeler tamamlandıktan sonra kapat',
 }

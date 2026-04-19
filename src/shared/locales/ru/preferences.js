@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': 'Название категории',
   'file-category-auto-archive': 'автоархивирование',
   'file-category-auto-archive-hint': 'Нераспознанные типы файлов сохраняются в путь по умолчанию и автоматически архивируются после загрузки',
-  'extension-downloads': 'Расширение браузера',
   'auto-submit-from-extension': 'Пропустить подтверждение для загрузок из расширения',
-  'auto-submit-http': 'Обычные ссылки (HTTP / FTP)',
-  'auto-submit-magnet': 'Magnet-ссылки',
-  'auto-submit-torrent': 'Torrent-файлы (.torrent)',
-  'auto-submit-metalink': 'Metalink-файлы (.meta4)',
-  'auto-submit-hint': 'Неотмеченные типы будут отображать диалог добавления задачи',
   'shutdown-when-complete': 'Выключить после завершения всех загрузок',
 }

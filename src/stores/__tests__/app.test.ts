@@ -533,18 +533,11 @@ describe('useAppStore', () => {
       return `motrixnext://new?url=${u}${r}${c}`
     }
 
-    it('auto-submits HTTP URI when master toggle and http sub-toggle are enabled', async () => {
+    it('auto-submits HTTP URI when enabled', async () => {
       const store = useAppStore()
-      // Mock preference store with auto-submit enabled
       const { usePreferenceStore } = await import('@/stores/preference')
       const prefStore = usePreferenceStore()
-      prefStore.config.autoSubmitFromExtension = {
-        enable: true,
-        http: true,
-        magnet: true,
-        torrent: true,
-        metalink: true,
-      }
+      prefStore.config.autoSubmitFromExtension = true
 
       store.handleDeepLinkUrls([buildDeepLink('https://example.com/file.zip')])
 
@@ -553,46 +546,11 @@ describe('useAppStore', () => {
       expect(store.addTaskVisible).toBe(false)
     })
 
-    it('falls back to AddTask dialog when master toggle is disabled', () => {
-      const store = useAppStore()
-      // Default config has autoSubmitFromExtension.enable = false
-
-      store.handleDeepLinkUrls([buildDeepLink('https://example.com/file.zip')])
-
-      // Should behave as before: item in pendingBatch, dialog opens
-      expect(store.pendingBatch).toHaveLength(1)
-      expect(store.addTaskVisible).toBe(true)
-    })
-
-    it('falls back to AddTask when master is on but http sub-toggle is off', async () => {
+    it('auto-submits magnet URI when enabled', async () => {
       const store = useAppStore()
       const { usePreferenceStore } = await import('@/stores/preference')
       const prefStore = usePreferenceStore()
-      prefStore.config.autoSubmitFromExtension = {
-        enable: true,
-        http: false,
-        magnet: true,
-        torrent: true,
-        metalink: true,
-      }
-
-      store.handleDeepLinkUrls([buildDeepLink('https://example.com/file.zip')])
-
-      expect(store.pendingBatch).toHaveLength(1)
-      expect(store.addTaskVisible).toBe(true)
-    })
-
-    it('auto-submits magnet URI when magnet sub-toggle is enabled', async () => {
-      const store = useAppStore()
-      const { usePreferenceStore } = await import('@/stores/preference')
-      const prefStore = usePreferenceStore()
-      prefStore.config.autoSubmitFromExtension = {
-        enable: true,
-        http: true,
-        magnet: true,
-        torrent: true,
-        metalink: true,
-      }
+      prefStore.config.autoSubmitFromExtension = true
 
       store.handleDeepLinkUrls([buildDeepLink('magnet:?xt=urn:btih:abc123')])
 
@@ -600,53 +558,48 @@ describe('useAppStore', () => {
       expect(store.addTaskVisible).toBe(false)
     })
 
-    it('falls back to AddTask for torrent URL when torrent sub-toggle is off', async () => {
+    it('falls back to AddTask dialog when disabled', () => {
       const store = useAppStore()
-      const { usePreferenceStore } = await import('@/stores/preference')
-      const prefStore = usePreferenceStore()
-      prefStore.config.autoSubmitFromExtension = {
-        enable: true,
-        http: true,
-        magnet: true,
-        torrent: false,
-        metalink: true,
-      }
+      // Default config has autoSubmitFromExtension = false
 
-      store.handleDeepLinkUrls([buildDeepLink('https://example.com/linux.torrent')])
+      store.handleDeepLinkUrls([buildDeepLink('https://example.com/file.zip')])
 
       expect(store.pendingBatch).toHaveLength(1)
       expect(store.addTaskVisible).toBe(true)
     })
 
-    it('falls back to AddTask for metalink URL when metalink sub-toggle is off', async () => {
+    it('always shows dialog for .torrent URLs (requires fetch→parse→file-select)', async () => {
       const store = useAppStore()
       const { usePreferenceStore } = await import('@/stores/preference')
       const prefStore = usePreferenceStore()
-      prefStore.config.autoSubmitFromExtension = {
-        enable: true,
-        http: true,
-        magnet: true,
-        torrent: true,
-        metalink: false,
-      }
+      prefStore.config.autoSubmitFromExtension = true
+
+      store.handleDeepLinkUrls([buildDeepLink('https://example.com/linux.torrent')])
+
+      // Torrent URLs must go through dialog regardless of auto-submit setting
+      expect(store.pendingBatch).toHaveLength(1)
+      expect(store.pendingBatch[0].kind).toBe('torrent')
+      expect(store.addTaskVisible).toBe(true)
+    })
+
+    it('always shows dialog for .metalink URLs (requires fetch→parse pipeline)', async () => {
+      const store = useAppStore()
+      const { usePreferenceStore } = await import('@/stores/preference')
+      const prefStore = usePreferenceStore()
+      prefStore.config.autoSubmitFromExtension = true
 
       store.handleDeepLinkUrls([buildDeepLink('https://example.com/bundle.meta4')])
 
       expect(store.pendingBatch).toHaveLength(1)
+      expect(store.pendingBatch[0].kind).toBe('metalink')
       expect(store.addTaskVisible).toBe(true)
     })
 
-    it('handles mixed batch: auto-submits eligible, dialogs ineligible', async () => {
+    it('handles mixed batch: auto-submits URIs, dialogs torrent', async () => {
       const store = useAppStore()
       const { usePreferenceStore } = await import('@/stores/preference')
       const prefStore = usePreferenceStore()
-      prefStore.config.autoSubmitFromExtension = {
-        enable: true,
-        http: true,
-        magnet: true,
-        torrent: false, // torrent goes to dialog
-        metalink: true,
-      }
+      prefStore.config.autoSubmitFromExtension = true
 
       store.handleDeepLinkUrls([
         buildDeepLink('https://example.com/file.zip'),
@@ -663,13 +616,7 @@ describe('useAppStore', () => {
       const store = useAppStore()
       const { usePreferenceStore } = await import('@/stores/preference')
       const prefStore = usePreferenceStore()
-      prefStore.config.autoSubmitFromExtension = {
-        enable: true,
-        http: true,
-        magnet: true,
-        torrent: true,
-        metalink: true,
-      }
+      prefStore.config.autoSubmitFromExtension = true
 
       store.handleDeepLinkUrls([buildDeepLink('https://example.com/a.zip'), buildDeepLink('https://example.com/b.mp4')])
 
@@ -681,13 +628,7 @@ describe('useAppStore', () => {
       const store = useAppStore()
       const { usePreferenceStore } = await import('@/stores/preference')
       const prefStore = usePreferenceStore()
-      prefStore.config.autoSubmitFromExtension = {
-        enable: true,
-        http: true,
-        magnet: true,
-        torrent: true,
-        metalink: true,
-      }
+      prefStore.config.autoSubmitFromExtension = true
 
       store.handleDeepLinkUrls([buildDeepLink('https://example.com/file.zip', 'https://example.com')])
 
@@ -699,13 +640,7 @@ describe('useAppStore', () => {
       const store = useAppStore()
       const { usePreferenceStore } = await import('@/stores/preference')
       const prefStore = usePreferenceStore()
-      prefStore.config.autoSubmitFromExtension = {
-        enable: true,
-        http: true,
-        magnet: true,
-        torrent: true,
-        metalink: true,
-      }
+      prefStore.config.autoSubmitFromExtension = true
 
       store.handleDeepLinkUrls([buildDeepLink('https://cdn.quark.cn/file.zip', 'https://pan.quark.cn', 'auth=secret')])
 
@@ -717,13 +652,7 @@ describe('useAppStore', () => {
       const store = useAppStore()
       const { usePreferenceStore } = await import('@/stores/preference')
       const prefStore = usePreferenceStore()
-      prefStore.config.autoSubmitFromExtension = {
-        enable: true,
-        http: true,
-        magnet: true,
-        torrent: true,
-        metalink: true,
-      }
+      prefStore.config.autoSubmitFromExtension = true
 
       // Regular deep links (not motrixnext://) should always go to dialog
       store.handleDeepLinkUrls(['https://example.com/file.zip'])

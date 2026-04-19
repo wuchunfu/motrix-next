@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': 'Kategória neve',
   'file-category-auto-archive': 'automatikus archiválás',
   'file-category-auto-archive-hint': 'A fel nem ismert típusok az alapértelmezett útvonalra kerülnek, és letöltés után automatikusan archiválódnak',
-  'extension-downloads': 'Böngészőbővítmény',
   'auto-submit-from-extension': 'Megerősítés kihagyása a bővítmény letöltéseinél',
-  'auto-submit-http': 'Normál hivatkozások (HTTP / FTP)',
-  'auto-submit-magnet': 'Magnet hivatkozások',
-  'auto-submit-torrent': 'Torrent fájlok (.torrent)',
-  'auto-submit-metalink': 'Metalink fájlok (.meta4)',
-  'auto-submit-hint': 'A nem jelölt típusok továbbra is megjelenítik a feladat hozzáadása párbeszédpanelt',
   'shutdown-when-complete': 'Leállítás az összes letöltés befejezése után',
 }

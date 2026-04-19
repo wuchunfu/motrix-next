@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': 'Όνομα κατηγορίας',
   'file-category-auto-archive': 'αυτόματη αρχειοθέτηση',
   'file-category-auto-archive-hint': 'Οι μη αναγνωρισμένοι τύποι αποθηκεύονται στην προεπιλεγμένη διαδρομή και αρχειοθετούνται αυτόματα μετά τη λήψη',
-  'extension-downloads': 'Επέκταση προγράμματος περιήγησης',
   'auto-submit-from-extension': 'Παράλειψη επιβεβαίωσης για λήψεις επέκτασης',
-  'auto-submit-http': 'Κανονικοί σύνδεσμοι (HTTP / FTP)',
-  'auto-submit-magnet': 'Σύνδεσμοι Magnet',
-  'auto-submit-torrent': 'Αρχεία Torrent (.torrent)',
-  'auto-submit-metalink': 'Αρχεία Metalink (.meta4)',
-  'auto-submit-hint': 'Οι μη επιλεγμένοι τύποι θα εμφανίζουν τον διάλογο προσθήκης εργασίας',
   'shutdown-when-complete': 'Τερματισμός μετά την ολοκλήρωση όλων των λήψεων',
 }

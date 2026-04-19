@@ -20,14 +20,7 @@ import { buildEngineOptions, submitManualUris } from '@/composables/useAddTaskSu
 import { isGlobalDownloadProxyActive } from '@/composables/useAddTaskSubmit'
 import { usePreferenceStore } from '@/stores/preference'
 import { useTaskStore } from '@/stores/task'
-import type {
-  Aria2RawGlobalStat,
-  Aria2EngineOptions,
-  TauriUpdate,
-  AppConfig,
-  BatchItem,
-  AutoSubmitConfig,
-} from '@shared/types'
+import type { Aria2RawGlobalStat, Aria2EngineOptions, TauriUpdate, AppConfig, BatchItem } from '@shared/types'
 import type { AddTaskForm } from '@/composables/useAddTaskSubmit'
 
 /** Payload shape emitted by Rust stat_service via `stat:update`. */
@@ -268,9 +261,11 @@ export const useAppStore = defineStore('app', () => {
                 pendingCookie.value = cookie
               }
 
-              // Auto-submit: bypass AddTask dialog when enabled for this type
+              // Auto-submit: bypass AddTask dialog for URI types when enabled.
+              // Torrent/metalink are excluded — they require a fetch→parse→
+              // file-select pipeline that only runs inside the AddTask dialog.
               const autoSubmit = usePreferenceStore().config.autoSubmitFromExtension
-              if (autoSubmit.enable && shouldAutoSubmit(autoSubmit, kind, downloadUrl)) {
+              if (autoSubmit && kind === 'uri') {
                 void autoSubmitExtensionUrl(downloadUrl, referer, cookie)
               } else {
                 items.push(createBatchItem(kind, downloadUrl))
@@ -315,19 +310,6 @@ export const useAppStore = defineStore('app', () => {
     if (items.length > 0) {
       enqueueBatch(items)
     }
-  }
-
-  /**
-   * Determines whether a download type should be auto-submitted based on
-   * the per-type sub-toggles in AutoSubmitConfig.
-   */
-  function shouldAutoSubmit(config: AutoSubmitConfig, kind: 'uri' | 'torrent' | 'metalink', url: string): boolean {
-    if (kind === 'torrent') return config.torrent
-    if (kind === 'metalink') return config.metalink
-    // 'uri' covers both HTTP/FTP links and magnet URIs (detectKind
-    // classifies both as 'uri'). Distinguish via URL scheme.
-    if (url.toLowerCase().startsWith('magnet:')) return config.magnet
-    return config.http
   }
 
   /**

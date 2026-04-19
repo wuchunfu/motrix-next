@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': 'Kategorinavn',
   'file-category-auto-archive': 'automatisk arkivering',
   'file-category-auto-archive-hint': 'Ukjente typer lagres i standardstien og arkiveres automatisk etter nedlasting',
-  'extension-downloads': 'Nettleserutvidelse',
   'auto-submit-from-extension': 'Hopp over bekreftelse for utvidelsesnedlastinger',
-  'auto-submit-http': 'Vanlige lenker (HTTP / FTP)',
-  'auto-submit-magnet': 'Magnet-lenker',
-  'auto-submit-torrent': 'Torrent-filer (.torrent)',
-  'auto-submit-metalink': 'Metalink-filer (.meta4)',
-  'auto-submit-hint': 'Uavmerkede typer viser fortsatt oppgave-dialogen',
   'shutdown-when-complete': 'Slå av etter at alle nedlastinger er ferdige',
 }

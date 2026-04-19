@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': 'Kategoriename',
   'file-category-auto-archive': 'Auto-Archivierung',
   'file-category-auto-archive-hint': 'Unbekannte Dateitypen werden im Standard-Pfad gespeichert und nach dem Download automatisch archiviert',
-  'extension-downloads': 'Browser-Erweiterung',
   'auto-submit-from-extension': 'Bestätigung für Erweiterungs-Downloads überspringen',
-  'auto-submit-http': 'Normale Links (HTTP / FTP)',
-  'auto-submit-magnet': 'Magnet-Links',
-  'auto-submit-torrent': 'Torrent-Dateien (.torrent)',
-  'auto-submit-metalink': 'Metalink-Dateien (.meta4)',
-  'auto-submit-hint': 'Nicht ausgewählte Typen zeigen weiterhin den Aufgaben-Dialog',
   'shutdown-when-complete': 'Nach Abschluss aller Downloads herunterfahren',
 }

@@ -21,7 +21,7 @@ import { logger } from '@shared/logger'
 import type { AppConfig } from '@shared/types'
 
 /** Current schema version. Must equal `migrations.length`. */
-export const CONFIG_VERSION = 2
+export const CONFIG_VERSION = 3
 
 /** Result returned by runMigrations for callers to act on (e.g. toast). */
 export interface MigrationResult {
@@ -83,6 +83,30 @@ const migrations: Migration[] = [
       'ConfigMigration',
       'v2: removed engineMaxConnectionPerServer — split and maxConnectionPerServer are now independent',
     )
+  },
+
+  // ── v2 → v3 ──────────────────────────────────────────────────────
+  // Flatten autoSubmitFromExtension from nested object to boolean.
+  //
+  // Before v3, autoSubmitFromExtension was an object with sub-toggles
+  // per download type: { enable, http, magnet, torrent, metalink }.
+  // The torrent/metalink sub-toggles were architecturally broken —
+  // auto-submitting them called addUri() which downloaded the .torrent
+  // file itself rather than its content.  The sub-toggles for HTTP and
+  // magnet added unnecessary UX complexity without practical benefit.
+  //
+  // After v3, autoSubmitFromExtension is a simple boolean derived from
+  // the old master switch (enable).  URI types (HTTP/FTP/magnet) are
+  // auto-submitted when true; torrent/metalink always show the dialog.
+  function migrateV3(config: Partial<AppConfig>): void {
+    const old = (config as Record<string, unknown>).autoSubmitFromExtension
+    if (old && typeof old === 'object' && 'enable' in old) {
+      config.autoSubmitFromExtension = (old as { enable: boolean }).enable
+      logger.info(
+        'ConfigMigration',
+        `v3: flattened autoSubmitFromExtension object to boolean (${config.autoSubmitFromExtension})`,
+      )
+    }
   },
 ]
 

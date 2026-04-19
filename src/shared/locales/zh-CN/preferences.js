@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': '分类名称',
   'file-category-auto-archive': '自动归档',
   'file-category-auto-archive-hint': '无法识别的类型将保存到默认路径，下载完成后自动归档',
-  'extension-downloads': '浏览器扩展',
   'auto-submit-from-extension': '接收扩展下载时跳过确认',
-  'auto-submit-http': '普通链接（HTTP / FTP）',
-  'auto-submit-magnet': '磁力链接',
-  'auto-submit-torrent': '种子文件（.torrent）',
-  'auto-submit-metalink': 'Metalink 文件（.meta4）',
-  'auto-submit-hint': '未勾选的类型仍需手动确认',
   'shutdown-when-complete': '所有下载完成后自动关机',
 }

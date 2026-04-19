@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': 'نام دسته‌بندی',
   'file-category-auto-archive': 'بایگانی خودکار',
   'file-category-auto-archive-hint': 'انواع ناشناخته در مسیر پیش‌فرض ذخیره و پس از دانلود به‌صورت خودکار بایگانی می‌شوند',
-  'extension-downloads': 'افزونه مرورگر',
   'auto-submit-from-extension': 'رد شدن از تأیید برای دانلودهای افزونه',
-  'auto-submit-http': 'لینک\u200cهای معمولی (HTTP / FTP)',
-  'auto-submit-magnet': 'لینک\u200cهای Magnet',
-  'auto-submit-torrent': 'فایل\u200cهای Torrent (.torrent)',
-  'auto-submit-metalink': 'فایل\u200cهای Metalink (.meta4)',
-  'auto-submit-hint': 'انواع غیرفعال همچنان پنجره افزودن وظیفه را نمایش می\u200cدهند',
   'shutdown-when-complete': 'خاموش شدن پس از اتمام همه دانلودها',
 }

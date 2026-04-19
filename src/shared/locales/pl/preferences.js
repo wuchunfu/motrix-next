@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': 'Nazwa kategorii',
   'file-category-auto-archive': 'automatyczne archiwizowanie',
   'file-category-auto-archive-hint': 'Nierozpoznane typy są zapisywane w domyślnej ścieżce i automatycznie archiwizowane po pobraniu',
-  'extension-downloads': 'Rozszerzenie przeglądarki',
   'auto-submit-from-extension': 'Pomiń potwierdzenie dla pobrań z rozszerzenia',
-  'auto-submit-http': 'Zwykłe linki (HTTP / FTP)',
-  'auto-submit-magnet': 'Linki Magnet',
-  'auto-submit-torrent': 'Pliki Torrent (.torrent)',
-  'auto-submit-metalink': 'Pliki Metalink (.meta4)',
-  'auto-submit-hint': 'Niezaznaczone typy nadal wyświetlają okno dodawania zadania',
   'shutdown-when-complete': 'Wyłącz po zakończeniu wszystkich pobierań',
 }

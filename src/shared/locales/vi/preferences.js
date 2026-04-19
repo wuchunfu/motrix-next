@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': 'Tên danh mục',
   'file-category-auto-archive': 'tự động lưu trữ',
   'file-category-auto-archive-hint': 'Các loại không nhận dạng được sẽ được lưu vào đường dẫn mặc định và tự động lưu trữ sau khi tải xuống',
-  'extension-downloads': 'Tiện ích mở rộng',
   'auto-submit-from-extension': 'Bỏ qua xác nhận cho tải xuống từ tiện ích',
-  'auto-submit-http': 'Liên kết thường (HTTP / FTP)',
-  'auto-submit-magnet': 'Liên kết Magnet',
-  'auto-submit-torrent': 'Tệp Torrent (.torrent)',
-  'auto-submit-metalink': 'Tệp Metalink (.meta4)',
-  'auto-submit-hint': 'Các loại chưa chọn sẽ vẫn hiển thị hộp thoại thêm tác vụ',
   'shutdown-when-complete': 'Tắt máy sau khi tải xong tất cả',
 }

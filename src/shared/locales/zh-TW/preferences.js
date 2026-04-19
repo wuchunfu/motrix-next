@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': '分類名稱',
   'file-category-auto-archive': '自動歸檔',
   'file-category-auto-archive-hint': '無法識別的類型將儲存到預設路徑，下載完成後自動歸檔',
-  'extension-downloads': '瀏覽器擴充',
   'auto-submit-from-extension': '接收擴充下載時跳過確認',
-  'auto-submit-http': '普通連結（HTTP / FTP）',
-  'auto-submit-magnet': '磁力連結',
-  'auto-submit-torrent': '種子檔案（.torrent）',
-  'auto-submit-metalink': 'Metalink 檔案（.meta4）',
-  'auto-submit-hint': '未勾選的類型仍需手動確認',
   'shutdown-when-complete': '所有下載完成後自動關機',
 }

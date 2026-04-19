@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': '카테고리 이름',
   'file-category-auto-archive': '자동 아카이브',
   'file-category-auto-archive-hint': '인식되지 않는 유형은 기본 경로에 저장되고 다운로드 후 자동으로 아카이브됩니다',
-  'extension-downloads': '브라우저 확장 프로그램',
   'auto-submit-from-extension': '확장 프로그램 다운로드 시 확인 건너뛰기',
-  'auto-submit-http': '일반 링크 (HTTP / FTP)',
-  'auto-submit-magnet': '마그넷 링크',
-  'auto-submit-torrent': '토렌트 파일 (.torrent)',
-  'auto-submit-metalink': '메타링크 파일 (.meta4)',
-  'auto-submit-hint': '선택하지 않은 유형은 작업 추가 대화 상자가 표시됩니다',
   'shutdown-when-complete': '모든 다운로드 완료 후 종료',
 }

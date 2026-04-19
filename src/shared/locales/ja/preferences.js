@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': 'カテゴリ名',
   'file-category-auto-archive': '自動アーカイブ',
   'file-category-auto-archive-hint': '認識できないタイプはデフォルトパスに保存され、ダウンロード後に自動的にアーカイブされます',
-  'extension-downloads': 'ブラウザ拡張機能',
   'auto-submit-from-extension': '拡張機能からのダウンロードを確認なしで開始',
-  'auto-submit-http': '通常リンク（HTTP / FTP）',
-  'auto-submit-magnet': 'マグネットリンク',
-  'auto-submit-torrent': 'Torrent ファイル（.torrent）',
-  'auto-submit-metalink': 'Metalink ファイル（.meta4）',
-  'auto-submit-hint': 'チェックを外したタイプはタスク追加ダイアログが表示されます',
   'shutdown-when-complete': 'すべてのダウンロード完了後にシャットダウン',
 }

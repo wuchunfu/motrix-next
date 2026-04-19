@@ -287,12 +287,6 @@ export default {
   'file-category-custom-label': 'اسم التصنيف',
   'file-category-auto-archive': 'أرشفة تلقائية',
   'file-category-auto-archive-hint': 'الأنواع غير المعروفة تُحفظ في المسار الافتراضي وتُؤرشف تلقائياً بعد التنزيل',
-  'extension-downloads': 'إضافة المتصفح',
   'auto-submit-from-extension': 'تخطي التأكيد لتنزيلات الإضافة',
-  'auto-submit-http': 'روابط عادية (HTTP / FTP)',
-  'auto-submit-magnet': 'روابط Magnet',
-  'auto-submit-torrent': 'ملفات Torrent (.torrent)',
-  'auto-submit-metalink': 'ملفات Metalink (.meta4)',
-  'auto-submit-hint': 'الأنواع غير المحددة ستظهر نافذة إضافة المهمة',
   'shutdown-when-complete': 'إيقاف التشغيل بعد اكتمال جميع التنزيلات',
 }
