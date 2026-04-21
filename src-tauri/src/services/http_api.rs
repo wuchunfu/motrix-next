@@ -142,10 +142,22 @@ pub fn is_torrent_or_metalink_url(url: &str) -> bool {
     lower.ends_with(".torrent") || lower.ends_with(".metalink") || lower.ends_with(".meta4")
 }
 
-/// Combined check: URL is auto-submittable if it has a supported scheme
-/// AND is not a torrent/metalink file.
+/// Combined check: URL is auto-submittable in Rust if it has a supported
+/// scheme, is not a torrent/metalink file, AND is not a magnet link.
+///
+/// Magnet links are excluded because they require the frontend's
+/// `addMagnetUri()` pipeline for:
+///   1. `pendingMagnetGids` registration → file selection polling
+///   2. `force-save: true` → BT session persistence
+///   3. `shouldShowFileSelection()` → pause-metadata awareness
+///
+/// When a magnet is received with auto-submit enabled, `handle_add`
+/// falls through to `show_add_task_in_main_window`, which routes via
+/// deep-link → frontend `autoSubmitExtensionUrl` → `addMagnetUri`.
 pub fn can_auto_submit(url: &str) -> bool {
-    is_auto_submittable_uri(url) && !is_torrent_or_metalink_url(url)
+    is_auto_submittable_uri(url)
+        && !is_torrent_or_metalink_url(url)
+        && !url.to_lowercase().starts_with("magnet:")
 }
 
 // ── Axum State ──────────────────────────────────────────────────────
@@ -746,8 +758,16 @@ mod tests {
     }
 
     #[test]
-    fn magnet_can_auto_submit() {
-        assert!(can_auto_submit("magnet:?xt=urn:btih:abcdef"));
+    fn magnet_cannot_auto_submit() {
+        // Magnet links must route through the frontend's addMagnetUri()
+        // for file selection polling and BT session persistence.
+        assert!(!can_auto_submit("magnet:?xt=urn:btih:abcdef"));
+    }
+
+    #[test]
+    fn magnet_case_insensitive_cannot_auto_submit() {
+        assert!(!can_auto_submit("MAGNET:?xt=urn:btih:ABCDEF1234"));
+        assert!(!can_auto_submit("Magnet:?xt=urn:btih:abcdef"));
     }
 
     #[test]
