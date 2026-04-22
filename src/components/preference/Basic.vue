@@ -1082,6 +1082,14 @@ onMounted(async () => {
       <NFormItem :label="t('preferences.new-task-show-downloading')">
         <NSwitch v-model:value="form.newTaskShowDownloading" />
       </NFormItem>
+      <NFormItem :label="t('preferences.no-confirm-before-delete-task')">
+        <NSwitch v-model:value="form.noConfirmBeforeDeleteTask" />
+      </NFormItem>
+      <NCollapseTransition :show="form.noConfirmBeforeDeleteTask" class="collapse-indent">
+        <NFormItem :label="t('preferences.delete-files-when-skip-confirm')">
+          <NSwitch v-model:value="form.deleteFilesWhenSkipConfirm" />
+        </NFormItem>
+      </NCollapseTransition>
       <NFormItem :label="t('preferences.task-completed-notify')">
         <NSwitch v-model:value="form.taskNotification" />
       </NFormItem>
@@ -1091,14 +1099,6 @@ onMounted(async () => {
         </NFormItem>
         <NFormItem :label="t('preferences.notify-on-complete')">
           <NSwitch v-model:value="form.notifyOnComplete" />
-        </NFormItem>
-      </NCollapseTransition>
-      <NFormItem :label="t('preferences.no-confirm-before-delete-task')">
-        <NSwitch v-model:value="form.noConfirmBeforeDeleteTask" />
-      </NFormItem>
-      <NCollapseTransition :show="form.noConfirmBeforeDeleteTask" class="collapse-indent">
-        <NFormItem :label="t('preferences.delete-files-when-skip-confirm')">
-          <NSwitch v-model:value="form.deleteFilesWhenSkipConfirm" />
         </NFormItem>
       </NCollapseTransition>
 
