@@ -65,6 +65,27 @@ const message = useAppMessage()
 const dirUserModified = ref(false)
 
 const activeTab = ref(ADD_TASK_TYPE.URI)
+const tabsRef = ref<InstanceType<typeof import('naive-ui').NTabs> | null>(null)
+
+/**
+ * Switch tab programmatically with correct animation direction.
+ *
+ * NTabs only computes `animationDirection` inside its internal `activateTab()`
+ * handler (user clicks).  Programmatic `:value` changes skip that and always
+ * default to `'next'`.  This helper mirrors the direction logic from the NTabs
+ * source and sets it on the component instance before updating `activeTab`.
+ */
+const TAB_ORDER = [ADD_TASK_TYPE.URI, ADD_TASK_TYPE.TORRENT] as const
+function switchTab(target: string): void {
+  if (activeTab.value === target) return
+  const inst = tabsRef.value as Record<string, unknown> | null
+  if (inst && 'animationDirection' in inst) {
+    const curIdx = TAB_ORDER.indexOf(activeTab.value as (typeof TAB_ORDER)[number])
+    const tgtIdx = TAB_ORDER.indexOf(target as (typeof TAB_ORDER)[number])
+    ;(inst as { animationDirection: string }).animationDirection = tgtIdx > curIdx ? 'next' : 'prev'
+  }
+  activeTab.value = target
+}
 const showAdvanced = ref(false)
 const submitting = ref(false)
 const selectedBatchIndex = ref(0)
@@ -202,13 +223,7 @@ const checkedRowKeys = computed({
   },
 })
 
-const submitLabel = computed(() => {
-  const pending = batch.value.filter((i) => i.status === 'pending').length
-  const failed = batch.value.filter((i) => i.status === 'failed').length
-  const count = pending + failed
-  if (count > 1) return `${t('app.submit')} (${count})`
-  return t('app.submit')
-})
+const submitLabel = computed(() => t('app.submit'))
 
 /** Whether file classification is currently enabled in preferences. */
 const categoryEnabled = computed(() => preferenceStore.config.fileCategoryEnabled)
@@ -274,12 +289,15 @@ watch(
       }
       // Auto-switch to Torrent tab when file items are present
       if (fileItems.value.length > 0) {
-        activeTab.value = ADD_TASK_TYPE.TORRENT
+        switchTab(ADD_TASK_TYPE.TORRENT)
       } else {
-        activeTab.value = ADD_TASK_TYPE.URI
+        switchTab(ADD_TASK_TYPE.URI)
       }
     } else {
-      activeTab.value = ADD_TASK_TYPE.URI
+      // Only reset tab if batchWatcher hasn't already handled a programmatic
+      // switch — otherwise we'd cause a rapid URI→TORRENT bounce that
+      // confuses NTabs' animation direction.
+      if (!batchDidWrite) switchTab(ADD_TASK_TYPE.URI)
       // No batch — check clipboard for URIs
       try {
         const { readText } = await import('@tauri-apps/plugin-clipboard-manager')
@@ -306,6 +324,8 @@ watch(
   () => batch.value.length,
   async (newLen, oldLen) => {
     if (!props.show || newLen <= oldLen) return
+    // Snapshot newly arrived items before any drain/resolve mutates the batch.
+    const newlyArrived = batch.value.slice(oldLen)
     const uriItems = batch.value.filter((i) => i.kind === 'uri')
     if (uriItems.length > 0) {
       batchDidWrite = true
@@ -315,11 +335,17 @@ watch(
       )
       appStore.pendingBatch = batch.value.filter((i) => i.kind !== 'uri')
     }
-    await localResolveUnresolvedItems()
-    // Auto-switch to Torrent tab when file items arrive
-    if (fileItems.value.length > 0) {
-      activeTab.value = ADD_TASK_TYPE.TORRENT
+    // Auto-switch tab SYNCHRONOUSLY (before any await) so NTabs computes
+    // the correct slide direction in the same render tick.
+    const hasNewFiles = newlyArrived.some((i) => i.kind !== 'uri')
+    const hasNewUris = newlyArrived.some((i) => i.kind === 'uri')
+    if (hasNewFiles) {
+      switchTab(ADD_TASK_TYPE.TORRENT)
+    } else if (hasNewUris) {
+      switchTab(ADD_TASK_TYPE.URI)
     }
+    // Resolve file metadata asynchronously (doesn't affect tab choice).
+    await localResolveUnresolvedItems()
   },
 )
 
@@ -526,7 +552,7 @@ function kindTagType(kind: string): 'info' | 'success' | 'warning' {
       @close="handleClose"
     >
       <NForm label-placement="left" label-width="110px">
-        <NTabs :value="activeTab" type="line" animated @update:value="(v: string) => (activeTab = v)">
+        <NTabs ref="tabsRef" :value="activeTab" type="line" animated @update:value="(v: string) => (activeTab = v)">
           <!-- ── URI Tab ──────────────────────────────────────── -->
           <NTabPane :name="ADD_TASK_TYPE.URI" :tab="t('task.uri-task') || 'URL'">
             <div class="tab-pane-content">
